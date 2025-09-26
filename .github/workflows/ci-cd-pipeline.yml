@@ -1,0 +1,141 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main ]
+
+env:
+  BUILD_DIR: dist
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    strategy:
+      matrix:
+        node-version: [18.x, 20.x]
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run linter (if present)
+        run: npm run lint --if-present
+
+      - name: Run typecheck (if present)
+        run: npm run typecheck --if-present
+
+      - name: Build project (if present)
+        run: npm run build --if-present
+
+      - name: Run tests (if present)
+        run: npm test --if-present -- --coverage
+
+  accessibility:
+    name: Accessibility checks (axe)
+    runs-on: ubuntu-latest
+    needs: test
+    timeout-minutes: 15
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Use Node.js 20.x
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20.x'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build project (if present)
+        run: npm run build --if-present
+
+      - name: Install wait-on (local) and jq via apt (for JSON parsing)
+        run: |
+          npm i --no-audit --no-fund wait-on --no-save
+          sudo apt-get update -y
+          sudo apt-get install -y jq
+
+      - name: Start server, wait and run axe
+        # Uses npx to avoid global installs; captures PID and ensures cleanup.
+        run: |
+          echo "Serving built site from ./${{ env.BUILD_DIR }} on port 8080"
+          npx http-server ./${{ env.BUILD_DIR }} -p 8080 -c-1 >/tmp/http-server.log 2>&1 &
+          SERVER_PID=$!
+          echo "http-server PID: $SERVER_PID"
+          echo "Waiting for server to be available on http://localhost:8080 ..."
+          npx wait-on http://localhost:8080
+          echo "Server is up — running @axe-core/cli"
+          # Run axe and save results as JSON
+          npx @axe-core/cli http://localhost:8080 --save=axe-results.json || true
+          echo "Axe results saved to axe-results.json"
+          cat axe-results.json || true
+          # Count violations and fail if any
+          if [ -f axe-results.json ]; then
+            VIOLATIONS_COUNT=$(jq '.violations | length' axe-results.json)
+            echo "Accessibility violations: $VIOLATIONS_COUNT"
+            if [ "$VIOLATIONS_COUNT" -gt 0 ]; then
+              echo "Accessibility check failed — ${VIOLATIONS_COUNT} violations found."
+              # Output trimmed list for quick debugging
+              jq '.violations[] | {id: .id, impact: .impact, help: .help, nodes: .nodes | length}' axe-results.json
+              # Kill the server and fail the job
+              kill $SERVER_PID || true
+              exit 1
+            fi
+          else
+            echo "No axe-results.json produced — something went wrong with the Axe run."
+            kill $SERVER_PID || true
+            exit 1
+          fi
+          # Cleanup
+          kill $SERVER_PID || true
+
+  deploy:
+    name: Deploy to Vercel
+    runs-on: ubuntu-latest
+    needs: [test, accessibility]
+    if: github.ref == 'refs/heads/main'
+    timeout-minutes: 20
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Use Node.js 20.x
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20.x'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build project (if present)
+        run: npm run build --if-present
+
+      - name: Deploy to Vercel
+        uses: amondnet/vercel-action@v25
+        with:
+          vercel-token: ${{ secrets.VERCEL_TOKEN }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          vercel-args: '--prod'
+          vercel-org-id: ${{ secrets.VERCEL_ORG_ID }}
+          vercel-project-id: ${{ secrets.VERCEL_PROJECT_ID }}
+          working-directory: .
