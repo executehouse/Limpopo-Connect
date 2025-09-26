@@ -1,10 +1,12 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 @layer base {
   body {
-    @apply bg-gray-50 text-gray-900;
+    @apply bg-gray-100 text-gray-800 font-sans;
     margin: 0;
     min-height: 100vh;
   }
@@ -12,18 +14,22 @@
 
 @layer components {
   .btn-primary {
-    @apply bg-limpopo-blue hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-lg transition duration-300 ease-in-out;
+    @apply bg-limpopo-blue hover:bg-blue-600 text-white font-bold py-3 px-6 rounded-full transition-transform transform hover:scale-105 duration-300 ease-in-out shadow-lg;
   }
   
   .btn-secondary {
-    @apply bg-limpopo-green hover:bg-green-700 text-white font-semibold py-2 px-4 rounded-lg transition duration-300 ease-in-out;
+    @apply bg-limpopo-green hover:bg-green-600 text-white font-bold py-3 px-6 rounded-full transition-transform transform hover:scale-105 duration-300 ease-in-out shadow-lg;
   }
   
   .card {
-    @apply bg-white rounded-lg shadow-md p-6 border border-gray-200;
+    @apply bg-white rounded-xl shadow-lg p-8 border border-gray-200/80 transition-all duration-300 hover:shadow-2xl hover:-translate-y-1;
   }
   
   .nav-link {
-    @apply text-gray-700 hover:text-limpopo-blue font-medium transition duration-200;
+    @apply text-gray-700 hover:text-limpopo-blue font-semibold transition duration-200 ease-in-out;
+  }
+
+  .bg-hero-gradient {
+    @apply bg-gradient-to-br from-limpopo-green via-limpopo-blue to-limpopo-gold;
   }
 }

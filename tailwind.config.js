@@ -7,22 +7,25 @@ export default {
   theme: {
     extend: {
       colors: {
-        'limpopo-green': '#2D5016',
-        'limpopo-gold': '#FFD700',
-        'limpopo-blue': '#1E40AF',
+        'limpopo-green': '#3E6B27',
+        'limpopo-gold': '#FBBF24',
+        'limpopo-blue': '#2563EB',
         gray: {
-          50: '#f9fafb',
-          100: '#f3f4f6',
-          200: '#e5e7eb',
-          300: '#d1d5db',
-          400: '#9ca3af',
-          500: '#6b7280',
-          600: '#4b5563',
+          50: '#F9FAFB',
+          100: '#F3F4F6',
+          200: '#E5E7EB',
+          300: '#D1D5DB',
+          400: '#9CA3AF',
+          500: '#6B7280',
+          600: '#4B5563',
           700: '#374151',
-          800: '#1f2937',
+          800: '#1F2937',
           900: '#111827',
         },
-      }
+      },
+      fontFamily: {
+        sans: ['Inter', 'sans-serif'],
+      },
     },
   },
   plugins: [],

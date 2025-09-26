@@ -45,19 +45,19 @@ const Header: React.FC = () => {
 
           {/* Auth Section */}
           <div className="hidden md:flex items-center space-x-4">
-            <button 
-              onClick={() => navigate('/login')}
+            <Link
+              to="/login"
               className="flex items-center space-x-1 nav-link"
             >
               <User className="h-5 w-5" />
               <span>Sign In</span>
-            </button>
-            <button 
-              onClick={() => navigate('/register')}
+            </Link>
+            <Link
+              to="/register"
               className="btn-primary"
             >
               Register
-            </button>
+            </Link>
           </div>
 
           {/* Mobile Menu Button */}
@@ -85,24 +85,20 @@ const Header: React.FC = () => {
                 </Link>
               ))}
               <div className="px-4 py-2 space-y-2 border-t border-gray-200 mt-4 pt-4">
-                <button 
-                  onClick={() => {
-                    navigate('/login');
-                    setIsMenuOpen(false);
-                  }}
+                <Link
+                  to="/login"
+                  onClick={() => setIsMenuOpen(false)}
                   className="block w-full text-left px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-md"
                 >
                   Sign In
-                </button>
-                <button 
-                  onClick={() => {
-                    navigate('/register');
-                    setIsMenuOpen(false);
-                  }}
-                  className="btn-primary w-full"
+                </Link>
+                <Link
+                  to="/register"
+                  onClick={() => setIsMenuOpen(false)}
+                  className="btn-primary w-full block text-center"
                 >
                   Register
-                </button>
+                </Link>
               </div>
             </div>
           </div>
