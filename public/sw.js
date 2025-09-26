@@ -6,9 +6,9 @@ const urlsToCache = [
   '/marketplace',
   '/tourism',
   '/news',
-  '/static/js/bundle.js',
-  '/static/css/main.css',
-  '/manifest.json'
+  '/connections',
+  '/manifest.json',
+  '/vite.svg'
 ];
 
 // Install service worker
