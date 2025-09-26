@@ -6,6 +6,13 @@ import Events from './pages/Events';
 import Marketplace from './pages/Marketplace';
 import Tourism from './pages/Tourism';
 import News from './pages/News';
+import Connections from './pages/Connections';
+import FriendshipPartners from './pages/connections/FriendshipPartners';
+import MeaningfulRelationships from './pages/connections/MeaningfulRelationships';
+import CasualMeetups from './pages/connections/CasualMeetups';
+import SharedInterests from './pages/connections/SharedInterests';
+import CommunityStories from './pages/connections/CommunityStories';
+import MissedMoments from './pages/connections/MissedMoments';
 import Login from './pages/auth/Login';
 import Register from './pages/auth/Register';
 import './index.css';
@@ -24,6 +31,13 @@ function App() {
             <Route path="marketplace" element={<Marketplace />} />
             <Route path="tourism" element={<Tourism />} />
             <Route path="news" element={<News />} />
+            <Route path="connections" element={<Connections />} />
+            <Route path="connections/friendship-partners" element={<FriendshipPartners />} />
+            <Route path="connections/meaningful-relationships" element={<MeaningfulRelationships />} />
+            <Route path="connections/casual-meetups" element={<CasualMeetups />} />
+            <Route path="connections/shared-interests" element={<SharedInterests />} />
+            <Route path="connections/community-stories" element={<CommunityStories />} />
+            <Route path="connections/missed-moments" element={<MissedMoments />} />
           </Route>
         </Routes>
       </div>
