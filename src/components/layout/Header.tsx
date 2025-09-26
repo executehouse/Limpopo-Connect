@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { Menu, X, MapPin, User } from 'lucide-react';
 
 const Header: React.FC = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const navigate = useNavigate();
+  const location = useLocation();
 
   const toggleMenu = () => setIsMenuOpen(!isMenuOpen);
 
@@ -36,7 +36,9 @@ const Header: React.FC = () => {
               <Link
                 key={item.path}
                 to={item.path}
-                className="nav-link"
+                className={`nav-link ${
+                  location.pathname === item.path ? 'active-nav-link' : ''
+                }`}
               >
                 {item.name}
               </Link>
@@ -78,7 +80,9 @@ const Header: React.FC = () => {
                 <Link
                   key={item.path}
                   to={item.path}
-                  className="block px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-md"
+                  className={`block px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-md ${
+                    location.pathname === item.path ? 'active-nav-link' : ''
+                  }`}
                   onClick={() => setIsMenuOpen(false)}
                 >
                   {item.name}
