@@ -29,6 +29,10 @@
     @apply text-gray-700 hover:text-limpopo-blue font-semibold transition duration-200 ease-in-out;
   }
 
+  .active-nav-link {
+    @apply text-limpopo-blue;
+  }
+
   .bg-hero-gradient {
     @apply bg-gradient-to-br from-limpopo-green via-limpopo-blue to-limpopo-gold;
   }
