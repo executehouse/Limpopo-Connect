@@ -6,6 +6,7 @@ A responsive, accessible React+TypeScript web application connecting residents, 
 
 Limpopo Connect is a comprehensive community platform that serves as a digital hub for the Limpopo Province. It enables residents, businesses, and visitors to:
 
+
 - **Discover Local Businesses**: Searchable directory with maps, reviews, and detailed information
 - **Stay Updated**: Community events, festivals, and local news
 - **Trade Locally**: Marketplace for local products and services
