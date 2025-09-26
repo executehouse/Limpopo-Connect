@@ -1,0 +1,83 @@
+name: CI → Build → Deploy (GitHub Pages)
+
+# Runs on pushes to main and on PRs targeting main
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+env:
+  NODE_VERSION: '20'
+  BUILD_DIR: dist        # Change to "build" if your project outputs to build/
+
+permissions:
+  contents: write       # needed for actions-gh-pages to push the branch
+
+jobs:
+  ci:
+    name: Lint • Test • Build
+    runs-on: ubuntu-latest
+    outputs:
+      artifact-path: ${{ steps.upload-artifact.outputs.artifact-path || 'dist' }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Use Node.js ${{ env.NODE_VERSION }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run lint
+        run: npm run lint --if-present
+
+      - name: Run unit tests
+        run: npm test --if-present -- --coverage
+
+      - name: Run typecheck
+        run: npm run typecheck --if-present
+
+      - name: Build production files
+        run: npm run build --if-present
+
+      - name: Run npm audit (non-failing)
+        run: npm audit --audit-level=moderate || true
+
+      - name: Upload production build artifact
+        id: upload-artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: production-build
+          path: ${{ env.BUILD_DIR }}
+
+  deploy-pages:
+    name: Deploy to GitHub Pages
+    needs: ci
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    steps:
+      - name: Checkout repository (shallow)
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Download production build artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: production-build
+          path: ./dist
+
+      # peaceiris/actions-gh-pages will create/update the gh-pages branch for you
+      - name: Deploy to GitHub Pages (gh-pages)
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_branch: gh-pages
+          publish_dir: ./dist
+          # optional: set user identity for the commit on gh-pages
+          # commit_message: "chore: update gh-pages (CI deploy)"
