@@ -1,0 +1,19 @@
+{
+  "name": "Limpopo Connect",
+  "short_name": "Limpopo Connect",
+  "description": "Connecting communities across Limpopo Province. Discover local businesses, events, tourism, and community life.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#2D5016",
+  "theme_color": "#1E40AF",
+  "orientation": "portrait-primary",
+  "categories": ["business", "social", "travel"],
+  "icons": [
+    {
+      "src": "/vite.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "maskable any"
+    }
+  ]
+}
