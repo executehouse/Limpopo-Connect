@@ -1,1 +1,7 @@
-
+{
+  "name": "limpopoconnect-api",
+  "version": "1.0.0",
+  "main": "GetListings/index.js",
+  "engines": { "node": "18.x" },
+  "dependencies": { "pg": "^8.11.0" }
+}
