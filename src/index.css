@@ -36,4 +36,32 @@
   .bg-hero-gradient {
     @apply bg-gradient-to-br from-limpopo-green via-limpopo-blue to-limpopo-gold;
   }
+
+  .footer-heading {
+    @apply text-lg font-semibold text-white mb-5 tracking-wider uppercase;
+  }
+
+  .footer-link {
+    @apply text-gray-400 hover:text-limpopo-gold transition-colors duration-300;
+  }
+
+  .social-icon {
+    @apply text-gray-400 hover:text-limpopo-gold transform hover:scale-110 transition-all duration-300;
+  }
+
+  .text-shadow {
+    text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  }
+
+  .text-shadow-lg {
+    text-shadow: 0 4px 10px rgba(0,0,0,0.2);
+  }
+
+  .feature-card {
+    @apply bg-white rounded-2xl p-8 text-left border border-gray-100 transition-all duration-300 hover:shadow-2xl hover:-translate-y-2;
+  }
+
+  .feature-icon {
+    @apply rounded-full p-4 mb-6 inline-flex transition-all duration-300;
+  }
 }
