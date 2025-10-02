@@ -2,6 +2,13 @@
 
 Azure Functions API for the Limpopo Connect platform with PostgreSQL database integration.
 
+## 📚 Documentation
+
+- **[QUICKSTART.md](./QUICKSTART.md)** - Get started in 5 minutes
+- **[AZURE_SETUP_GUIDE.md](./AZURE_SETUP_GUIDE.md)** - Comprehensive setup guide
+- **[ARCHITECTURE.md](./ARCHITECTURE.md)** - System architecture and diagrams
+- **[TROUBLESHOOTING.md](./TROUBLESHOOTING.md)** - Problem-solving checklist
+
 ## Database Setup
 
 This API is configured to work with **Azure PostgreSQL Flexible Server**.
@@ -141,3 +148,25 @@ Simple health check function that tests database connectivity.
   "rows": [{"ok": 1}]
 }
 ```
+
+## Additional Resources
+
+- **Azure PostgreSQL Documentation**: https://docs.microsoft.com/azure/postgresql/
+- **node-postgres (pg) Documentation**: https://node-postgres.com/
+- **Azure Functions Node.js Guide**: https://docs.microsoft.com/azure/azure-functions/functions-reference-node
+
+## Need Help?
+
+1. Check [TROUBLESHOOTING.md](./TROUBLESHOOTING.md) for common issues
+2. Review [AZURE_SETUP_GUIDE.md](./AZURE_SETUP_GUIDE.md) for detailed instructions
+3. Run `npm run test:connection` to diagnose connection problems
+4. Check Azure Service Health for service issues
+
+## Contributing
+
+When adding new database functionality:
+1. Update the schema in `setup-database.sql`
+2. Create/update Azure Functions in their respective directories
+3. Test with `npm run test:connection`
+4. Update documentation as needed
+
