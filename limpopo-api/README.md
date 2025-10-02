@@ -4,6 +4,7 @@ Azure Functions API for the Limpopo Connect platform with PostgreSQL database in
 
 ## 📚 Documentation
 
+- **[INDEX.md](./INDEX.md)** - 📖 **START HERE** - Complete overview and guide
 - **[QUICKSTART.md](./QUICKSTART.md)** - Get started in 5 minutes
 - **[AZURE_SETUP_GUIDE.md](./AZURE_SETUP_GUIDE.md)** - Comprehensive setup guide
 - **[ARCHITECTURE.md](./ARCHITECTURE.md)** - System architecture and diagrams
