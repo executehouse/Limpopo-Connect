@@ -42,6 +42,7 @@ Limpopo Connect is a comprehensive community platform that serves as a digital h
 - **Build Tool**: Vite
 - **Routing**: React Router
 - **Icons**: Lucide React
+- **Backend**: Azure Functions + Azure PostgreSQL Flexible Server
 - **Backend Ready**: Firebase (Authentication, Firestore, Storage)
 - **PWA**: Service Worker, Web App Manifest
 - **Deployment**: Vercel/Netlify ready
@@ -82,6 +83,23 @@ npm run lint         # Run ESLint
 npm run preview      # Preview production build
 ```
 
+## 🗄️ Backend Setup
+
+### Azure PostgreSQL Flexible Server
+
+The API uses Azure PostgreSQL Flexible Server for data storage. See [limpopo-api/README.md](limpopo-api/README.md) for detailed setup instructions.
+
+**Quick setup:**
+
+1. Create Azure PostgreSQL Flexible Server in Azure Portal
+2. Configure firewall rules to allow connections
+3. Create a `.env` file in `limpopo-api/` directory:
+   ```bash
+   DATABASE_URL=postgresql://username:password@server.postgres.database.azure.com:5432/database?sslmode=require
+   ```
+
+For complete backend setup documentation, refer to the [API README](limpopo-api/README.md).
+
 ## 🏗️ Project Structure
 
 ```
@@ -100,6 +118,14 @@ src/
 ├── App.tsx             # Main app component with routing
 ├── main.tsx           # App entry point
 └── index.css          # Global styles with Tailwind
+
+limpopo-api/
+├── GetListings/        # Azure Function for database operations
+│   ├── function.json   # Function configuration
+│   └── index.js        # Function handler
+├── db.js               # PostgreSQL connection pool
+├── package.json        # API dependencies
+└── README.md           # API setup documentation
 ```
 
 ## 🎨 Design System
