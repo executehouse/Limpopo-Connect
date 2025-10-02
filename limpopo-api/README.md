@@ -8,6 +8,10 @@ This API is configured to work with **Azure PostgreSQL Flexible Server**.
 
 ### Azure PostgreSQL Flexible Server Setup
 
+📖 **For detailed step-by-step instructions, see [AZURE_SETUP_GUIDE.md](./AZURE_SETUP_GUIDE.md)**
+
+**Quick Setup:**
+
 1. **Create Azure PostgreSQL Flexible Server**
    - Go to Azure Portal
    - Create a new PostgreSQL Flexible Server
@@ -28,11 +32,22 @@ This API is configured to work with **Azure PostgreSQL Flexible Server**.
    ```
 
 4. **Set Environment Variable**
-   - Copy `.env.example` to `.env`
+   - Copy `.env.example` to `.env` or run `npm run setup:env`
    - Replace the placeholders with your actual values:
    
    ```bash
    DATABASE_URL=postgresql://adminuser:MyP@ssw0rd@myserver.postgres.database.azure.com:5432/limpopoconnect?sslmode=require
+   ```
+
+5. **Test Connection**
+   ```bash
+   npm install
+   npm run test:connection
+   ```
+
+6. **Initialize Database Schema**
+   ```bash
+   psql $DATABASE_URL -f setup-database.sql
    ```
 
 ### Local Development
@@ -46,12 +61,27 @@ For local development:
 
 2. Set up environment variables:
    ```bash
-   cp .env.example .env
+   npm run setup:env
    # Edit .env with your Azure PostgreSQL connection details
    ```
 
-3. Test the connection:
-   - The `GetListings` function will test the connection with a simple query
+3. Initialize database:
+   ```bash
+   psql $DATABASE_URL -f setup-database.sql
+   ```
+
+4. Test the connection:
+   ```bash
+   npm run test:connection
+   ```
+
+5. Run Azure Functions locally:
+   ```bash
+   cd ..
+   func start
+   ```
+
+The `GetListings` function will be available at: http://localhost:7071/api/GetListings
 
 ### SSL Configuration
 
@@ -80,6 +110,22 @@ The database connection is configured to work with Azure PostgreSQL Flexible Ser
 | Variable | Description | Required |
 |----------|-------------|----------|
 | `DATABASE_URL` | PostgreSQL connection string | Yes |
+
+## Scripts
+
+| Script | Description |
+|--------|-------------|
+| `npm run test:connection` | Test database connectivity and display server info |
+| `npm run setup:env` | Create .env file from .env.example |
+
+## Database Schema
+
+The database schema is defined in `setup-database.sql`. It includes tables for:
+- **listings**: Business directory entries
+- **events**: Community events and activities  
+- **marketplace_items**: Items for sale in the marketplace
+- **tourism_attractions**: Tourism locations and attractions
+- **users**: User accounts
 
 ## Functions
 

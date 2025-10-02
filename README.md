@@ -87,18 +87,29 @@ npm run preview      # Preview production build
 
 ### Azure PostgreSQL Flexible Server
 
-The API uses Azure PostgreSQL Flexible Server for data storage. See [limpopo-api/README.md](limpopo-api/README.md) for detailed setup instructions.
+The API uses Azure PostgreSQL Flexible Server for data storage.
+
+**📖 Documentation:**
+- [Quick Start Guide](limpopo-api/QUICKSTART.md) - 5-minute setup
+- [Complete Setup Guide](limpopo-api/AZURE_SETUP_GUIDE.md) - Detailed instructions
+- [API README](limpopo-api/README.md) - API documentation
 
 **Quick setup:**
 
 1. Create Azure PostgreSQL Flexible Server in Azure Portal
 2. Configure firewall rules to allow connections
-3. Create a `.env` file in `limpopo-api/` directory:
+3. Set up locally:
    ```bash
-   DATABASE_URL=postgresql://username:password@server.postgres.database.azure.com:5432/database?sslmode=require
+   cd limpopo-api
+   npm install
+   npm run setup:env
+   # Edit .env with your connection string
+   npm run test:connection
    ```
-
-For complete backend setup documentation, refer to the [API README](limpopo-api/README.md).
+4. Initialize database:
+   ```bash
+   psql $DATABASE_URL -f setup-database.sql
+   ```
 
 ## 🏗️ Project Structure
 
