@@ -2,11 +2,23 @@
 
 Azure Functions API for the Limpopo Connect platform with PostgreSQL database integration.
 
+## 📚 Documentation
+
+- **[INDEX.md](./INDEX.md)** - 📖 **START HERE** - Complete overview and guide
+- **[QUICKSTART.md](./QUICKSTART.md)** - Get started in 5 minutes
+- **[AZURE_SETUP_GUIDE.md](./AZURE_SETUP_GUIDE.md)** - Comprehensive setup guide
+- **[ARCHITECTURE.md](./ARCHITECTURE.md)** - System architecture and diagrams
+- **[TROUBLESHOOTING.md](./TROUBLESHOOTING.md)** - Problem-solving checklist
+
 ## Database Setup
 
 This API is configured to work with **Azure PostgreSQL Flexible Server**.
 
 ### Azure PostgreSQL Flexible Server Setup
+
+📖 **For detailed step-by-step instructions, see [AZURE_SETUP_GUIDE.md](./AZURE_SETUP_GUIDE.md)**
+
+**Quick Setup:**
 
 1. **Create Azure PostgreSQL Flexible Server**
    - Go to Azure Portal
@@ -28,11 +40,22 @@ This API is configured to work with **Azure PostgreSQL Flexible Server**.
    ```
 
 4. **Set Environment Variable**
-   - Copy `.env.example` to `.env`
+   - Copy `.env.example` to `.env` or run `npm run setup:env`
    - Replace the placeholders with your actual values:
    
    ```bash
    DATABASE_URL=postgresql://adminuser:MyP@ssw0rd@myserver.postgres.database.azure.com:5432/limpopoconnect?sslmode=require
+   ```
+
+5. **Test Connection**
+   ```bash
+   npm install
+   npm run test:connection
+   ```
+
+6. **Initialize Database Schema**
+   ```bash
+   psql $DATABASE_URL -f setup-database.sql
    ```
 
 ### Local Development
@@ -46,12 +69,27 @@ For local development:
 
 2. Set up environment variables:
    ```bash
-   cp .env.example .env
+   npm run setup:env
    # Edit .env with your Azure PostgreSQL connection details
    ```
 
-3. Test the connection:
-   - The `GetListings` function will test the connection with a simple query
+3. Initialize database:
+   ```bash
+   psql $DATABASE_URL -f setup-database.sql
+   ```
+
+4. Test the connection:
+   ```bash
+   npm run test:connection
+   ```
+
+5. Run Azure Functions locally:
+   ```bash
+   cd ..
+   func start
+   ```
+
+The `GetListings` function will be available at: http://localhost:7071/api/GetListings
 
 ### SSL Configuration
 
@@ -81,6 +119,22 @@ The database connection is configured to work with Azure PostgreSQL Flexible Ser
 |----------|-------------|----------|
 | `DATABASE_URL` | PostgreSQL connection string | Yes |
 
+## Scripts
+
+| Script | Description |
+|--------|-------------|
+| `npm run test:connection` | Test database connectivity and display server info |
+| `npm run setup:env` | Create .env file from .env.example |
+
+## Database Schema
+
+The database schema is defined in `setup-database.sql`. It includes tables for:
+- **listings**: Business directory entries
+- **events**: Community events and activities  
+- **marketplace_items**: Items for sale in the marketplace
+- **tourism_attractions**: Tourism locations and attractions
+- **users**: User accounts
+
 ## Functions
 
 ### GetListings
@@ -95,3 +149,25 @@ Simple health check function that tests database connectivity.
   "rows": [{"ok": 1}]
 }
 ```
+
+## Additional Resources
+
+- **Azure PostgreSQL Documentation**: https://docs.microsoft.com/azure/postgresql/
+- **node-postgres (pg) Documentation**: https://node-postgres.com/
+- **Azure Functions Node.js Guide**: https://docs.microsoft.com/azure/azure-functions/functions-reference-node
+
+## Need Help?
+
+1. Check [TROUBLESHOOTING.md](./TROUBLESHOOTING.md) for common issues
+2. Review [AZURE_SETUP_GUIDE.md](./AZURE_SETUP_GUIDE.md) for detailed instructions
+3. Run `npm run test:connection` to diagnose connection problems
+4. Check Azure Service Health for service issues
+
+## Contributing
+
+When adding new database functionality:
+1. Update the schema in `setup-database.sql`
+2. Create/update Azure Functions in their respective directories
+3. Test with `npm run test:connection`
+4. Update documentation as needed
+
