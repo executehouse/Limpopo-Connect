@@ -6,8 +6,8 @@
   "scripts": {
     "dev": "npm-run-all --parallel dev:frontend dev:api:*",
     "dev:frontend": "vite",
-    "dev:api:auth": "node limpopo-api/auth.js",
-    "dev:api:businesses": "node limpopo-api/businesses.js",
+    "dev:api:auth": "npm --prefix limpopo-api run start:auth",
+    "dev:api:businesses": "npm --prefix limpopo-api run start:businesses",
     "build": "tsc -b && vite build",
     "lint": "eslint .",
     "test": "vitest",
