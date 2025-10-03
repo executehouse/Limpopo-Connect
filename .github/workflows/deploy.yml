@@ -3,7 +3,7 @@ name: Deploy Limpopo Connect with Key Vault
 on:
   push:
     branches:
-      - main  # triggers on main branch
+      - main
 
 jobs:
   build-and-deploy:
@@ -18,7 +18,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: '20'  # must match your Azure Web App runtime
+          node-version: '20'  # Must match your Azure Web App runtime
 
       # 3️⃣ Install dependencies
       - name: Install dependencies
@@ -34,13 +34,22 @@ jobs:
         with:
           creds: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
 
-      # 6️⃣ Fetch Key Vault secret and set env var
-      - name: Fetch DB password from Key Vault
+      # 6️⃣ Fetch DB secrets from Key Vault
+      - name: Fetch DB settings from Key Vault
         id: kv
         run: |
-          SECRET_NAME="azure-postgres-admin-password"
           VAULT_NAME="limpopoconnect-kv-801"
-          DB_PASSWORD=$(az keyvault secret show --vault-name $VAULT_NAME --name $SECRET_NAME --query value -o tsv)
+          export DB_HOST="limpopoconnect-db.postgres.database.azure.com"
+          export DB_NAME="postgres"
+          export DB_USER="limpopoconnect_admin@limpopoconnect-db"
+          export DB_PORT="5432"
+          export DB_PASSWORD=$(az keyvault secret show --vault-name $VAULT_NAME --name azure-postgres-admin-password --query value -o tsv)
+
+          # Make all DB vars available as GitHub Actions env
+          echo "DB_HOST=$DB_HOST" >> $GITHUB_ENV
+          echo "DB_NAME=$DB_NAME" >> $GITHUB_ENV
+          echo "DB_USER=$DB_USER" >> $GITHUB_ENV
+          echo "DB_PORT=$DB_PORT" >> $GITHUB_ENV
           echo "DB_PASSWORD=$DB_PASSWORD" >> $GITHUB_ENV
 
       # 7️⃣ Deploy to Azure Web App
@@ -50,3 +59,9 @@ jobs:
           app-name: limpoconnect-webapp
           package: .
           slot-name: production
+
+      # 8️⃣ Confirm deployment
+      - name: Confirm deployment
+        run: |
+          echo "Deployment complete!"
+          az webapp show -g limpopoconnect-rg -n limpoconnect-webapp --query "{name:name, state:state, defaultHostName:defaultHostName}"
