@@ -10,7 +10,7 @@ const Register: React.FC = () => {
     phone: '',
     password: '',
     confirmPassword: '',
-    userType: 'resident'
+    role: 'citizen'
   });
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
@@ -49,6 +49,7 @@ const Register: React.FC = () => {
           name: `${formData.firstName} ${formData.lastName}`,
           email: formData.email,
           password: formData.password,
+          role: formData.role,
         }),
       });
 
@@ -90,20 +91,20 @@ const Register: React.FC = () => {
 
           {/* Form */}
           <form onSubmit={handleSubmit} className="space-y-4">
-            {/* User Type */}
+            {/* Role */}
             <div>
-              <label htmlFor="userType" className="block text-sm font-medium text-gray-700 mb-2">
+              <label htmlFor="role" className="block text-sm font-medium text-gray-700 mb-2">
                 I am a
               </label>
               <select
-                id="userType"
-                name="userType"
+                id="role"
+                name="role"
                 className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-limpopo-blue focus:border-transparent"
-                value={formData.userType}
+                value={formData.role}
                 onChange={handleChange}
               >
-                <option value="resident">Resident</option>
-                <option value="business">Business Owner</option>
+                <option value="citizen">Citizen</option>
+                <option value="business_owner">Business Owner</option>
                 <option value="visitor">Visitor</option>
               </select>
             </div>
