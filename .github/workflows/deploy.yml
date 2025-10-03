@@ -1,33 +1,52 @@
-name: Deploy to Azure Web App
+name: Deploy Limpopo Connect with Key Vault
 
 on:
   push:
     branches:
-      - main  # deploy when main branch updates
+      - main  # triggers on main branch
 
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
+
     steps:
-    - uses: actions/checkout@v3
+      # 1️⃣ Checkout code
+      - name: Checkout repository
+        uses: actions/checkout@v3
 
-    # Install Node.js
-    - name: Setup Node.js
-      uses: actions/setup-node@v3
-      with:
-        node-version: '20'
+      # 2️⃣ Setup Node.js
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '20'  # must match your Azure Web App runtime
 
-    # Install dependencies & build
-    - name: Install dependencies
-      run: npm install
+      # 3️⃣ Install dependencies
+      - name: Install dependencies
+        run: npm install
 
-    - name: Build
-      run: npm run build   # adjust if you have a build script
+      # 4️⃣ Build app (adjust if your build script is different)
+      - name: Build
+        run: npm run build
 
-    # Deploy to Azure Web App
-    - name: Deploy to Azure Web App
-      uses: azure/webapps-deploy@v2
-      with:
-        app-name: limpoconnect-webapp
-        publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
-        package: .
+      # 5️⃣ Login to Azure using publish profile
+      - name: Azure Login
+        uses: azure/login@v1
+        with:
+          creds: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
+
+      # 6️⃣ Fetch Key Vault secret and set env var
+      - name: Fetch DB password from Key Vault
+        id: kv
+        run: |
+          SECRET_NAME="azure-postgres-admin-password"
+          VAULT_NAME="limpopoconnect-kv-801"
+          DB_PASSWORD=$(az keyvault secret show --vault-name $VAULT_NAME --name $SECRET_NAME --query value -o tsv)
+          echo "DB_PASSWORD=$DB_PASSWORD" >> $GITHUB_ENV
+
+      # 7️⃣ Deploy to Azure Web App
+      - name: Deploy to Azure Web App
+        uses: azure/webapps-deploy@v2
+        with:
+          app-name: limpoconnect-webapp
+          package: .
+          slot-name: production
