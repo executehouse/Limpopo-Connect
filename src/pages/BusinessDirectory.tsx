@@ -1,62 +1,49 @@
 import React, { useState } from 'react';
 import { Search, Filter, MapPin, Star, Phone, Globe } from 'lucide-react';
 
+import { useEffect } from 'react';
+import { Link } from 'react-router-dom';
+
+// Match the database schema
 interface Business {
-  id: number;
+  id: string;
   name: string;
   category: string;
   description: string;
-  location: string;
+  address: string;
   phone: string;
   website?: string;
-  rating: number;
-  reviewCount: number;
-  image: string;
+  image_url?: string;
+  // rating and reviewCount will be added later
 }
 
 const BusinessDirectory: React.FC = () => {
+  const [businesses, setBusinesses] = useState<Business[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('All');
 
-  // Sample data - in real app this would come from an API
-  const businesses: Business[] = [
-    {
-      id: 1,
-      name: "Baobab Restaurant & Lodge",
-      category: "Hospitality",
-      description: "Traditional South African cuisine with a modern twist, featuring local Limpopo ingredients.",
-      location: "Polokwane",
-      phone: "+27 15 123 4567",
-      website: "www.baobarestaurant.co.za",
-      rating: 4.5,
-      reviewCount: 89,
-      image: "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=400&h=300&fit=crop"
-    },
-    {
-      id: 2,
-      name: "Limpopo Craft Brewery",
-      category: "Food & Beverage",
-      description: "Local craft brewery serving authentic South African beers and traditional pub food.",
-      location: "Mokopane",
-      phone: "+27 15 234 5678",
-      rating: 4.2,
-      reviewCount: 156,
-      image: "https://images.unsplash.com/photo-1568213816046-0ee1c42bd559?w=400&h=300&fit=crop"
-    },
-    {
-      id: 3,
-      name: "Marula Hardware & Garden",
-      category: "Retail",
-      description: "Complete hardware and gardening supplies for all your home improvement needs.",
-      location: "Tzaneen",
-      phone: "+27 15 345 6789",
-      rating: 4.0,
-      reviewCount: 67,
-      image: "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=400&h=300&fit=crop"
-    }
-  ];
+  useEffect(() => {
+    const fetchBusinesses = async () => {
+      try {
+        const response = await fetch('/api/businesses');
+        if (!response.ok) {
+          throw new Error('Failed to fetch businesses');
+        }
+        const data = await response.json();
+        setBusinesses(data);
+      } catch (err: any) {
+        setError(err.message);
+      } finally {
+        setIsLoading(false);
+      }
+    };
 
-  const categories = ['All', 'Hospitality', 'Food & Beverage', 'Retail', 'Services', 'Healthcare', 'Education'];
+    fetchBusinesses();
+  }, []);
+
+  const categories = ['All', ...new Set(businesses.map(b => b.category))];
 
   const filteredBusinesses = businesses.filter(business => {
     const matchesSearch = business.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -105,97 +92,84 @@ const BusinessDirectory: React.FC = () => {
 
       {/* Results Section */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="mb-6">
-          <p className="text-gray-600">
-            Showing {filteredBusinesses.length} of {businesses.length} businesses
-            {selectedCategory !== 'All' && ` in ${selectedCategory}`}
-          </p>
-        </div>
-
-        {/* Business Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {filteredBusinesses.map((business) => (
-            <div key={business.id} className="card hover:shadow-lg transition">
-              <img
-                src={business.image}
-                alt={business.name}
-                className="w-full h-48 object-cover rounded-lg mb-4"
-              />
-              
-              <div className="space-y-3">
-                <div className="flex items-start justify-between">
-                  <h3 className="text-xl font-semibold text-gray-900">{business.name}</h3>
-                  <span className="text-sm bg-limpopo-blue text-white px-2 py-1 rounded">
-                    {business.category}
-                  </span>
-                </div>
-
-                <p className="text-gray-600 text-sm">{business.description}</p>
-
-                <div className="flex items-center space-x-1">
-                  <div className="flex">
-                    {[...Array(5)].map((_, i) => (
-                      <Star
-                        key={i}
-                        className={`h-4 w-4 ${
-                          i < Math.floor(business.rating)
-                            ? 'text-limpopo-gold fill-current'
-                            : 'text-gray-300'
-                        }`}
-                      />
-                    ))}
-                  </div>
-                  <span className="text-sm text-gray-600">
-                    {business.rating} ({business.reviewCount} reviews)
-                  </span>
-                </div>
-
-                <div className="space-y-2">
-                  <div className="flex items-center space-x-2 text-gray-600">
-                    <MapPin className="h-4 w-4" />
-                    <span className="text-sm">{business.location}</span>
-                  </div>
-                  <div className="flex items-center space-x-2 text-gray-600">
-                    <Phone className="h-4 w-4" />
-                    <span className="text-sm">{business.phone}</span>
-                  </div>
-                  {business.website && (
-                    <div className="flex items-center space-x-2 text-gray-600">
-                      <Globe className="h-4 w-4" />
-                      <a 
-                        href={`https://${business.website}`} 
-                        target="_blank" 
-                        rel="noopener noreferrer"
-                        className="text-sm text-limpopo-blue hover:underline"
-                      >
-                        {business.website}
-                      </a>
-                    </div>
-                  )}
-                </div>
-
-                <div className="flex gap-2 pt-2">
-                  <button className="btn-primary flex-1 text-sm py-2">
-                    View Details
-                  </button>
-                  <button className="btn-secondary flex-1 text-sm py-2">
-                    Contact
-                  </button>
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
-
-        {/* Empty State */}
-        {filteredBusinesses.length === 0 && (
+        {isLoading ? (
           <div className="text-center py-12">
-            <Search className="mx-auto h-12 w-12 text-gray-400 mb-4" />
-            <h3 className="text-lg font-medium text-gray-900 mb-2">No businesses found</h3>
-            <p className="text-gray-600">
-              Try adjusting your search terms or category filter
-            </p>
+            <p className="text-lg text-gray-600">Loading businesses...</p>
           </div>
+        ) : error ? (
+          <div className="text-center py-12 bg-red-100 text-red-700 p-4 rounded-lg">
+            <h3 className="font-bold text-lg">Failed to load businesses</h3>
+            <p>{error}</p>
+          </div>
+        ) : (
+          <>
+            <div className="mb-6">
+              <p className="text-gray-600">
+                Showing {filteredBusinesses.length} of {businesses.length} businesses
+                {selectedCategory !== 'All' && ` in ${selectedCategory}`}
+              </p>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {filteredBusinesses.map((business) => (
+                <div key={business.id} className="card hover:shadow-lg transition">
+                  <img
+                    src={business.image_url || 'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=400&h=300&fit=crop'}
+                    alt={business.name}
+                    className="w-full h-48 object-cover rounded-lg mb-4"
+                  />
+                  <div className="space-y-3">
+                    <div className="flex items-start justify-between">
+                      <h3 className="text-xl font-semibold text-gray-900">{business.name}</h3>
+                      <span className="text-sm bg-limpopo-blue text-white px-2 py-1 rounded">
+                        {business.category}
+                      </span>
+                    </div>
+                    <p className="text-gray-600 text-sm">{business.description}</p>
+                    <div className="space-y-2">
+                      <div className="flex items-center space-x-2 text-gray-600">
+                        <MapPin className="h-4 w-4" />
+                        <span className="text-sm">{business.address}</span>
+                      </div>
+                      <div className="flex items-center space-x-2 text-gray-600">
+                        <Phone className="h-4 w-4" />
+                        <span className="text-sm">{business.phone}</span>
+                      </div>
+                      {business.website && (
+                        <div className="flex items-center space-x-2 text-gray-600">
+                          <Globe className="h-4 w-4" />
+                          <a
+                            href={business.website}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-sm text-limpopo-blue hover:underline"
+                          >
+                            {business.website}
+                          </a>
+                        </div>
+                      )}
+                    </div>
+                    <div className="flex gap-2 pt-2">
+                      <Link to={`/business/${business.id}`} className="btn-primary flex-1 text-sm py-2 text-center">
+                        View Details
+                      </Link>
+                      <button className="btn-secondary flex-1 text-sm py-2">
+                        Contact
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+            {filteredBusinesses.length === 0 && (
+              <div className="text-center py-12">
+                <Search className="mx-auto h-12 w-12 text-gray-400 mb-4" />
+                <h3 className="text-lg font-medium text-gray-900 mb-2">No businesses found</h3>
+                <p className="text-gray-600">
+                  Try adjusting your search terms or category filter
+                </p>
+              </div>
+            )}
+          </>
         )}
       </div>
     </div>
