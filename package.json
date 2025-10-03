@@ -9,13 +9,16 @@
     "dev:api:auth": "npm --prefix limpopo-api run start:auth",
     "dev:api:businesses": "npm --prefix limpopo-api run start:businesses",
     "build": "tsc -b && vite build",
+    "start": "node server.js",
     "lint": "eslint .",
     "test": "vitest",
     "preview": "vite preview",
     "verify-build": "node scripts/verify-build.js"
   },
   "dependencies": {
-    "@types/react-router-dom": "^5.3.3",
+    "express": "^4.18.2",
+    "http-proxy-middleware": "^2.0.6",
+    "pg": "^8.10.0",
     "firebase": "^12.3.0",
     "lucide-react": "^0.544.0",
     "react": "^19.1.1",
