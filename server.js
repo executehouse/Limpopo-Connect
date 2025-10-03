@@ -25,7 +25,6 @@ const API_URL = process.env.API_URL || 'http://localhost:3001';
 app.use('/api', createProxyMiddleware({
   target: API_URL,
   changeOrigin: true,
-  pathRewrite: { '^/api': '' }, // removes /api prefix when forwarding
   logLevel: 'warn'
 }));
 
