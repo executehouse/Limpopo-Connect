@@ -67,9 +67,11 @@ Limpopo Connect is a comprehensive community platform that serves as a digital h
    ```
 
 3. **Start development server**
+   To run the full development environment, including the frontend server and all backend API services, use the following command:
    ```bash
    npm run dev
    ```
+   This single command starts the Vite frontend, the authentication API, and the business directory API in parallel.
 
 4. **Open in browser**
    Navigate to `http://localhost:5173`
@@ -77,10 +79,13 @@ Limpopo Connect is a comprehensive community platform that serves as a digital h
 ### Available Scripts
 
 ```bash
-npm run dev          # Start development server
-npm run build        # Build for production
-npm run lint         # Run ESLint
-npm run preview      # Preview production build
+npm run dev              # Start all services (frontend + all backend APIs)
+npm run dev:frontend     # Start only the Vite frontend server
+npm run dev:api:auth     # Start only the authentication API
+npm run dev:api:businesses # Start only the businesses API
+npm run build            # Build for production
+npm run lint             # Run ESLint
+npm run preview          # Preview production build
 ```
 
 ## 🗄️ Backend Setup

@@ -6,6 +6,8 @@
     "node": "18.x"
   },
   "scripts": {
+    "start:auth": "node auth.js",
+    "start:businesses": "node businesses.js",
     "test:connection": "node test-connection.js",
     "setup:env": "cp .env.example .env && echo 'Created .env file. Please edit it with your Azure PostgreSQL connection details.'"
   },
