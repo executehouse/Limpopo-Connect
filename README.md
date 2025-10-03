@@ -88,60 +88,50 @@ npm run lint             # Run ESLint
 npm run preview          # Preview production build
 ```
 
-## 🗄️ Backend Setup
+## 🗄️ Backend Architecture & Setup
 
-### Azure PostgreSQL Flexible Server
+The backend is a serverless API built with **Node.js, TypeScript, and Azure Functions**. It connects to an **Azure Database for PostgreSQL Flexible Server** and uses **Azure Blob Storage** for file uploads. The entire infrastructure is defined as code using **Bicep**.
 
-The API uses Azure PostgreSQL Flexible Server for data storage.
+**📖 Key Documentation:**
 
-**📖 Documentation:**
-- [Quick Start Guide](limpopo-api/QUICKSTART.md) - 5-minute setup
-- [Complete Setup Guide](limpopo-api/AZURE_SETUP_GUIDE.md) - Detailed instructions
-- [API README](limpopo-api/README.md) - API documentation
-
-**Quick setup:**
-
-1. Create Azure PostgreSQL Flexible Server in Azure Portal
-2. Configure firewall rules to allow connections
-3. Set up locally:
-   ```bash
-   cd limpopo-api
-   npm install
-   npm run setup:env
-   # Edit .env with your connection string
-   npm run test:connection
-   ```
-4. Initialize database:
-   ```bash
-   psql $DATABASE_URL -f setup-database.sql
-   ```
+-   **[Backend Local Setup Guide](./limpopo-api/README-backend.md)**: Step-by-step instructions for running the API on your local machine.
+-   **[Database Setup Guide](./limpopo-api/setup-database.md)**: Instructions for provisioning and migrating the Azure PostgreSQL database.
+-   **[Operational Runbook](./OPERATIONAL.md)**: A guide for deploying, monitoring, restoring, and maintaining the production environment.
+-   **[Security Policy](./SECURITY.md)**: An overview of the threat model, password policies, and key management procedures.
+-   **[API Specification (OpenAPI)](./openapi.yaml)**: A complete OpenAPI 3.0 specification for all API endpoints.
 
 ## 🏗️ Project Structure
 
 ```
 src/
-├── components/          # Reusable UI components
-│   ├── layout/         # Layout components (Header, Footer, etc.)
-│   └── ui/             # UI components
-├── pages/              # Page components
-│   ├── auth/           # Authentication pages
-│   ├── Home.tsx        # Homepage
-│   ├── BusinessDirectory.tsx
-│   ├── Events.tsx
-│   ├── Marketplace.tsx
-│   ├── Tourism.tsx
-│   └── News.tsx
-├── App.tsx             # Main app component with routing
-├── main.tsx           # App entry point
-└── index.css          # Global styles with Tailwind
+├── components/          # Frontend: Reusable UI components
+│   ├── layout/
+│   └── ui/
+├── pages/              # Frontend: Page components
+│   ├── Home.tsx
+│   └── ...
+├── App.tsx             # Frontend: Main app component
+└── main.tsx           # Frontend: App entry point
 
 limpopo-api/
-├── GetListings/        # Azure Function for database operations
-│   ├── function.json   # Function configuration
-│   └── index.js        # Function handler
-├── db.js               # PostgreSQL connection pool
-├── package.json        # API dependencies
-└── README.md           # API setup documentation
+├── src/                # Backend: TypeScript source code
+│   ├── functions/      # Backend: Individual Azure Function endpoints
+│   ├── lib/            # Backend: Shared libraries (auth, db connection)
+│   └── models/         # Backend: Database interaction models
+├── migrations/         # Backend: SQL database migration scripts
+├── seeds/              # Backend: SQL seed data
+├── tests/              # Backend: Jest tests
+├── package.json        # Backend: API dependencies
+└── README-backend.md   # Backend: Local setup guide
+
+infra/
+├── main.bicep          # Infrastructure: Main Bicep file
+├── db.bicep            # Infrastructure: PostgreSQL module
+├── storage.bicep       # Infrastructure: Storage Account module
+└── ...                 # etc.
+
+azure-pipelines.yml     # CI/CD pipeline definition
+openapi.yaml            # API specification
 ```
 
 ## 🎨 Design System
