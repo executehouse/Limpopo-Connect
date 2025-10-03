@@ -40,8 +40,8 @@ const Login: React.FC = () => {
       // Redirect to the home page on successful login
       navigate('/');
 
-    } catch (err: any) {
-      setError(err.message);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'An error occurred');
     } finally {
       setIsLoading(false);
     }
