@@ -61,8 +61,8 @@ const Register: React.FC = () => {
       // Redirect to login page with a success message
       navigate('/login', { state: { message: 'Registration successful! Please log in.' } });
 
-    } catch (err: any) {
-      setError(err.message);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'An error occurred');
     } finally {
       setIsLoading(false);
     }
