@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Search, Filter, MapPin, Star, Phone, Globe } from 'lucide-react';
+import { Search, Filter, MapPin, Phone, Globe } from 'lucide-react';
 
 import { useEffect } from 'react';
 import { Link } from 'react-router-dom';
@@ -33,8 +33,8 @@ const BusinessDirectory: React.FC = () => {
         }
         const data = await response.json();
         setBusinesses(data);
-      } catch (err: any) {
-        setError(err.message);
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'An error occurred');
       } finally {
         setIsLoading(false);
       }
