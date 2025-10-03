@@ -10,7 +10,19 @@
     "setup:env": "cp .env.example .env && echo 'Created .env file. Please edit it with your Azure PostgreSQL connection details.'"
   },
   "dependencies": {
+    "bcrypt": "^6.0.0",
+    "body-parser": "^2.2.0",
     "dotenv": "^17.2.3",
-    "pg": "^8.11.0"
+    "express": "^5.1.0",
+    "jsonwebtoken": "^9.0.2",
+    "pg": "^8.11.0",
+    "uuid": "^13.0.0"
+  },
+  "devDependencies": {
+    "@types/bcrypt": "^6.0.0",
+    "@types/body-parser": "^1.19.6",
+    "@types/express": "^5.0.3",
+    "@types/jsonwebtoken": "^9.0.10",
+    "@types/uuid": "^10.0.0"
   }
 }

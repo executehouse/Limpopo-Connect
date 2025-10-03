@@ -15,6 +15,7 @@ const Register: React.FC = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const navigate = useNavigate();
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
@@ -22,17 +23,49 @@ const Register: React.FC = () => {
       ...formData,
       [e.target.name]: e.target.value
     });
+    if (error) {
+      setError(null);
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsLoading(true);
+    setError(null);
+
+    if (formData.password !== formData.confirmPassword) {
+      setError('Passwords do not match.');
+      return;
+    }
     
-    // Simulate registration process
-    setTimeout(() => {
+    setIsLoading(true);
+
+    try {
+      const response = await fetch('/api/auth/signup', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          name: `${formData.firstName} ${formData.lastName}`,
+          email: formData.email,
+          password: formData.password,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || 'An unexpected error occurred.');
+      }
+
+      // Redirect to login page with a success message
+      navigate('/login', { state: { message: 'Registration successful! Please log in.' } });
+
+    } catch (err: any) {
+      setError(err.message);
+    } finally {
       setIsLoading(false);
-      navigate('/');
-    }, 1000);
+    }
   };
 
   return (
@@ -225,6 +258,14 @@ const Register: React.FC = () => {
                 </a>
               </label>
             </div>
+
+            {/* Error Message */}
+            {error && (
+              <div className="bg-red-100 border-l-4 border-red-500 text-red-700 p-4" role="alert">
+                <p className="font-bold">Error</p>
+                <p>{error}</p>
+              </div>
+            )}
 
             <button
               type="submit"
