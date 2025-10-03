@@ -1,0 +1,33 @@
+name: Deploy to Azure Web App
+
+on:
+  push:
+    branches:
+      - main  # deploy when main branch updates
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+
+    # Install Node.js
+    - name: Setup Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: '20'
+
+    # Install dependencies & build
+    - name: Install dependencies
+      run: npm install
+
+    - name: Build
+      run: npm run build   # adjust if you have a build script
+
+    # Deploy to Azure Web App
+    - name: Deploy to Azure Web App
+      uses: azure/webapps-deploy@v2
+      with:
+        app-name: limpoconnect-webapp
+        publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
+        package: .
