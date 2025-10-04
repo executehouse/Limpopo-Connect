@@ -1,5 +1,6 @@
 require('dotenv').config();
 const express = require('express');
+const cors = require('cors');
 const bodyParser = require('body-parser');
 const { query } = require('./db');
 const { v4: uuidv4 } = require('uuid');
@@ -9,6 +10,7 @@ const app = express();
 const port = process.env.PORT || 3002;
 const JWT_SECRET = process.env.JWT_SECRET || 'your-super-secret-key';
 
+app.use(cors());
 app.use(bodyParser.json());
 
 // JWT Authentication Middleware
