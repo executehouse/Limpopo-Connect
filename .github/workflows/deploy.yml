@@ -28,11 +28,11 @@ jobs:
       - name: Build
         run: npm run build
 
-      # 5️⃣ Login to Azure using publish profile
+      # 5️⃣ Login to Azure using service principal
       - name: Azure Login
         uses: azure/login@v1
         with:
-          creds: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
 
       # 6️⃣ Fetch DB secrets from Key Vault
       - name: Fetch DB settings from Key Vault
@@ -40,8 +40,8 @@ jobs:
         run: |
           VAULT_NAME="limpopoconnect-kv-801"
           export DB_HOST="limpopoconnect-db.postgres.database.azure.com"
-          export DB_NAME="postgres"
-          export DB_USER="limpopoconnect_admin@limpopoconnect-db"
+          export DB_NAME="limpopoconnect"
+          export DB_USER="limpopoconnect_admin"
           export DB_PORT="5432"
           export DB_PASSWORD=$(az keyvault secret show --vault-name $VAULT_NAME --name azure-postgres-admin-password --query value -o tsv)
 
