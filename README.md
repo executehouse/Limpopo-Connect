@@ -1,6 +1,5 @@
 # Limpopo Connect
 
-
 [![Deploy to GitHub Pages](https://github.com/Tshikwetamakole/Limpopo-Connect/actions/workflows/deploy-pages.yml/badge.svg)](https://github.com/Tshikwetamakole/Limpopo-Connect/actions/workflows/deploy-pages.yml)
 
 A responsive, accessible React+TypeScript web application connecting residents, businesses, and visitors across Limpopo Province, South Africa.
