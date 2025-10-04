@@ -30,7 +30,8 @@ export const validateName = (name: string): boolean => {
 };
 
 export const sanitizeInput = (input: string): string => {
-  return input.trim().replace(/[<>"']/g, '');
+  // Remove HTML tags, dangerous characters, and trim whitespace
+  return input.trim().replace(/<[^>]*>/g, '').replace(/[<>"'\\]/g, '');
 };
 
 export const validateBusinessName = (name: string): boolean => {
