@@ -13,7 +13,7 @@ if (!connection) {
 
 const blobServiceClient = BlobServiceClient.fromConnectionString(connection);
 
-const processImageUpload = async (blob: unknown, context: InvocationContext): Promise<void> => {
+export const processImageUpload = async (blob: unknown, context: InvocationContext): Promise<void> => {
     if (!blob || !(blob instanceof Buffer)) {
         context.error('Blob input was not a Buffer.');
         return;

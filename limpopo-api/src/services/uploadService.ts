@@ -1,4 +1,4 @@
-import { BlobServiceClient, generateBlobSASQueryParameters, BlobSASPermissions } from '@azure/storage-blob';
+import { BlobServiceClient, generateBlobSASQueryParameters, BlobSASPermissions, StorageSharedKeyCredential } from '@azure/storage-blob';
 import { DefaultAzureCredential } from '@azure/identity';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -82,12 +82,13 @@ export const generateSignedUploadUrl = async (request: SignedUploadUrlRequest, u
   const accountKey = process.env.AZURE_STORAGE_ACCOUNT_KEY;
   if (accountKey) {
     // Generate SAS with account key
+    const sharedKeyCredential = new StorageSharedKeyCredential(
+      process.env.AZURE_STORAGE_ACCOUNT_NAME!,
+      accountKey
+    );
     sasToken = generateBlobSASQueryParameters(
       sasOptions,
-      {
-        accountName: process.env.AZURE_STORAGE_ACCOUNT_NAME!,
-        accountKey
-      }
+      sharedKeyCredential
     ).toString();
   } else {
     // For managed identity, you would need to use a different approach

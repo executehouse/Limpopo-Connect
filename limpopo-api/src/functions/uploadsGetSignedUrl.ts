@@ -19,7 +19,7 @@ const blobServiceClient = new BlobServiceClient(
   sharedKeyCredential
 );
 
-const uploadsGetSignedUrl = async (request: AuthenticatedRequest, context: InvocationContext): Promise<HttpResponseInit> => {
+export const uploadsGetSignedUrl = async (request: AuthenticatedRequest, context: InvocationContext): Promise<HttpResponseInit> => {
     context.log(`Http function processed request for url "${request.url}"`);
 
     try {

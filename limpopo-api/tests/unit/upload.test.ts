@@ -1,15 +1,31 @@
+// Mock uuid
+jest.mock('uuid', () => ({
+  v4: jest.fn(() => 'mock-uuid-12345')
+}));
+
 // Mock Azure Storage
-jest.mock('@azure/storage-blob', () => ({
-  BlobServiceClient: {
-    fromConnectionString: jest.fn(() => ({
-      getContainerClient: jest.fn(() => ({
-        getBlobClient: jest.fn(() => ({
-          generateSasUrl: jest.fn(() => 'https://mock-sas-url.com'),
-          url: 'https://mock-blob-url.com/blob'
-        }))
-      }))
+const mockGetContainerClient = jest.fn(() => ({
+  getBlobClient: jest.fn(() => ({
+    generateSasUrl: jest.fn(() => 'https://mock-sas-url.com'),
+    url: 'https://mock-blob-url.com/blob',
+    getProperties: jest.fn(() => Promise.resolve({
+      contentType: 'image/jpeg',
+      contentLength: 102400
     }))
-  },
+  })),
+  getBlockBlobClient: jest.fn(() => ({
+    uploadData: jest.fn(() => Promise.resolve())
+  }))
+}));
+
+const MockBlobServiceClient: any = jest.fn().mockImplementation(() => ({
+  getContainerClient: mockGetContainerClient
+}));
+
+MockBlobServiceClient.fromConnectionString = jest.fn(() => new MockBlobServiceClient());
+
+jest.mock('@azure/storage-blob', () => ({
+  BlobServiceClient: MockBlobServiceClient,
   StorageSharedKeyCredential: jest.fn(),
   BlobSASPermissions: {
     parse: jest.fn(() => 'mock-permissions')
@@ -21,15 +37,15 @@ jest.mock('@azure/storage-blob', () => ({
 
 // Mock Sharp for image processing
 jest.mock('sharp', () => {
-  const mockSharp = {
+  const mockSharp: any = {
     metadata: jest.fn(() => Promise.resolve({
       width: 800,
       height: 600,
       format: 'jpeg',
       size: 102400
     })),
-    resize: jest.fn(() => mockSharp),
-    jpeg: jest.fn(() => mockSharp),
+    resize: jest.fn(function(this: any) { return mockSharp; }),
+    jpeg: jest.fn(function(this: any) { return mockSharp; }),
     toBuffer: jest.fn(() => Promise.resolve(Buffer.from('mock-image-data')))
   };
   
@@ -46,6 +62,7 @@ describe('Upload Functionality', () => {
     jest.clearAllMocks();
     process.env.AZURE_STORAGE_ACCOUNT_NAME = 'testaccount';
     process.env.AZURE_STORAGE_ACCOUNT_KEY = 'testkey';
+    process.env.AzureWebJobsStorage = 'DefaultEndpointsProtocol=https;AccountName=testaccount;AccountKey=testkey;EndpointSuffix=core.windows.net';
   });
 
   describe('Signed URL Generation', () => {
@@ -108,7 +125,7 @@ describe('Upload Functionality', () => {
 
       expect(result.status).toBe(400);
       expect(result.jsonBody.error).toBe('Validation failed');
-      expect(result.jsonBody.details).toContain('Unsupported file type');
+      expect(result.jsonBody.details.some((msg: string) => msg.includes('Unsupported file type'))).toBe(true);
     });
 
     it('should reject files that are too large', async () => {
@@ -138,7 +155,7 @@ describe('Upload Functionality', () => {
 
       expect(result.status).toBe(400);
       expect(result.jsonBody.error).toBe('Validation failed');
-      expect(result.jsonBody.details).toContain('File too large');
+      expect(result.jsonBody.details.some((msg: string) => msg.includes('File too large'))).toBe(true);
     });
 
     it('should require businessId for business photos', async () => {
@@ -223,7 +240,8 @@ describe('Upload Functionality', () => {
       await processImageUpload(mockBlob, mockContext as any);
 
       expect(mockContext.log).toHaveBeenCalledWith(
-        expect.stringContaining('Invalid blob path format')
+        'Invalid blob path format. Expected "purpose/uploadId.extension". Got:',
+        'invalid-path'
       );
     });
   });
