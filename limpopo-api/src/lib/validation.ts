@@ -32,3 +32,30 @@ export const validateName = (name: string): boolean => {
 export const sanitizeInput = (input: string): string => {
   return input.trim().replace(/[<>"']/g, '');
 };
+
+export const validateBusinessName = (name: string): boolean => {
+  return Boolean(name) && name.trim().length >= 2 && name.trim().length <= 200;
+};
+
+export const validateCoordinates = (lat: number, lng: number): boolean => {
+  return lat >= -90 && lat <= 90 && lng >= -180 && lng <= 180;
+};
+
+export const validateUrl = (url: string): boolean => {
+  try {
+    const parsed = new URL(url);
+    return parsed.protocol === 'http:' || parsed.protocol === 'https:';
+  } catch {
+    return false;
+  }
+};
+
+export const validatePhone = (phone: string): boolean => {
+  // Simple phone validation - numbers, spaces, dashes, plus, parentheses
+  const phoneRegex = /^[\d\s\-\+\(\)]+$/;
+  return phoneRegex.test(phone) && phone.replace(/\D/g, '').length >= 10;
+};
+
+export const validateMimeType = (mimeType: string, allowedTypes: string[] = ['image/jpeg', 'image/png', 'image/webp']): boolean => {
+  return allowedTypes.includes(mimeType);
+};

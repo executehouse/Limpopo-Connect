@@ -19,12 +19,17 @@ export interface Business {
   version: number;
 }
 
-export const createBusiness = async (businessData: Omit<Business, 'id' | 'created_at' | 'updated_at' | 'version'>): Promise<Business> => {
+export const createBusiness = async (businessData: Omit<Business, 'id' | 'created_at' | 'updated_at' | 'version' | 'deleted_at' | 'is_verified'>): Promise<Business> => {
   const { owner_id, name, category_id, description, address, lat, lng, phone, website, open_hours } = businessData;
-  const geom = `ST_SetSRID(ST_MakePoint(${lng}, ${lat}), 4326)`;
+  
+  // Validate coordinates
+  if (lat < -90 || lat > 90 || lng < -180 || lng > 180) {
+    throw new Error('Invalid coordinates: lat must be between -90 and 90, lng must be between -180 and 180');
+  }
+  
   const { rows } = await query(
     `INSERT INTO businesses (owner_id, name, category_id, description, address, lat, lng, geom, phone, website, open_hours)
-     VALUES ($1, $2, $3, $4, $5, $6, $7, ${geom}, $8, $9, $10)
+     VALUES ($1, $2, $3, $4, $5, $6, $7, ST_SetSRID(ST_MakePoint($7, $6), 4326), $8, $9, $10)
      RETURNING *`,
     [owner_id, name, category_id, description, address, lat, lng, phone, website, open_hours]
   );
@@ -74,7 +79,18 @@ export const findBusinesses = async (options: { near?: { lat: number, lng: numbe
 
 export const updateBusiness = async (id: string, updates: Partial<Business>): Promise<Business | undefined> => {
     const { name, category_id, description, address, lat, lng, phone, website, open_hours } = updates;
-    const geom = (lat && lng) ? `ST_SetSRID(ST_MakePoint(${lng}, ${lat}), 4326)` : null;
+    
+    // Validate coordinates if provided
+    if ((lat !== undefined && (lat < -90 || lat > 90)) || (lng !== undefined && (lng < -180 || lng > 180))) {
+        throw new Error('Invalid coordinates: lat must be between -90 and 90, lng must be between -180 and 180');
+    }
+
+    let geomUpdate = '';
+    const params = [name, category_id, description, address, lat, lng, phone, website, open_hours, id];
+    
+    if (lat !== undefined && lng !== undefined) {
+        geomUpdate = ', geom = ST_SetSRID(ST_MakePoint($6, $5), 4326)';
+    }
 
     const { rows } = await query(
         `UPDATE businesses SET
@@ -83,15 +99,15 @@ export const updateBusiness = async (id: string, updates: Partial<Business>): Pr
             description = COALESCE($3, description),
             address = COALESCE($4, address),
             lat = COALESCE($5, lat),
-            lng = COALESCE($6, lng),
-            geom = COALESCE(${geom}, geom),
+            lng = COALESCE($6, lng)${geomUpdate},
             phone = COALESCE($7, phone),
             website = COALESCE($8, website),
             open_hours = COALESCE($9, open_hours),
-            version = version + 1
+            version = version + 1,
+            updated_at = CURRENT_TIMESTAMP
         WHERE id = $10 AND deleted_at IS NULL
         RETURNING *`,
-        [name, category_id, description, address, lat, lng, phone, website, open_hours, id]
+        params
     );
     return rows[0];
 };
