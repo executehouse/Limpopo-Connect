@@ -1,5 +1,6 @@
 import { app, HttpRequest, HttpResponseInit, InvocationContext } from "@azure/functions";
 import { findBusinessById } from '../models/business';
+import { findBusinessPhotos } from '../models/businessPhoto';
 
 export async function businessesGet(request: HttpRequest, context: InvocationContext): Promise<HttpResponseInit> {
     context.log(`Http function processed request for url "${request.url}"`);
@@ -15,8 +16,16 @@ export async function businessesGet(request: HttpRequest, context: InvocationCon
         if (!business) {
             return { status: 404, jsonBody: { error: 'Business not found' } };
         }
+        
+        // Fetch business photos
+        const photos = await findBusinessPhotos(id);
+        
         return {
-            jsonBody: business
+            status: 200,
+            jsonBody: {
+                ...business,
+                photos
+            }
         };
     } catch (error) {
         context.log('Error getting business:', error);
