@@ -12,7 +12,9 @@ param postgresAdmin string
 @secure()
 param postgresAdminPassword string
 
-var postgresServerName = '${baseName}-pg'
+@description('The PostgreSQL server name.')
+param postgresServerName string = 'limpopoconnect-db'
+
 var storageAccountName = '${baseName}sa'
 var functionAppName = '${baseName}-api'
 var keyVaultName = '${baseName}-kv'

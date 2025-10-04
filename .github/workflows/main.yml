@@ -1,9 +1,0 @@
-# 1) install deps
-npm install
-
-# 2) build TypeScript + frontend (this runs your existing build script)
-npm run build
-
-# 3) run the server locally (simulate App Service)
-API_URL="http://localhost:3001" PORT=8080 node server.js
-# visit http://localhost:8080 to verify the SPA loads and /api/* is proxied correctly

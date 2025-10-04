@@ -59,4 +59,14 @@ resource postgisExtension 'Microsoft.DBforPostgreSQL/flexibleServers/configurati
   }
 }
 
-output connectionString string = 'postgresql://${adminUsername}:${adminPassword}@${postgresServer.properties.fullyQualifiedDomainName}:5432/postgres?sslmode=require'
+// Create limpopoconnect database
+resource limpopoconnectDatabase 'Microsoft.DBforPostgreSQL/flexibleServers/databases@2023-03-01-preview' = {
+  parent: postgresServer
+  name: 'limpopoconnect'
+  properties: {
+    charset: 'UTF8'
+    collation: 'en_US.utf8'
+  }
+}
+
+output connectionString string = 'postgresql://${adminUsername}:${adminPassword}@${postgresServer.properties.fullyQualifiedDomainName}:5432/limpopoconnect?sslmode=require'
