@@ -31,11 +31,15 @@ const getJwtSecret = async (): Promise<string> => {
   return jwtSecret;
 };
 
+interface RefreshTokenRequest {
+    refreshToken: string;
+}
+
 export async function authRefresh(request: HttpRequest, context: InvocationContext): Promise<HttpResponseInit> {
     context.log(`Http function processed request for url "${request.url}"`);
 
     try {
-        const body = await request.json() as any;
+        const body = await request.json() as RefreshTokenRequest;
         const { refreshToken } = body;
 
         if (!refreshToken) {

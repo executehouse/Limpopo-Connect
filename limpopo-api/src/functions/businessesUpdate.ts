@@ -2,11 +2,23 @@ import { app, HttpResponseInit, InvocationContext } from "@azure/functions";
 import { withAuth, AuthenticatedRequest } from '../lib/auth';
 import { findBusinessById, updateBusiness } from '../models/business';
 
+interface UpdateBusinessRequest {
+    name?: string;
+    category_id?: number;
+    description?: string;
+    address?: string;
+    lat?: number;
+    lng?: number;
+    phone?: string;
+    website?: string;
+    open_hours?: Record<string, unknown> | null;
+}
+
 const businessesUpdate = async (request: AuthenticatedRequest, context: InvocationContext): Promise<HttpResponseInit> => {
     context.log(`Http function processed request for url "${request.url}"`);
 
     const id = request.params.id;
-    const updates = await request.json() as any;
+    const updates = await request.json() as UpdateBusinessRequest;
 
     if (!id) {
         return { status: 400, jsonBody: { error: 'Business ID is required' } };

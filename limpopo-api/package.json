@@ -10,7 +10,7 @@
     "start:auth": "node auth.js",
     "start:businesses": "node businesses.js",
     "test": "jest",
-    "lint": "eslint . --ext .ts"
+    "lint": "ESLINT_USE_FLAT_CONFIG=false eslint src/ --max-warnings 0"
   },
   "dependencies": {
     "@azure/functions": "^4.0.0",

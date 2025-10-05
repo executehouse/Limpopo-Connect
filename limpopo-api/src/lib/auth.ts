@@ -1,4 +1,4 @@
-import { app, HttpRequest, HttpResponseInit, InvocationContext } from "@azure/functions";
+import { HttpRequest, HttpResponseInit, InvocationContext } from "@azure/functions";
 import * as jwt from 'jsonwebtoken';
 import { findUserById, User } from '../models/user';
 import { DefaultAzureCredential } from '@azure/identity';

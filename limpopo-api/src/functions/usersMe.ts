@@ -16,7 +16,7 @@ export const usersMeHandler = async (request: AuthenticatedRequest, context: Inv
         }
 
         // Remove sensitive fields before returning
-        const { password_hash, ...userResponse } = authedUser;
+        const { password_hash: _password_hash, ...userResponse } = authedUser;
 
         return {
             status: 200,

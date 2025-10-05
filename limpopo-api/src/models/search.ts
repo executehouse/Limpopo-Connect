@@ -5,7 +5,7 @@ export interface SearchResult {
   type: 'business' | 'event' | 'market_item';
   title: string;
   description?: string;
-  geom?: any;
+  geom?: Record<string, unknown> | null;
   relevance: number;
 }
 
@@ -20,7 +20,7 @@ export const searchAll = async (
 ): Promise<SearchResult[]> => {
   const { types = ['business', 'event', 'market_item'], limit = 20, offset = 0 } = options;
   const queries = [];
-  const params: any[] = [searchTerm, limit, offset];
+  const params: Array<string | number> = [searchTerm, limit, offset];
   let paramIndex = 4;
 
   let distanceCalculation = 'NULL';

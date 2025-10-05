@@ -1,14 +1,26 @@
 import { app, HttpResponseInit, InvocationContext } from "@azure/functions";
 import { withAuth, AuthenticatedRequest } from '../lib/auth';
-import { createBusiness, Business } from '../models/business';
+import { createBusiness } from '../models/business';
 import { findCategoryById } from '../models/businessCategory';
 import { validateBusinessName, validateCoordinates, validateUrl, validatePhone, sanitizeInput } from '../lib/validation';
+
+interface CreateBusinessRequest {
+    name: string;
+    category_id: number;
+    description?: string;
+    address: string;
+    lat: number;
+    lng: number;
+    phone?: string;
+    website?: string;
+    open_hours?: Record<string, unknown> | null;
+}
 
 export const businessesCreate = async (request: AuthenticatedRequest, context: InvocationContext): Promise<HttpResponseInit> => {
     context.log(`Http function processed request for url "${request.url}"`);
 
     try {
-        const body = await request.json() as any;
+        const body = await request.json() as CreateBusinessRequest;
         const { name, category_id, description, address, lat, lng, phone, website, open_hours } = body;
 
         // Validation

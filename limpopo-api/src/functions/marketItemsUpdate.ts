@@ -2,11 +2,20 @@ import { app, HttpResponseInit, InvocationContext } from "@azure/functions";
 import { withAuth, AuthenticatedRequest } from '../lib/auth';
 import { findMarketItemById, updateMarketItem } from '../models/marketItem';
 
+interface UpdateMarketItemRequest {
+    title?: string;
+    description?: string;
+    price?: number;
+    currency?: string;
+    stock?: number;
+    shipping_info?: Record<string, unknown> | null;
+}
+
 const marketItemsUpdate = async (request: AuthenticatedRequest, context: InvocationContext): Promise<HttpResponseInit> => {
     context.log(`Http function processed request for url "${request.url}"`);
 
     const id = request.params.id;
-    const updates = await request.json() as any;
+    const updates = await request.json() as UpdateMarketItemRequest;
 
     if (!id) {
         return { status: 400, jsonBody: { error: 'Market item ID is required' } };

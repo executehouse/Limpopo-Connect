@@ -11,7 +11,7 @@ export interface Business {
   lng: number;
   phone: string;
   website: string;
-  open_hours: any;
+  open_hours: Record<string, unknown> | null;
   is_verified: boolean;
   created_at: Date;
   updated_at: Date;
@@ -42,7 +42,7 @@ export const findBusinessById = async (id: string): Promise<Business | undefined
 };
 
 export const findBusinesses = async (options: { near?: { lat: number, lng: number, radius: number }, category?: string, search?: string, limit?: number, offset?: number } = {}): Promise<Business[]> => {
-  let whereClauses = ['deleted_at IS NULL'];
+  const whereClauses = ['deleted_at IS NULL'];
   const params = [];
   let paramIndex = 1;
 

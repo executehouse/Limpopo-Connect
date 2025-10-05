@@ -19,11 +19,19 @@ const blobServiceClient = new BlobServiceClient(
   sharedKeyCredential
 );
 
+interface SignedUrlRequest {
+    fileName: string;
+    contentType: string;
+    contentLength: number;
+    businessId?: string;
+    purpose?: string;
+}
+
 export const uploadsGetSignedUrl = async (request: AuthenticatedRequest, context: InvocationContext): Promise<HttpResponseInit> => {
     context.log(`Http function processed request for url "${request.url}"`);
 
     try {
-        const body = await request.json() as any;
+        const body = await request.json() as SignedUrlRequest;
         const { fileName, contentType, contentLength, businessId, purpose = 'business-photo' } = body;
         const userId = request.authedUser!.id;
 

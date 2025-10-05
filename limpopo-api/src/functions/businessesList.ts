@@ -1,6 +1,13 @@
 import { app, HttpRequest, HttpResponseInit, InvocationContext } from "@azure/functions";
 import { findBusinesses } from '../models/business';
-import { findAllCategories } from '../models/businessCategory';
+
+interface BusinessListOptions {
+    near?: { lat: number; lng: number; radius: number };
+    category?: string;
+    search?: string;
+    limit: number;
+    offset: number;
+}
 
 export async function businessesList(request: HttpRequest, context: InvocationContext): Promise<HttpResponseInit> {
     context.log(`Http function processed request for url "${request.url}"`);
@@ -12,7 +19,7 @@ export async function businessesList(request: HttpRequest, context: InvocationCo
         const limit = Math.min(parseInt(request.query.get('limit') || '20', 10), 100);
         const offset = parseInt(request.query.get('offset') || '0', 10);
 
-        const options: any = { limit, offset };
+        const options: BusinessListOptions = { limit, offset };
 
         if (near) {
             const [lat, lng, radius] = near.split(',').map(parseFloat);
