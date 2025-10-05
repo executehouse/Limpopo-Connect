@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { MapPin, Mail } from 'lucide-react';
+import { sendResetEmail } from '../../lib/supabase';
 
 const ForgotPassword = () => {
   const [email, setEmail] = useState('');
@@ -15,21 +16,27 @@ const ForgotPassword = () => {
     setIsLoading(true);
 
     try {
-      const response = await fetch('/api/auth/forgot-password', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ email }),
-      });
+      if (import.meta.env.VITE_SUPABASE_URL && import.meta.env.VITE_SUPABASE_ANON_KEY) {
+  const { error } = await sendResetEmail(email);
+  if (error) throw new Error(error.message || 'Unable to send reset email');
+        setMessage('If an account exists for that email, a reset link has been sent.');
+      } else {
+        const response = await fetch('/api/auth/forgot-password', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ email }),
+        });
 
-      const data = await response.json();
+        const data = await response.json();
 
-      if (!response.ok) {
-        throw new Error(data.error || 'An unexpected error occurred.');
+        if (!response.ok) {
+          throw new Error(data.error || 'An unexpected error occurred.');
+        }
+
+        setMessage(data.message);
       }
-
-      setMessage(data.message);
 
     } catch (err) {
       setError(err instanceof Error ? err.message : 'An error occurred');

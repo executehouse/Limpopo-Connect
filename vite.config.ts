@@ -22,7 +22,13 @@ export default defineConfig({
     environment: 'jsdom',
     setupFiles: './src/setupTests.ts',
   },
-  base: '/',
+  // When running in GitHub Actions the GITHUB_REPOSITORY env var is available
+  // (format: owner/repo). For GitHub Pages hosted from a repository the site
+  // is typically served at /<repo>/ so we set the base automatically there.
+  // Locally this falls back to the BASE_PATH env var or '/'.
+  base: process.env.GITHUB_REPOSITORY
+    ? `/${process.env.GITHUB_REPOSITORY.split('/')[1]}/`
+    : (process.env.BASE_PATH || '/'),
   build: {
     outDir: 'dist',
     assetsDir: 'assets',

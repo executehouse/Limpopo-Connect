@@ -19,6 +19,17 @@ NODE_ENV=development
 
 The service role key is only used server-side for privileged inserts/updates bypassing RLS. Never expose it to the frontend.
 
+Frontend (Vite) environment
+--------------------------------
+To enable the frontend to talk to Supabase directly (recommended for using Supabase Auth and Storage from the browser) add the following to your Vite env (root `.env.local` or `.env`):
+
+```
+VITE_SUPABASE_URL=https://your-project-ref.supabase.co
+VITE_SUPABASE_ANON_KEY=your-anon-key
+```
+
+When these variables are present the React frontend will use the Supabase client for sign-up, sign-in and password reset flows. Otherwise the app will continue to use the existing backend auth endpoints (`/api/auth/*`).
+
 ## 3. Database Migration
 If you previously ran the Azure PostgreSQL migrations, you can apply the same SQL to the Supabase database.
 
