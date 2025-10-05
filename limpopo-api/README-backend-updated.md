@@ -2,6 +2,15 @@
 
 This is the backend API for the Limpopo Connect PWA, built using Azure Functions with Node.js and TypeScript. It provides a complete authentication system, business directory, events management, marketplace, and more.
 
+## Features
+
+- 🔐 **Authentication System**: JWT-based auth with Argon2 password hashing
+- 🏢 **Business Directory**: Search, filter, and geospatial queries
+- 📅 **Events Management**: Community events with registration
+- 🛒 **Marketplace**: Local products and services
+- 📰 **News & Updates**: Community announcements
+- 🤖 **AI Integration**: Azure AI inference with GitHub Models (Python)
+
 ## Getting Started
 
 ### Prerequisites
@@ -60,6 +69,9 @@ This is the backend API for the Limpopo Connect PWA, built using Azure Functions
    # Azure Storage (for file uploads)
    # AZURE_STORAGE_ACCOUNT_NAME=your_storage_account
    # AZURE_STORAGE_ACCOUNT_KEY=your_storage_key
+
+   # GitHub Token for AI Inference (optional)
+   # GITHUB_TOKEN=your_github_personal_access_token
 
    # Environment
    NODE_ENV=development
@@ -467,6 +479,36 @@ az functionapp config appsettings set --name <app-name> --resource-group <rg> --
 4. **Rate Limiting:** Implement rate limiting for public endpoints
 5. **Input Validation:** All inputs are sanitized and validated
 6. **SQL Injection:** Uses parameterized queries throughout
+
+## AI Integration
+
+The backend includes Python-based AI integration using Azure AI Inference with GitHub Models. This enables intelligent features like:
+
+- Natural language business search
+- Content generation for descriptions
+- FAQ chatbot capabilities
+- Content summarization
+- Translation services
+
+### Setup AI Integration
+
+1. **Install Python dependencies:**
+   ```bash
+   pip install -r requirements.txt
+   ```
+
+2. **Set up GitHub Token:**
+   Create a token at https://github.com/settings/tokens and add to your `.env`:
+   ```env
+   GITHUB_TOKEN=your_github_personal_access_token
+   ```
+
+3. **Test the integration:**
+   ```bash
+   python ai_inference.py
+   ```
+
+For detailed documentation, see [AI_INTEGRATION.md](./AI_INTEGRATION.md).
 
 ## Architecture
 
