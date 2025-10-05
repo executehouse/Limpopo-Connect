@@ -32,3 +32,6 @@ __pycache__/
 *.so
 .Python
 
+# Archived Azure Functions code
+limpopo-api/archive/
+

@@ -1,4 +1,3 @@
-import request from 'supertest';
 import { describe, it, expect, beforeAll, beforeEach, vi } from 'vitest';
 
 // Mock the database module
@@ -15,16 +14,15 @@ vi.mock('../../src/models/user', () => ({
 }));
 
 
-import { query } from '../../src/lib/db';
 import { findUserByEmail, createUser, findUserById, verifyPassword } from '../../src/models/user';
 
 // NOTE: Auth Flow Integration tests disabled after migration away from Azure Functions implementation.
 describe.skip('Auth Flow Integration (disabled post-Azure migration)', () => {
-  let app: any;
+  let _app: unknown;
 
   beforeAll(async () => {
     // Azure Functions app removed; placeholder to satisfy lifecycle
-    app = {};
+    _app = {};
   });
 
   beforeEach(() => {

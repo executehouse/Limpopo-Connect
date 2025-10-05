@@ -60,7 +60,7 @@ export const createUser = async (userData: Pick<User, 'email' | 'name' | 'role'>
 export const verifyPassword = async (password: string, hash: string): Promise<boolean> => {
   try {
     return await argon2.verify(hash, password);
-  } catch (error) {
+  } catch {
     return false;
   }
 };
