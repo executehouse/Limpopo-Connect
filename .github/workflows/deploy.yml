@@ -47,7 +47,7 @@ jobs:
             export DB_PORT="5432"
             export DB_PASSWORD=$(az keyvault secret show --vault-name $VAULT_NAME --name azure-postgres-admin-password --query value -o tsv)
 
-            # Make all DB vars available as GitHub Actions env
+           # Make all DB vars available as GitHub Actions env
             echo "DB_HOST=$DB_HOST" >> $GITHUB_ENV
             echo "DB_NAME=$DB_NAME" >> $GITHUB_ENV
             echo "DB_USER=$DB_USER" >> $GITHUB_ENV
