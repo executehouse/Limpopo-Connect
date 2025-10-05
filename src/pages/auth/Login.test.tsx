@@ -48,7 +48,8 @@ describe('Login Component', () => {
     fireEvent.click(submitButton);
 
     await waitFor(() => {
-      expect(screen.getByText('Email is required')).toBeInTheDocument();
+      const errorMessage = screen.getByTestId('error-message');
+      expect(errorMessage).toHaveTextContent('Email is required');
     });
   });
 
@@ -66,7 +67,8 @@ describe('Login Component', () => {
     fireEvent.click(submitButton);
 
     await waitFor(() => {
-      expect(screen.getByText('Please enter a valid email address')).toBeInTheDocument();
+      const errorMessage = screen.getByTestId('error-message');
+      expect(errorMessage).toHaveTextContent('Please enter a valid email address');
     });
   });
 
@@ -84,7 +86,8 @@ describe('Login Component', () => {
     fireEvent.click(submitButton);
 
     await waitFor(() => {
-      expect(screen.getByText('Password is required')).toBeInTheDocument();
+      const errorMessage = screen.getByTestId('error-message');
+      expect(errorMessage).toHaveTextContent('Password is required');
     });
   });
 
@@ -101,13 +104,14 @@ describe('Login Component', () => {
     // Trigger validation error
     fireEvent.click(submitButton);
     await waitFor(() => {
-      expect(screen.getByText('Email is required')).toBeInTheDocument();
+      const errorMessage = screen.getByTestId('error-message');
+      expect(errorMessage).toHaveTextContent('Email is required');
     });
 
     // Type in email field - error should clear
     fireEvent.change(emailInput, { target: { value: 'test@example.com' } });
     await waitFor(() => {
-      expect(screen.queryByText('Email is required')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('error-message')).not.toBeInTheDocument();
     });
   });
 
@@ -307,7 +311,8 @@ describe('Login Component', () => {
     fireEvent.click(submitButton);
 
     await waitFor(() => {
-      expect(screen.getByText('Invalid credentials')).toBeInTheDocument();
+      const errorMessage = screen.getByTestId('error-message');
+      expect(errorMessage).toHaveTextContent('Invalid credentials');
     });
   });
 

@@ -6,8 +6,8 @@
   "scripts": {
     "dev": "npm-run-all --parallel dev:frontend dev:api:*",
     "dev:frontend": "vite",
-    "dev:api:auth": "npm --prefix limpopo-api run start:auth",
-    "dev:api:businesses": "npm --prefix limpopo-api run start:businesses",
+    "dev:api:auth": "PORT=3001 npm --prefix limpopo-api run start:auth",
+    "dev:api:businesses": "PORT=3002 npm --prefix limpopo-api run start:businesses",
     "build": "tsc -b && vite build",
     "start": "node server.js",
     "lint": "eslint .",

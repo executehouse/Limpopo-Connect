@@ -1,14 +1,15 @@
+import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { createOrder } from '../../src/models/order';
 import pool from '../../src/lib/db';
 import { MarketItem } from '../../src/models/marketItem';
 
 // Mock the entire db module
-jest.mock('../../src/lib/db', () => ({
+vi.mock('../../src/lib/db', () => ({
   __esModule: true,
   default: {
-    connect: jest.fn(),
+    connect: vi.fn(),
   },
-  query: jest.fn(),
+  query: vi.fn(),
 }));
 
 import { PoolClient } from 'pg';
@@ -17,16 +18,16 @@ import { PoolClient } from 'pg';
 type MockPoolClient = Pick<PoolClient, 'query' | 'release'>;
 
 describe('Order Model', () => {
-    let mockClient: jest.Mocked<MockPoolClient>;
+    let mockClient: vi.Mocked<MockPoolClient>;
 
     beforeEach(() => {
         // Reset mocks before each test
         mockClient = {
-            query: jest.fn(),
-            release: jest.fn(),
-        } as unknown as jest.Mocked<MockPoolClient>;
-        (pool.connect as jest.Mock).mockResolvedValue(mockClient);
-        jest.clearAllMocks();
+            query: vi.fn(),
+            release: vi.fn(),
+        } as unknown as vi.Mocked<MockPoolClient>;
+        (pool.connect as vi.Mock).mockResolvedValue(mockClient);
+        vi.clearAllMocks();
     });
 
     describe('createOrder', () => {
@@ -42,7 +43,7 @@ describe('Order Model', () => {
         it('should create an order, order items, and commit the transaction on success', async () => {
             // Arrange
             const mockOrder = { id: 'order-xyz', total: 61.00, /* other fields */ };
-            (mockClient.query as jest.Mock)
+            (mockClient.query as vi.Mock)
                 .mockResolvedValueOnce({ rows: [] }) // BEGIN
                 .mockResolvedValueOnce({ rows: mockDbItems }) // Fetch items
                 .mockResolvedValueOnce({ rows: [mockOrder] }) // Create order
@@ -68,7 +69,7 @@ describe('Order Model', () => {
             // Deep copy the mock items to avoid polluting state for other tests
             const lowStockItems = JSON.parse(JSON.stringify(mockDbItems));
             lowStockItems[0].stock = 0; // Not enough stock for item-abc
-            (mockClient.query as jest.Mock)
+            (mockClient.query as vi.Mock)
                 .mockResolvedValueOnce({ rows: [] }) // For BEGIN
                 .mockResolvedValueOnce({ rows: lowStockItems }); // For SELECT
 
@@ -82,7 +83,7 @@ describe('Order Model', () => {
 
         it('should throw an error and rollback if an item is not found', async () => {
             // Arrange
-            (mockClient.query as jest.Mock)
+            (mockClient.query as vi.Mock)
                 .mockResolvedValueOnce({ rows: [] }) // For BEGIN
                 .mockResolvedValueOnce({ rows: [mockDbItems[0]] }); // For SELECT
 

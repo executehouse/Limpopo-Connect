@@ -1,36 +1,38 @@
+import { describe, it, expect, beforeEach, vi } from 'vitest';
+
 // Mock uuid
-jest.mock('uuid', () => ({
-  v4: jest.fn(() => 'mock-uuid-12345')
+vi.mock('uuid', () => ({
+  v4: vi.fn(() => 'mock-uuid-12345')
 }));
 
 // Azure Storage mocks removed post-migration
 
 // Mock Sharp for image processing
-jest.mock('sharp', () => {
+vi.mock('sharp', () => {
   const mockSharp: any = {
-    metadata: jest.fn(() => Promise.resolve({
+    metadata: vi.fn(() => Promise.resolve({
       width: 800,
       height: 600,
       format: 'jpeg',
       size: 102400
     })),
-    resize: jest.fn(function(this: any) { return mockSharp; }),
-    jpeg: jest.fn(function(this: any) { return mockSharp; }),
-    toBuffer: jest.fn(() => Promise.resolve(Buffer.from('mock-image-data')))
+    resize: vi.fn(function(this: any) { return mockSharp; }),
+    jpeg: vi.fn(function(this: any) { return mockSharp; }),
+    toBuffer: vi.fn(() => Promise.resolve(Buffer.from('mock-image-data')))
   };
   
-  return jest.fn(() => mockSharp);
+  return vi.fn(() => mockSharp);
 });
 
 // Mock database
-jest.mock('../../src/lib/db', () => ({
-  query: jest.fn(),
+vi.mock('../../src/lib/db', () => ({
+  query: vi.fn(),
 }));
 
 // NOTE: Upload functionality tests disabled (Azure Blob Storage removed). Will be reimplemented with Supabase Storage.
 describe.skip('Upload Functionality (disabled post-Azure migration)', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     process.env.AZURE_STORAGE_ACCOUNT_NAME = 'testaccount';
     process.env.AZURE_STORAGE_ACCOUNT_KEY = 'testkey';
     process.env.AzureWebJobsStorage = 'DefaultEndpointsProtocol=https;AccountName=testaccount;AccountKey=testkey;EndpointSuffix=core.windows.net';
@@ -41,7 +43,7 @@ describe.skip('Upload Functionality (disabled post-Azure migration)', () => {
       const { uploadsGetSignedUrl } = await import('../../src/functions/uploadsGetSignedUrl');
       
       const mockRequest = {
-        json: jest.fn().mockResolvedValue({
+        json: vi.fn().mockResolvedValue({
           fileName: 'test-image.jpg',
           contentType: 'image/jpeg',
           contentLength: 1024000, // 1MB
@@ -52,12 +54,12 @@ describe.skip('Upload Functionality (disabled post-Azure migration)', () => {
           id: 'user-uuid',
           role: 'business'
         },
-        headers: { get: jest.fn() },
+        headers: { get: vi.fn() },
         url: '/api/uploads/signed-url'
       };
       
       const mockContext = {
-        log: jest.fn()
+        log: vi.fn()
       };
 
       const result = await uploadsGetSignedUrl(mockRequest as any, mockContext as any);
@@ -73,7 +75,7 @@ describe.skip('Upload Functionality (disabled post-Azure migration)', () => {
       const { uploadsGetSignedUrl } = await import('../../src/functions/uploadsGetSignedUrl');
       
       const mockRequest = {
-        json: jest.fn().mockResolvedValue({
+        json: vi.fn().mockResolvedValue({
           fileName: 'test-file.pdf',
           contentType: 'application/pdf',
           contentLength: 1024000,
@@ -84,12 +86,12 @@ describe.skip('Upload Functionality (disabled post-Azure migration)', () => {
           id: 'user-uuid',
           role: 'business'
         },
-        headers: { get: jest.fn() },
+        headers: { get: vi.fn() },
         url: '/api/uploads/signed-url'
       };
       
       const mockContext = {
-        log: jest.fn()
+        log: vi.fn()
       };
 
       const result = await uploadsGetSignedUrl(mockRequest as any, mockContext as any);
@@ -103,7 +105,7 @@ describe.skip('Upload Functionality (disabled post-Azure migration)', () => {
       const { uploadsGetSignedUrl } = await import('../../src/functions/uploadsGetSignedUrl');
       
       const mockRequest = {
-        json: jest.fn().mockResolvedValue({
+        json: vi.fn().mockResolvedValue({
           fileName: 'huge-image.jpg',
           contentType: 'image/jpeg',
           contentLength: 11 * 1024 * 1024, // 11MB
@@ -114,12 +116,12 @@ describe.skip('Upload Functionality (disabled post-Azure migration)', () => {
           id: 'user-uuid',
           role: 'business'
         },
-        headers: { get: jest.fn() },
+        headers: { get: vi.fn() },
         url: '/api/uploads/signed-url'
       };
       
       const mockContext = {
-        log: jest.fn()
+        log: vi.fn()
       };
 
       const result = await uploadsGetSignedUrl(mockRequest as any, mockContext as any);
@@ -133,7 +135,7 @@ describe.skip('Upload Functionality (disabled post-Azure migration)', () => {
       const { uploadsGetSignedUrl } = await import('../../src/functions/uploadsGetSignedUrl');
       
       const mockRequest = {
-        json: jest.fn().mockResolvedValue({
+        json: vi.fn().mockResolvedValue({
           fileName: 'test-image.jpg',
           contentType: 'image/jpeg',
           contentLength: 1024000,
@@ -144,12 +146,12 @@ describe.skip('Upload Functionality (disabled post-Azure migration)', () => {
           id: 'user-uuid',
           role: 'business'
         },
-        headers: { get: jest.fn() },
+        headers: { get: vi.fn() },
         url: '/api/uploads/signed-url'
       };
       
       const mockContext = {
-        log: jest.fn()
+        log: vi.fn()
       };
 
       const result = await uploadsGetSignedUrl(mockRequest as any, mockContext as any);
@@ -166,8 +168,8 @@ describe.skip('Upload Functionality (disabled post-Azure migration)', () => {
       
       const mockBlob = Buffer.from('mock-image-data');
       const mockContext = {
-        log: jest.fn(),
-        error: jest.fn(),
+        log: vi.fn(),
+        error: vi.fn(),
         triggerMetadata: {
           name: 'business-photo/test-upload-id.jpg'
         }
@@ -184,8 +186,8 @@ describe.skip('Upload Functionality (disabled post-Azure migration)', () => {
       const { processImageUpload } = await import('../../src/functions/processImageUpload');
       
       const mockContext = {
-        log: jest.fn(),
-        error: jest.fn(),
+        log: vi.fn(),
+        error: vi.fn(),
         triggerMetadata: {
           name: 'test-blob.jpg'
         }
@@ -201,8 +203,8 @@ describe.skip('Upload Functionality (disabled post-Azure migration)', () => {
       
       const mockBlob = Buffer.from('mock-image-data');
       const mockContext = {
-        log: jest.fn(),
-        error: jest.fn(),
+        log: vi.fn(),
+        error: vi.fn(),
         triggerMetadata: {
           name: 'invalid-path' // Missing purpose/uploadId format
         }
