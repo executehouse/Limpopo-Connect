@@ -64,7 +64,6 @@ describe.skip('Business API Integration (disabled post-Azure migration)', () => 
       
       vi.mocked(createBusiness).mockResolvedValue(mockCreatedBusiness);
 
-      const { businessesCreate } = await import('../../src/functions/businessesCreate');
       const mockRequest = {
         json: vi.fn().mockResolvedValue({
           name: 'Test Restaurant',
@@ -96,7 +95,6 @@ describe.skip('Business API Integration (disabled post-Azure migration)', () => 
     });
 
     it('should return validation errors for invalid data', async () => {
-      const businessesCreateModule = await import('../../src/functions/businessesCreate');
       const businessesCreate = businessesCreateModule.businessesCreate;
       const mockRequest = {
         json: vi.fn().mockResolvedValue({
@@ -154,7 +152,6 @@ describe.skip('Business API Integration (disabled post-Azure migration)', () => 
       
       vi.mocked(findBusinesses).mockResolvedValue(mockBusinesses);
 
-      const { businessesList } = await import('../../src/functions/businessesList');
       const mockRequest = {
         query: {
           get: vi.fn((key: string) => {
@@ -186,7 +183,6 @@ describe.skip('Business API Integration (disabled post-Azure migration)', () => 
     });
 
     it('should handle invalid near parameter', async () => {
-      const businessesListModule = await import('../../src/functions/businessesList');
       const businessesList = businessesListModule.businessesList;
       const mockRequest = {
         query: {
@@ -236,7 +232,6 @@ describe.skip('Business API Integration (disabled post-Azure migration)', () => 
       vi.mocked(findBusinessById).mockResolvedValue(mockBusinessDetails);
       vi.mocked(findBusinessPhotos).mockResolvedValue(mockPhotos);
 
-      const { businessesGet } = await import('../../src/functions/businessesGet');
       const mockRequest = {
         params: { id: 'business-uuid' },
         headers: { get: vi.fn() },
@@ -258,7 +253,6 @@ describe.skip('Business API Integration (disabled post-Azure migration)', () => 
     it('should return 404 for non-existent business', async () => {
       vi.mocked(findBusinessById).mockResolvedValue(null);
 
-      const businessesGetModule = await import('../../src/functions/businessesGet');
       const businessesGet = businessesGetModule.businessesGet;
       const mockRequest = {
         params: { id: 'non-existent' },

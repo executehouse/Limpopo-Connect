@@ -40,7 +40,6 @@ describe.skip('Upload Functionality (disabled post-Azure migration)', () => {
 
   describe('Signed URL Generation', () => {
     it('should generate signed URL for valid image upload request', async () => {
-      const { uploadsGetSignedUrl } = await import('../../src/functions/uploadsGetSignedUrl');
       
       const mockRequest = {
         json: vi.fn().mockResolvedValue({
@@ -72,7 +71,6 @@ describe.skip('Upload Functionality (disabled post-Azure migration)', () => {
     });
 
     it('should reject invalid file types', async () => {
-      const { uploadsGetSignedUrl } = await import('../../src/functions/uploadsGetSignedUrl');
       
       const mockRequest = {
         json: vi.fn().mockResolvedValue({
@@ -102,7 +100,6 @@ describe.skip('Upload Functionality (disabled post-Azure migration)', () => {
     });
 
     it('should reject files that are too large', async () => {
-      const { uploadsGetSignedUrl } = await import('../../src/functions/uploadsGetSignedUrl');
       
       const mockRequest = {
         json: vi.fn().mockResolvedValue({
@@ -132,7 +129,6 @@ describe.skip('Upload Functionality (disabled post-Azure migration)', () => {
     });
 
     it('should require businessId for business photos', async () => {
-      const { uploadsGetSignedUrl } = await import('../../src/functions/uploadsGetSignedUrl');
       
       const mockRequest = {
         json: vi.fn().mockResolvedValue({
@@ -164,7 +160,6 @@ describe.skip('Upload Functionality (disabled post-Azure migration)', () => {
 
   describe('Image Processing', () => {
     it('should process uploaded image and generate thumbnails', async () => {
-      const { processImageUpload } = await import('../../src/functions/processImageUpload');
       
       const mockBlob = Buffer.from('mock-image-data');
       const mockContext = {
@@ -183,7 +178,6 @@ describe.skip('Upload Functionality (disabled post-Azure migration)', () => {
     });
 
     it('should handle invalid blob input', async () => {
-      const { processImageUpload } = await import('../../src/functions/processImageUpload');
       
       const mockContext = {
         log: vi.fn(),
@@ -199,7 +193,6 @@ describe.skip('Upload Functionality (disabled post-Azure migration)', () => {
     });
 
     it('should handle invalid blob path format', async () => {
-      const { processImageUpload } = await import('../../src/functions/processImageUpload');
       
       const mockBlob = Buffer.from('mock-image-data');
       const mockContext = {

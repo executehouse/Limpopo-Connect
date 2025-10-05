@@ -58,7 +58,6 @@ describe.skip('Auth Flow Integration (disabled post-Azure migration)', () => {
 
       // Since we can't easily test the actual HTTP endpoints without a running server,
       // we'll test the function handlers directly
-      const { authRegister } = await import('../../src/functions/authRegister');
       const mockRequest = {
         json: vi.fn().mockResolvedValue(registerData),
         headers: { get: vi.fn() },
@@ -77,7 +76,6 @@ describe.skip('Auth Flow Integration (disabled post-Azure migration)', () => {
     });
 
     it('should return validation errors for invalid input', async () => {
-      const { authRegister } = await import('../../src/functions/authRegister');
       const mockRequest = {
         json: vi.fn().mockResolvedValue({
           email: 'invalid-email',
@@ -106,7 +104,6 @@ describe.skip('Auth Flow Integration (disabled post-Azure migration)', () => {
         email: 'test@example.com'
       });
 
-      const { authRegister } = await import('../../src/functions/authRegister');
       const mockRequest = {
         json: vi.fn().mockResolvedValue({
           email: 'test@example.com',
@@ -143,7 +140,6 @@ describe.skip('Auth Flow Integration (disabled post-Azure migration)', () => {
       vi.mocked(findUserByEmail).mockResolvedValue(mockUser);
       vi.mocked(verifyPassword).mockResolvedValue(true);
 
-      const { authLogin } = await import('../../src/functions/authLogin');
       const mockRequest = {
         json: vi.fn().mockResolvedValue({
           email: 'test@example.com',
@@ -167,7 +163,6 @@ describe.skip('Auth Flow Integration (disabled post-Azure migration)', () => {
     it('should reject invalid credentials', async () => {
       vi.mocked(findUserByEmail).mockResolvedValue(null);
 
-      const { authLogin } = await import('../../src/functions/authLogin');
       const mockRequest = {
         json: vi.fn().mockResolvedValue({
           email: 'nonexistent@example.com',
@@ -187,7 +182,6 @@ describe.skip('Auth Flow Integration (disabled post-Azure migration)', () => {
     });
 
     it('should reject invalid email format', async () => {
-      const { authLogin } = await import('../../src/functions/authLogin');
       const mockRequest = {
         json: vi.fn().mockResolvedValue({
           email: 'invalid-email',
@@ -237,7 +231,6 @@ describe.skip('Auth Flow Integration (disabled post-Azure migration)', () => {
         }
       );
 
-      const { authRefresh } = await import('../../src/functions/authRefresh');
       const mockRequest = {
         json: vi.fn().mockResolvedValue({ refreshToken }),
         headers: { get: vi.fn() },
@@ -255,7 +248,6 @@ describe.skip('Auth Flow Integration (disabled post-Azure migration)', () => {
     });
 
     it('should reject invalid refresh token', async () => {
-      const { authRefresh } = await import('../../src/functions/authRefresh');
       const mockRequest = {
         json: vi.fn().mockResolvedValue({ refreshToken: 'invalid-token' }),
         headers: { get: vi.fn() },

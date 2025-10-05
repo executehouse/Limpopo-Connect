@@ -77,14 +77,10 @@ fi
 print_section "4. Critical Files Verification"
 
 CRITICAL_FILES=(
-    "limpopo-api/src/functions/authLogin.ts"
-    "limpopo-api/src/functions/authRegister.ts"
-    "limpopo-api/src/functions/businessesCreate.ts"
-    "limpopo-api/src/functions/businessesList.ts"
-    "limpopo-api/src/functions/businessesGet.ts"
-    "limpopo-api/src/lib/auth.ts"
-    "limpopo-api/src/lib/db.ts"
-    "limpopo-api/src/lib/validation.ts"
+    "limpopo-api/auth.js"
+    "limpopo-api/businesses.js"
+    "limpopo-api/db.js"
+    "limpopo-api/src/lib/supabaseClient.js"
     "limpopo-api/migrations/001_init_schema.sql"
     "limpopo-api/migrations/002_extensions.sql"
     "dist/index.html"
@@ -115,19 +111,17 @@ else
     print_warning "No .env.example found - ensure environment variables are documented"
 fi
 
-# 6. Verify API Endpoints
-print_section "6. API Endpoints Verification"
+# 6. Verify API Services
+print_section "6. API Services Verification"
 
-API_FUNCTIONS=$(ls limpopo-api/src/functions/*.ts 2>/dev/null | wc -l)
-if [ $API_FUNCTIONS -gt 0 ]; then
-    print_success "Found $API_FUNCTIONS API function implementations"
+if [ -f "limpopo-api/auth.js" ] && [ -f "limpopo-api/businesses.js" ]; then
+    print_success "Express.js API services found"
     echo ""
-    echo "Implemented endpoints:"
-    ls limpopo-api/src/functions/*.ts | xargs -n1 basename | sed 's/.ts$//' | while read func; do
-        echo "  - $func"
-    done
+    echo "Available services:"
+    echo "  - auth.js (Authentication service on port 3001)"
+    echo "  - businesses.js (Business listings service on port 3002)"
 else
-    print_error "No API functions found"
+    print_error "API service files missing"
 fi
 
 # 7. Check Database Migrations
@@ -178,9 +172,9 @@ if [ $OVERALL_STATUS -eq 0 ]; then
     echo ""
     echo "Next steps:"
     echo "1. Review DEPLOYMENT_CHECKLIST.md"
-    echo "2. Configure environment variables in Azure"
-    echo "3. Deploy backend to Azure Functions"
-    echo "4. Deploy frontend to GitHub Pages"
+    echo "2. Configure environment variables (Supabase credentials)"
+    echo "3. Deploy backend services (auth.js and businesses.js)"
+    echo "4. Deploy frontend to hosting platform"
     echo "5. Run smoke tests using SMOKE_TEST_GUIDE.md"
 else
     echo -e "${RED}✗ Some checks failed. Please fix the issues before deploying.${NC}"
