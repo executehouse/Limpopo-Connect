@@ -1,13 +1,21 @@
 import React, { useState, useEffect } from 'react';
-import { Link, useLocation } from 'react-router-dom';
-import { Menu, X, MapPin, User } from 'lucide-react';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { Menu, X, MapPin, User, LogOut } from 'lucide-react';
+import { useAuth } from '../../contexts/AuthContext';
 
 const Header: React.FC = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const location = useLocation();
+  const navigate = useNavigate();
+  const { user, signOut } = useAuth();
 
   const toggleMenu = () => setIsMenuOpen(!isMenuOpen);
+
+  const handleSignOut = async () => {
+    await signOut();
+    navigate('/login');
+  };
 
   useEffect(() => {
     const handleScroll = () => {
@@ -63,19 +71,36 @@ const Header: React.FC = () => {
 
           {/* Auth Section */}
           <div className="hidden md:flex items-center space-x-4">
-            <Link
-              to="/login"
-              className="flex items-center space-x-1 nav-link"
-            >
-              <User className="h-5 w-5" />
-              <span>Sign In</span>
-            </Link>
-            <Link
-              to="/register"
-              className="btn-primary"
-            >
-              Register
-            </Link>
+            {user ? (
+              <>
+                <span className="text-sm text-gray-700">
+                  {user.email}
+                </span>
+                <button
+                  onClick={handleSignOut}
+                  className="flex items-center space-x-1 nav-link"
+                >
+                  <LogOut className="h-5 w-5" />
+                  <span>Sign Out</span>
+                </button>
+              </>
+            ) : (
+              <>
+                <Link
+                  to="/login"
+                  className="flex items-center space-x-1 nav-link"
+                >
+                  <User className="h-5 w-5" />
+                  <span>Sign In</span>
+                </Link>
+                <Link
+                  to="/register"
+                  className="btn-primary"
+                >
+                  Register
+                </Link>
+              </>
+            )}
           </div>
 
           {/* Mobile Menu Button */}
@@ -108,20 +133,39 @@ const Header: React.FC = () => {
               </Link>
             ))}
             <div className="pt-4 mt-4 border-t border-gray-200 flex items-center justify-between">
-              <Link
-                to="/login"
-                onClick={() => setIsMenuOpen(false)}
-                className="flex-1 text-center py-3 px-4 rounded-lg text-gray-700 hover:bg-gray-100 font-medium"
-              >
-                Sign In
-              </Link>
-              <Link
-                to="/register"
-                onClick={() => setIsMenuOpen(false)}
-                className="flex-1 btn-primary text-center"
-              >
-                Register
-              </Link>
+              {user ? (
+                <div className="flex-1 flex flex-col space-y-2">
+                  <span className="text-sm text-gray-600 px-4">
+                    {user.email}
+                  </span>
+                  <button
+                    onClick={() => {
+                      setIsMenuOpen(false);
+                      handleSignOut();
+                    }}
+                    className="flex-1 text-center py-3 px-4 rounded-lg text-gray-700 hover:bg-gray-100 font-medium"
+                  >
+                    Sign Out
+                  </button>
+                </div>
+              ) : (
+                <>
+                  <Link
+                    to="/login"
+                    onClick={() => setIsMenuOpen(false)}
+                    className="flex-1 text-center py-3 px-4 rounded-lg text-gray-700 hover:bg-gray-100 font-medium"
+                  >
+                    Sign In
+                  </Link>
+                  <Link
+                    to="/register"
+                    onClick={() => setIsMenuOpen(false)}
+                    className="flex-1 btn-primary text-center"
+                  >
+                    Register
+                  </Link>
+                </>
+              )}
             </div>
           </div>
         </div>

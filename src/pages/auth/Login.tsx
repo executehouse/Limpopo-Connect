@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { MapPin, Mail, Lock, Eye, EyeOff } from 'lucide-react';
+import { useAuth } from '../../contexts/AuthContext';
 
 const Login: React.FC = () => {
   const [email, setEmail] = useState('');
@@ -12,6 +13,7 @@ const Login: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const successMessage = location.state?.message;
+  const { signIn } = useAuth();
 
   // Load saved email on mount if "Remember Me" was checked
   useEffect(() => {
@@ -51,36 +53,10 @@ const Login: React.FC = () => {
     setIsLoading(true);
 
     try {
-      const response = await fetch('/api/auth/login', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ email: trimmedEmail, password }),
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.error || 'Login failed. Please try again.');
-      }
-
-      // Store tokens and user info
-      // Backend returns accessToken and refreshToken
-      if (data.accessToken) {
-        localStorage.setItem('accessToken', data.accessToken);
-      }
-      if (data.refreshToken) {
-        localStorage.setItem('refreshToken', data.refreshToken);
-      }
+      const { error } = await signIn(trimmedEmail, password);
       
-      // Also store in legacy 'token' field for backward compatibility
-      if (data.accessToken) {
-        localStorage.setItem('token', data.accessToken);
-      }
-
-      if (data.user) {
-        localStorage.setItem('user', JSON.stringify(data.user));
+      if (error) {
+        throw new Error(error.message || 'Login failed. Please try again.');
       }
 
       // Handle "Remember Me" functionality

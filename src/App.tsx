@@ -1,4 +1,5 @@
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { AuthProvider } from './contexts/AuthContext';
 import Layout from './components/layout/Layout';
 import Home from './pages/Home';
 import BusinessDirectory from './pages/BusinessDirectory';
@@ -21,31 +22,33 @@ import './index.css';
 
 function App() {
   return (
-    <Router>
-      <div className="App min-h-screen bg-gray-50">
-        <Routes>
-          <Route path="/login" element={<Login />} />
-          <Route path="/register" element={<Register />} />
-          <Route path="/forgot-password" element={<ForgotPassword />} />
-          <Route path="/reset-password" element={<ResetPassword />} />
-          <Route path="/" element={<Layout />}>
-            <Route index element={<Home />} />
-            <Route path="business-directory" element={<BusinessDirectory />} />
-            <Route path="events" element={<Events />} />
-            <Route path="marketplace" element={<Marketplace />} />
-            <Route path="tourism" element={<Tourism />} />
-            <Route path="news" element={<News />} />
-            <Route path="connections" element={<Connections />} />
-            <Route path="connections/friendship-partners" element={<FriendshipPartners />} />
-            <Route path="connections/meaningful-relationships" element={<MeaningfulRelationships />} />
-            <Route path="connections/casual-meetups" element={<CasualMeetups />} />
-            <Route path="connections/shared-interests" element={<SharedInterests />} />
-            <Route path="connections/community-stories" element={<CommunityStories />} />
-            <Route path="connections/missed-moments" element={<MissedMoments />} />
-          </Route>
-        </Routes>
-      </div>
-    </Router>
+    <AuthProvider>
+      <Router>
+        <div className="App min-h-screen bg-gray-50">
+          <Routes>
+            <Route path="/login" element={<Login />} />
+            <Route path="/register" element={<Register />} />
+            <Route path="/forgot-password" element={<ForgotPassword />} />
+            <Route path="/reset-password" element={<ResetPassword />} />
+            <Route path="/" element={<Layout />}>
+              <Route index element={<Home />} />
+              <Route path="business-directory" element={<BusinessDirectory />} />
+              <Route path="events" element={<Events />} />
+              <Route path="marketplace" element={<Marketplace />} />
+              <Route path="tourism" element={<Tourism />} />
+              <Route path="news" element={<News />} />
+              <Route path="connections" element={<Connections />} />
+              <Route path="connections/friendship-partners" element={<FriendshipPartners />} />
+              <Route path="connections/meaningful-relationships" element={<MeaningfulRelationships />} />
+              <Route path="connections/casual-meetups" element={<CasualMeetups />} />
+              <Route path="connections/shared-interests" element={<SharedInterests />} />
+              <Route path="connections/community-stories" element={<CommunityStories />} />
+              <Route path="connections/missed-moments" element={<MissedMoments />} />
+            </Route>
+          </Routes>
+        </div>
+      </Router>
+    </AuthProvider>
   );
 }
 
