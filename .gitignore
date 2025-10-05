@@ -24,6 +24,10 @@ dist-ssr
 *.sw?
 .env
 
+# Azure Functions (legacy)
+local.settings.json
+host.json
+
 # Python
 .venv/
 __pycache__/

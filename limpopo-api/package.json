@@ -3,14 +3,11 @@
   "version": "1.0.0",
   "description": "Supabase-integrated API for Limpopo Connect (migrated from Azure Functions)",
   "scripts": {
-    "build": "tsc",
-    "watch": "tsc -w",
-    "prestart": "npm run build",
     "start:auth": "node auth.js",
     "start:businesses": "node businesses.js",
     "dev": "npm-run-all --parallel start:auth start:businesses",
     "test": "jest",
-    "lint": "ESLINT_USE_FLAT_CONFIG=false eslint src/ --max-warnings 0"
+    "lint": "ESLINT_USE_FLAT_CONFIG=false eslint . --max-warnings 0"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.45.1",
@@ -21,6 +18,7 @@
     "dotenv": "^16.3.1",
     "express": "^4.18.2",
     "jsonwebtoken": "^9.0.2",
+    "npm-run-all": "^4.1.5",
     "pg": "^8.11.3",
     "sharp": "^0.34.4",
     "uuid": "^9.0.1"
