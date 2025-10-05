@@ -1,0 +1,3 @@
+# Azure AI Inference SDK
+azure-ai-inference>=1.0.0b5
+azure-core>=1.30.0
