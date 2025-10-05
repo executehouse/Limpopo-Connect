@@ -1,12 +1,11 @@
 {
   "IsEncrypted": false,
   "Values": {
-    "AzureWebJobsStorage": "",
-    "FUNCTIONS_WORKER_RUNTIME": "node",
-    "DATABASE_URL": "postgresql://limpopo_user:limpopo_password@localhost:5432/limpopo_connect_dev",
-    "JWT_SECRET": "a-very-strong-and-long-secret-key-that-is-at-least-32-characters",
+    "DATABASE_URL": "postgresql://postgres:postgres@localhost:5432/postgres",
+    "JWT_SECRET": "change-this-in-production-32-chars-min",
     "NODE_ENV": "development",
-    "AZURE_STORAGE_ACCOUNT_NAME": "your-local-dev-storage-account-name",
-    "AZURE_STORAGE_ACCOUNT_KEY": "your-local-dev-storage-account-key"
+    "SUPABASE_URL": "https://your-project-ref.supabase.co",
+    "SUPABASE_ANON_KEY": "your-anon-key",
+    "SUPABASE_SERVICE_ROLE_KEY": "your-service-role-key"
   }
 }

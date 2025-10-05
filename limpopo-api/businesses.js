@@ -2,7 +2,7 @@ require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const bodyParser = require('body-parser');
-const { query } = require('./db');
+const { requireSupabase, requireSupabaseAdmin } = require('./src/lib/supabaseClient.js');
 const { v4: uuidv4 } = require('uuid');
 const jwt = require('jsonwebtoken');
 
@@ -34,8 +34,13 @@ const authenticateToken = (req, res, next) => {
 // GET all business listings
 app.get('/api/businesses', async (req, res) => {
   try {
-    const result = await query('SELECT * FROM listings ORDER BY created_at DESC');
-    res.status(200).json(result.rows);
+    const supabase = requireSupabase();
+    const { data, error } = await supabase
+      .from('listings')
+      .select('*')
+      .order('created_at', { ascending: false });
+    if (error) throw error;
+    res.status(200).json(data);
   } catch (error) {
     console.error('Error fetching businesses:', error);
     res.status(500).json({ error: 'An internal server error occurred.' });
@@ -46,11 +51,17 @@ app.get('/api/businesses', async (req, res) => {
 app.get('/api/businesses/:id', async (req, res) => {
   const { id } = req.params;
   try {
-    const result = await query('SELECT * FROM listings WHERE id = $1', [id]);
-    if (result.rows.length === 0) {
+    const supabase = requireSupabase();
+    const { data, error } = await supabase
+      .from('listings')
+      .select('*')
+      .eq('id', id)
+      .maybeSingle();
+    if (error) throw error;
+    if (!data) {
       return res.status(404).json({ error: 'Business not found.' });
     }
-    res.status(200).json(result.rows[0]);
+    res.status(200).json(data);
   } catch (error) {
     console.error(`Error fetching business ${id}:`, error);
     res.status(500).json({ error: 'An internal server error occurred.' });
@@ -68,17 +79,14 @@ app.post('/api/businesses', authenticateToken, async (req, res) => {
 
   try {
     const id = uuidv4();
-    const result = await query(
-      `INSERT INTO listings (id, name, category, description, address, phone, email, website, owner_id)
-       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
-       RETURNING *`,
-      [id, name, category, description, address, phone, email, website, ownerId]
-    );
-
-    res.status(201).json({
-      message: 'Business created successfully',
-      business: result.rows[0],
-    });
+    const supabase = requireSupabaseAdmin();
+    const { data, error } = await supabase
+      .from('listings')
+      .insert({ id, name, category, description, address, phone, email, website, owner_id: ownerId })
+      .select('*')
+      .single();
+    if (error) throw error;
+    res.status(201).json({ message: 'Business created successfully', business: data });
   } catch (error) {
     console.error('Error creating business:', error);
     res.status(500).json({ error: 'An internal server error occurred.' });

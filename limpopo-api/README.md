@@ -1,62 +1,28 @@
 # Limpopo Connect API
 
-Azure Functions API for the Limpopo Connect platform with PostgreSQL database integration.
+Supabase-integrated API for the Limpopo Connect platform (migrated from Azure Functions + Azure PostgreSQL).
 
 ## 📚 Documentation
 
 - **[INDEX.md](./INDEX.md)** - 📖 **START HERE** - Complete overview and guide
 - **[QUICKSTART.md](./QUICKSTART.md)** - Get started in 5 minutes
-- **[AZURE_SETUP_GUIDE.md](./AZURE_SETUP_GUIDE.md)** - Comprehensive setup guide
+- **[SUPABASE_SETUP.md](../SUPABASE_SETUP.md)** - Supabase setup guide
 - **[ARCHITECTURE.md](./ARCHITECTURE.md)** - System architecture and diagrams
 - **[TROUBLESHOOTING.md](./TROUBLESHOOTING.md)** - Problem-solving checklist
 
 ## Database Setup
 
-This API is configured to work with **Azure PostgreSQL Flexible Server**.
+This API is now configured to work with a **Supabase Postgres** database.
 
-### Azure PostgreSQL Flexible Server Setup
+### Supabase Setup (Summary)
 
-📖 **For detailed step-by-step instructions, see [AZURE_SETUP_GUIDE.md](./AZURE_SETUP_GUIDE.md)**
+For detailed instructions see `SUPABASE_SETUP.md`.
 
-**Quick Setup:**
-
-1. **Create Azure PostgreSQL Flexible Server**
-   - Go to Azure Portal
-   - Create a new PostgreSQL Flexible Server
-   - Choose your server name, admin username, and password
-   - Select appropriate tier based on your needs
-
-2. **Configure Firewall Rules**
-   - Add your IP address to the firewall rules
-   - For Azure Functions, enable "Allow Azure services and resources to access this server"
-
-3. **Get Connection String**
-   - Navigate to your PostgreSQL server in Azure Portal
-   - Go to "Connection strings"
-   - Copy the ADO.NET or JDBC connection string and convert to PostgreSQL format:
-   
-   ```
-   postgresql://{username}:{password}@{server-name}.postgres.database.azure.com:5432/{database}?sslmode=require
-   ```
-
-4. **Set Environment Variable**
-   - Copy `.env.example` to `.env` or run `npm run setup:env`
-   - Replace the placeholders with your actual values:
-   
-   ```bash
-   DATABASE_URL=postgresql://adminuser:MyP@ssw0rd@myserver.postgres.database.azure.com:5432/limpopoconnect?sslmode=require
-   ```
-
-5. **Test Connection**
-   ```bash
-   npm install
-   npm run test:connection
-   ```
-
-6. **Initialize Database Schema**
-   ```bash
-   psql $DATABASE_URL -f setup-database.sql
-   ```
+1. Create a Supabase project and obtain `SUPABASE_URL`, `SUPABASE_ANON_KEY`, and `SUPABASE_SERVICE_ROLE_KEY`.
+2. Copy `limpopo-api/.env.example` to `.env` and set values.
+3. Apply migrations in `migrations/` using the Supabase SQL editor.
+4. (Optional) Load sample data from `seeds/sample_data.sql`.
+5. Start services: `npm run dev --prefix limpopo-api`.
 
 ### Local Development
 
@@ -83,20 +49,18 @@ For local development:
    npm run test:connection
    ```
 
-5. Run Azure Functions locally:
+5. Run backend services locally:
    ```bash
-   cd ..
-   func start
+   npm run dev --prefix limpopo-api
    ```
+   Auth service: http://localhost:3001  Businesses service: http://localhost:3002
 
-The `GetListings` function will be available at: http://localhost:7071/api/GetListings
+### Database Notes
 
-### SSL Configuration
-
-The database connection is configured to work with Azure PostgreSQL Flexible Server:
-- SSL is enabled when `DATABASE_URL` is provided
-- `rejectUnauthorized` is set to `false` to support Azure's SSL certificates
-- This is the recommended configuration for Azure PostgreSQL Flexible Server
+Supabase provides a managed Postgres instance with optional Row Level Security (RLS). This codebase currently:
+- Uses `@supabase/supabase-js` for CRUD operations
+- Leverages a service-role key for privileged inserts (user + listing creation)
+- Retains custom JWT auth (can be migrated to Supabase Auth later)
 
 ### Troubleshooting
 
@@ -152,22 +116,21 @@ Simple health check function that tests database connectivity.
 
 ## Additional Resources
 
-- **Azure PostgreSQL Documentation**: https://docs.microsoft.com/azure/postgresql/
-- **node-postgres (pg) Documentation**: https://node-postgres.com/
-- **Azure Functions Node.js Guide**: https://docs.microsoft.com/azure/azure-functions/functions-reference-node
+- **Supabase Docs**: https://supabase.com/docs
+- **supabase-js Reference**: https://supabase.com/docs/reference/javascript
 
 ## Need Help?
 
 1. Check [TROUBLESHOOTING.md](./TROUBLESHOOTING.md) for common issues
-2. Review [AZURE_SETUP_GUIDE.md](./AZURE_SETUP_GUIDE.md) for detailed instructions
-3. Run `npm run test:connection` to diagnose connection problems
-4. Check Azure Service Health for service issues
+2. Review `SUPABASE_SETUP.md` for environment setup
+3. Ensure Supabase env vars are loaded
+4. Verify RLS policies if encountering permission errors
 
 ## Contributing
 
 When adding new database functionality:
-1. Update the schema in `setup-database.sql`
-2. Create/update Azure Functions in their respective directories
-3. Test with `npm run test:connection`
+1. Update/create migrations in `migrations/`
+2. Add or update Supabase queries in models/services
+3. Add/update tests (re-enable previously skipped Azure tests with new Supabase logic)
 4. Update documentation as needed
 

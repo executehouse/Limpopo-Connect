@@ -2,7 +2,7 @@ require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const bodyParser = require('body-parser');
-const { query } = require('./db');
+const { requireSupabase, requireSupabaseAdmin } = require('./src/lib/supabaseClient.js');
 const argon2 = require('argon2');
 const jwt = require('jsonwebtoken');
 const { v4: uuidv4 } = require('uuid');
@@ -30,15 +30,19 @@ app.post('/api/auth/signup', async (req, res) => {
     const hashedPassword = await argon2.hash(password);
     const id = uuidv4();
 
-    const result = await query(
-      'INSERT INTO users (id, name, email, password_hash, role) VALUES ($1, $2, $3, $4, $5) RETURNING id, email, name, role',
-      [id, name, email, hashedPassword, userRole]
-    );
-
-    res.status(201).json({
-      message: 'User created successfully',
-      user: result.rows[0],
-    });
+    const supabase = requireSupabaseAdmin();
+    const { data, error } = await supabase
+      .from('users')
+      .insert({ id, name, email, password_hash: hashedPassword, role: userRole })
+      .select('id, email, name, role')
+      .single();
+    if (error) {
+      if (error.code === '23505') {
+        return res.status(409).json({ error: 'A user with this email already exists.' });
+      }
+      throw error;
+    }
+    res.status(201).json({ message: 'User created successfully', user: data });
   } catch (error) {
     if (error.code === '23505') { // unique_violation for email
       return res.status(409).json({ error: 'A user with this email already exists.' });
@@ -57,8 +61,13 @@ app.post('/api/auth/login', async (req, res) => {
   }
 
   try {
-    const result = await query('SELECT * FROM users WHERE email = $1', [email]);
-    const user = result.rows[0];
+    const supabase = requireSupabase();
+    const { data: user, error } = await supabase
+      .from('users')
+      .select('*')
+      .eq('email', email)
+      .maybeSingle();
+    if (error) throw error;
 
     if (!user) {
       return res.status(401).json({ error: 'Invalid credentials.' });
@@ -112,10 +121,12 @@ app.post('/api/auth/forgot-password', async (req, res) => {
     const hashedToken = crypto.createHash('sha256').update(resetToken).digest('hex');
     const resetExpires = new Date(Date.now() + 3600000); // 1 hour from now
 
-    await query(
-      'UPDATE users SET password_reset_token = $1, password_reset_expires = $2 WHERE email = $3',
-      [hashedToken, resetExpires, email]
-    );
+    const supabase = requireSupabaseAdmin();
+    const { error: updateError } = await supabase
+      .from('users')
+      .update({ password_reset_token: hashedToken, password_reset_expires: resetExpires })
+      .eq('email', email);
+    if (updateError) throw updateError;
 
     // In a real app, you'd email this link. For now, we just confirm.
     // The link would be something like: http://limpopoconnect.site/reset-password?token=${resetToken}
@@ -137,22 +148,23 @@ app.post('/api/auth/reset-password', async (req, res) => {
   const hashedToken = crypto.createHash('sha256').update(token).digest('hex');
 
   try {
-    const userResult = await query(
-      'SELECT * FROM users WHERE password_reset_token = $1 AND password_reset_expires > NOW()',
-      [hashedToken]
-    );
-
-    if (userResult.rows.length === 0) {
+    const supabase = requireSupabaseAdmin();
+    const { data: user, error } = await supabase
+      .from('users')
+      .select('*')
+      .eq('password_reset_token', hashedToken)
+      .gt('password_reset_expires', new Date().toISOString())
+      .maybeSingle();
+    if (error) throw error;
+    if (!user) {
       return res.status(400).json({ error: 'Password reset token is invalid or has expired.' });
     }
-
-    const user = userResult.rows[0];
     const hashedPassword = await bcrypt.hash(password, 10);
-
-    await query(
-      'UPDATE users SET password_hash = $1, password_reset_token = NULL, password_reset_expires = NULL WHERE id = $2',
-      [hashedPassword, user.id]
-    );
+    const { error: updateError } = await supabase
+      .from('users')
+      .update({ password_hash: hashedPassword, password_reset_token: null, password_reset_expires: null })
+      .eq('id', user.id);
+    if (updateError) throw updateError;
 
     res.status(200).json({ message: 'Password has been reset successfully.' });
 

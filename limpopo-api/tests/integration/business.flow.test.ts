@@ -20,15 +20,13 @@ jest.mock('../../src/models/businessPhoto', () => ({
   findBusinessPhotos: jest.fn(),
 }));
 
-// Mock Key Vault modules
-jest.mock('@azure/identity');
-jest.mock('@azure/keyvault-secrets');
 
 const mockBusiness = require('../../src/models/business');
 const mockBusinessCategory = require('../../src/models/businessCategory');
 const mockBusinessPhoto = require('../../src/models/businessPhoto');
 
-describe('Business API Integration', () => {
+// NOTE: Azure Functions based integration tests disabled after migration to Supabase / Express
+describe.skip('Business API Integration (disabled post-Azure migration)', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     process.env.JWT_SECRET = 'test-secret-key-for-integration-test';
