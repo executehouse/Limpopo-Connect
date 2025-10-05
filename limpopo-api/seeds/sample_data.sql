@@ -14,9 +14,9 @@ INSERT INTO roles (name) VALUES ('admin'), ('business'), ('resident'), ('visitor
 -- require('argon2').hash('password123').then(h => console.log(h))
 -- Using a placeholder hash for now. Replace with real argon2 hash.
 INSERT INTO users (id, email, password_hash, role, name, is_verified) VALUES
-('a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11', 'admin@limpopo.co.za', '$argon2i$v=19$m=4096,t=3,p=1$l8V2pCRsO4w0Y2/a4r8Y0g$1q2w3e4r5t6y7u8i9o0p', 'admin', 'Admin User', true),
-('a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a12', 'business@limpopo.co.za', '$argon2i$v=19$m=4096,t=3,p=1$l8V2pCRsO4w0Y2/a4r8Y0g$1q2w3e4r5t6y7u8i9o0p', 'business', 'Business Owner', true),
-('a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a13', 'resident@limpopo.co.za', '$argon2i$v=19$m=4096,t=3,p=1$l8V2pCRsO4w0Y2/a4r8Y0g$1q2w3e4r5t6y7u8i9o0p', 'resident', 'Local Resident', true);
+('a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11', 'admin@limpopo.co.za', '$argon2id$v=19$m=65536,t=3,p=4$JtIDqfk+T4MycqwZ3Kt3kw$nKBT1u0KJVyf8cDGPqUhWq2HqyYmS0YigQzAI/EBYNs', 'admin', 'Admin User', true),
+('a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a12', 'business@limpopo.co.za', '$argon2id$v=19$m=65536,t=3,p=4$JtIDqfk+T4MycqwZ3Kt3kw$nKBT1u0KJVyf8cDGPqUhWq2HqyYmS0YigQzAI/EBYNs', 'business', 'Business Owner', true),
+('a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a13', 'resident@limpopo.co.za', '$argon2id$v=19$m=65536,t=3,p=4$JtIDqfk+T4MycqwZ3Kt3kw$nKBT1u0KJVyf8cDGPqUhWq2HqyYmS0YigQzAI/EBYNs', 'resident', 'Local Resident', true);
 
 -- BUSINESS CATEGORIES
 INSERT INTO business_categories (name, slug) VALUES
