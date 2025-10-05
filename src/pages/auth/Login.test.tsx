@@ -4,8 +4,20 @@ import Login from './Login';
 import '@testing-library/jest-dom';
 import { vi } from 'vitest';
 
-// Mock fetch
-global.fetch = vi.fn();
+// Mock the AuthContext
+const mockSignIn = vi.fn();
+const mockUseAuth = vi.fn(() => ({
+  signIn: mockSignIn,
+  user: null,
+  session: null,
+  signUp: vi.fn(),
+  signOut: vi.fn(),
+  loading: false,
+}));
+
+vi.mock('../../contexts/AuthContext', () => ({
+  useAuth: () => mockUseAuth(),
+}));
 
 // Mock useNavigate and useLocation
 const mockNavigate = vi.fn();
@@ -135,17 +147,8 @@ describe('Login Component', () => {
     expect(passwordInput.type).toBe('password');
   });
 
-  test('should handle successful login and store tokens', async () => {
-    const mockResponse = {
-      accessToken: 'mock-access-token',
-      refreshToken: 'mock-refresh-token',
-      user: { id: '1', email: 'test@example.com', name: 'Test User' },
-    };
-
-    (global.fetch as any).mockResolvedValueOnce({
-      ok: true,
-      json: async () => mockResponse,
-    });
+  test('should handle successful login via Supabase', async () => {
+    mockSignIn.mockResolvedValueOnce({ error: null });
 
     render(
       <MemoryRouter>
@@ -162,25 +165,13 @@ describe('Login Component', () => {
     fireEvent.click(submitButton);
 
     await waitFor(() => {
-      expect(localStorage.getItem('accessToken')).toBe('mock-access-token');
-      expect(localStorage.getItem('refreshToken')).toBe('mock-refresh-token');
-      expect(localStorage.getItem('token')).toBe('mock-access-token');
-      expect(localStorage.getItem('user')).toBe(JSON.stringify(mockResponse.user));
+      expect(mockSignIn).toHaveBeenCalledWith('test@example.com', 'password123');
       expect(mockNavigate).toHaveBeenCalledWith('/');
     });
   });
 
   test('should handle remember me functionality', async () => {
-    const mockResponse = {
-      accessToken: 'mock-access-token',
-      refreshToken: 'mock-refresh-token',
-      user: { id: '1', email: 'test@example.com', name: 'Test User' },
-    };
-
-    (global.fetch as any).mockResolvedValueOnce({
-      ok: true,
-      json: async () => mockResponse,
-    });
+    mockSignIn.mockResolvedValueOnce({ error: null });
 
     render(
       <MemoryRouter>
@@ -205,16 +196,7 @@ describe('Login Component', () => {
   });
 
   test('should not save email when remember me is unchecked', async () => {
-    const mockResponse = {
-      accessToken: 'mock-access-token',
-      refreshToken: 'mock-refresh-token',
-      user: { id: '1', email: 'test@example.com', name: 'Test User' },
-    };
-
-    (global.fetch as any).mockResolvedValueOnce({
-      ok: true,
-      json: async () => mockResponse,
-    });
+    mockSignIn.mockResolvedValueOnce({ error: null });
 
     render(
       <MemoryRouter>
@@ -254,16 +236,7 @@ describe('Login Component', () => {
   });
 
   test('should trim and lowercase email before submission', async () => {
-    const mockResponse = {
-      accessToken: 'mock-access-token',
-      refreshToken: 'mock-refresh-token',
-      user: { id: '1', email: 'test@example.com', name: 'Test User' },
-    };
-
-    (global.fetch as any).mockResolvedValueOnce({
-      ok: true,
-      json: async () => mockResponse,
-    });
+    mockSignIn.mockResolvedValueOnce({ error: null });
 
     render(
       <MemoryRouter>
@@ -280,20 +253,13 @@ describe('Login Component', () => {
     fireEvent.click(submitButton);
 
     await waitFor(() => {
-      expect(global.fetch).toHaveBeenCalledWith('/api/auth/login', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ email: 'test@example.com', password: 'password123' }),
-      });
+      expect(mockSignIn).toHaveBeenCalledWith('test@example.com', 'password123');
     });
   });
 
   test('should display error message on login failure', async () => {
-    (global.fetch as any).mockResolvedValueOnce({
-      ok: false,
-      json: async () => ({ error: 'Invalid credentials' }),
+    mockSignIn.mockResolvedValueOnce({ 
+      error: new Error('Invalid credentials') 
     });
 
     render(
@@ -317,8 +283,8 @@ describe('Login Component', () => {
   });
 
   test('should disable submit button while loading', async () => {
-    (global.fetch as any).mockImplementationOnce(
-      () => new Promise((resolve) => setTimeout(resolve, 100))
+    mockSignIn.mockImplementationOnce(
+      () => new Promise((resolve) => setTimeout(() => resolve({ error: null }), 100))
     );
 
     render(

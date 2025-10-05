@@ -42,10 +42,10 @@ Limpopo Connect is a comprehensive community platform that serves as a digital h
 - **Build Tool**: Vite
 - **Routing**: React Router
 - **Icons**: Lucide React
--- **Backend**: Azure Functions (API) and Supabase Postgres (managed database)
-- **Backend Ready**: Firebase (Authentication, Firestore, Storage)
+- **Backend**: Node.js, Express, Supabase (Authentication, Postgres Database)
+- **Authentication**: Supabase Auth with email/password
 - **PWA**: Service Worker, Web App Manifest
-- **Deployment**: Vercel/Netlify ready
+- **Deployment**: GitHub Pages (static), Node.js hosting for API
 
 ## 🚀 Quick Start
 
@@ -96,6 +96,7 @@ The backend is a serverless API built with **Node.js, TypeScript, and Azure Func
 
 -   **[Backend Local Setup Guide](./limpopo-api/README-backend.md)**: Step-by-step instructions for running the API on your local machine.
 --   **[Database Setup Guide](./SUPABASE_SETUP.md)**: Instructions for provisioning and migrating the database to Supabase or other managed database providers.
+-   **[Frontend Authentication Setup](./FRONTEND_AUTH_SETUP.md)**: Guide for configuring Supabase authentication in the frontend application.
 -   **[Operational Runbook](./OPERATIONAL.md)**: A guide for deploying, monitoring, restoring, and maintaining the production environment.
 -   **[Security Policy](./SECURITY.md)**: An overview of the threat model, password policies, and key management procedures.
 -   **[API Specification (OpenAPI)](./openapi.yaml)**: A complete OpenAPI 3.0 specification for all API endpoints.
