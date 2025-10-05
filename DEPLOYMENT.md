@@ -35,8 +35,11 @@ The Azure infrastructure is managed via Bicep files in the `infra/` directory an
 - **Name**: `Deploy Infrastructure`
 - **Trigger**: Manual (`workflow_dispatch`)
 - **File**: `.github/workflows/deploy-infra.yml`
+- **Azure CLI**: Uses `Azure/cli@v2.2.0` action for Azure CLI operations
 
 To deploy or update the infrastructure, navigate to the "Actions" tab of the GitHub repository, select the "Deploy Infrastructure" workflow, and run it.
+
+The workflow uses the Azure CLI Action (`Azure/cli@v2.2.0`) to verify deployments and interact with Azure resources.
 
 ### Required Secrets
 The workflow requires the following secrets to be configured in the GitHub repository settings (`Settings > Secrets and variables > Actions`):

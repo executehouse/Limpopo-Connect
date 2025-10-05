@@ -23,3 +23,12 @@ jobs:
           template: ./infra/main.bicep
           parameters: 'postgresAdmin=${{ secrets.POSTGRES_ADMIN }} postgresAdminPassword=${{ secrets.POSTGRES_ADMIN_PASSWORD }}'
           failOnStdErr: false
+
+      - name: Verify Deployment
+        uses: Azure/cli@v2.2.0
+        with:
+          inlineScript: |
+            echo "Verifying infrastructure deployment..."
+            az group show -n ${{ secrets.AZURE_RG_NAME }} --query "{name:name, location:location, provisioningState:properties.provisioningState}"
+            echo "Listing deployed resources..."
+            az resource list -g ${{ secrets.AZURE_RG_NAME }} --query "[].{name:name, type:type, location:location}" -o table
