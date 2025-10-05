@@ -1,6 +1,6 @@
 # Limpopo Connect API
 
-Supabase-integrated API for the Limpopo Connect platform (migrated from Azure Functions + Azure PostgreSQL).
+Supabase-integrated API for the Limpopo Connect platform (migrated from Azure Functions; database migrated to Supabase Postgres).
 
 ## 📚 Documentation
 
@@ -29,20 +29,21 @@ For detailed instructions see `SUPABASE_SETUP.md`.
 For local development:
 
 1. Install dependencies:
+
    ```bash
    npm install
    ```
 
 2. Set up environment variables:
+
    ```bash
    npm run setup:env
-   # Edit .env with your Azure PostgreSQL connection details
+   # Edit .env with your database connection details (e.g., Supabase connection or local Postgres)
    ```
 
 3. Initialize database:
-   ```bash
-   psql $DATABASE_URL -f setup-database.sql
-   ```
+
+   - Apply migrations using the Supabase SQL editor or using psql against your database URL (SQL files are in `migrations/`).
 
 4. Test the connection:
    ```bash
@@ -50,10 +51,12 @@ For local development:
    ```
 
 5. Run backend services locally:
+
    ```bash
    npm run dev --prefix limpopo-api
    ```
-   Auth service: http://localhost:3001  Businesses service: http://localhost:3002
+
+   Auth service: [http://localhost:3001](http://localhost:3001)  Businesses service: [http://localhost:3002](http://localhost:3002)
 
 ### Database Notes
 
@@ -65,17 +68,13 @@ Supabase provides a managed Postgres instance with optional Row Level Security (
 ### Troubleshooting
 
 **Connection timeout errors:**
-- Check that your IP is whitelisted in Azure firewall rules
-- Verify that "Allow Azure services" is enabled if deploying to Azure Functions
+- Ensure your database host and network allow connections from the deployment environment (check firewall rules or allowed IPs)
 
 **SSL/TLS errors:**
-- Ensure connection string includes `?sslmode=require`
-- The API is configured to accept Azure's SSL certificates
+- Ensure connection string includes the required SSL parameters for your database provider (e.g., `?sslmode=require`)
 
 **Authentication errors:**
-- Verify username format: `username@servername` (not required for Flexible Server)
-- For Flexible Server, use just the username without `@servername`
-- Check that password is correctly URL-encoded in connection string
+- Verify username and password format for your database provider and check that the password is URL-encoded if it contains special characters.
 
 ## Environment Variables
 
@@ -121,7 +120,7 @@ Simple health check function that tests database connectivity.
 
 ## Need Help?
 
-1. Check [TROUBLESHOOTING.md](./TROUBLESHOOTING.md) for common issues
+1. Check the backend README and `SUPABASE_SETUP.md` (if using Supabase) for common issues
 2. Review `SUPABASE_SETUP.md` for environment setup
 3. Ensure Supabase env vars are loaded
 4. Verify RLS policies if encountering permission errors
@@ -129,6 +128,19 @@ Simple health check function that tests database connectivity.
 ## Contributing
 
 When adding new database functionality:
+## Supabase Auth Endpoints (Preview)
+
+These endpoints are available in addition to legacy custom JWT auth:
+
+```
+POST /api/auth/supabase/register  # email/password signup
+POST /api/auth/supabase/login     # returns Supabase session (access & refresh tokens)
+GET  /api/auth/supabase/me        # requires Bearer access token
+```
+
+If `SUPABASE_URL` / `SUPABASE_ANON_KEY` are not configured the endpoints return 501.
+
+Planned deprecation: once the frontend migrates fully, the legacy `/api/auth/register` and `/api/auth/login` routes can be removed.
 1. Update/create migrations in `migrations/`
 2. Add or update Supabase queries in models/services
 3. Add/update tests (re-enable previously skipped Azure tests with new Supabase logic)

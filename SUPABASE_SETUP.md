@@ -37,12 +37,40 @@ If you enable RLS on tables (`users`, `listings`, etc.), ensure you either:
 
 The current code uses the service role for user creation and listings insertion.
 
-## 5. Storage (Future Work)
+## 5. Supabase Auth (New Optional Layer)
+
+You can now use built-in Supabase Auth endpoints alongside the legacy custom JWT auth.
+
+Endpoints:
+| Method | Path | Description |
+|--------|------|-------------|
+| POST | /api/auth/supabase/register | Create a new Supabase user (email/password). Confirmation email if enabled. |
+| POST | /api/auth/supabase/login | Authenticate and receive a Supabase session (access + refresh tokens). |
+| GET  | /api/auth/supabase/me | Return current authenticated Supabase user (Bearer token required). |
+
+Example login request:
+```bash
+curl -X POST http://localhost:3001/api/auth/supabase/login \
+   -H 'Content-Type: application/json' \
+   -d '{"email":"user@example.com","password":"StrongPass123!"}'
+```
+
+Protected example:
+```bash
+curl -H "Authorization: Bearer <access_token>" http://localhost:3001/api/auth/supabase/me
+```
+
+Migration strategy:
+1. Gradually shift frontend to call Supabase Auth endpoints.
+2. Map `supabaseUser.id` to existing domain records if needed.
+3. Remove legacy custom auth once all consumers have migrated.
+
+## 6. Storage (Future Work)
 Azure Blob based upload logic has been disabled. To migrate:
 1. Enable Supabase Storage and create a bucket (e.g., `public-uploads`).
 2. Replace the disabled upload tests and implement new endpoints using `supabase.storage.from('public-uploads')` APIs.
 
-## 6. Local Development
+## 7. Local Development
 From repo root:
 ```
 cp limpopo-api/.env.example limpopo-api/.env
@@ -58,7 +86,7 @@ npm install
 npm run dev
 ```
 
-## 7. Removed Azure Components
+## 8. Removed Azure Components
 The following were removed:
 - Azure Pipelines YAML files
 - `infra/` Bicep templates
@@ -66,13 +94,13 @@ The following were removed:
 - Azure Key Vault & Blob Storage dependencies
 - Azure specific tests (skipped for now)
 
-## 8. Next Steps / Hardening
+## 9. Next Steps / Hardening
 - Replace custom auth with Supabase Auth (optional) to leverage email/password, OTP, social providers.
 - Implement RLS policies for finer security.
 - Reintroduce upload + image processing with Supabase Storage + Edge Functions.
 - Rebuild tests around the new architecture rather than skipping them.
 
-## 9. Troubleshooting
+## 10. Troubleshooting
 | Issue | Cause | Fix |
 |-------|-------|-----|
 | Error: Supabase client not initialized | Missing env vars | Set SUPABASE_URL & SUPABASE_ANON_KEY |

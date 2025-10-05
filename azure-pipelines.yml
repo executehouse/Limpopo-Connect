@@ -83,28 +83,14 @@ stages:
                 az deployment group create \
                   --resource-group $(RESOURCE_GROUP_NAME) \
                   --template-file $(INFRA_DIRECTORY)/main.bicep \
-                  --parameters baseName=$(BASE_NAME) \
-                  --parameters postgresAdmin=$(POSTGRES_ADMIN_USER) \
-                  --parameters postgresAdminPassword=$(POSTGRES_ADMIN_PASSWORD)
+                  --parameters baseName=$(BASE_NAME)
 
-          - task: AzureCLI@2
-            displayName: 'Run DB Migrations'
+          - task: Bash@3
+            displayName: 'DB Migrations (removed)'
             inputs:
-              azureSubscription: 'your-azure-subscription' # Service Connection Name
-              scriptType: 'bash'
-              scriptLocation: 'inlineScript'
-              inlineScript: |
-                # Install psql
-                sudo apt-get update
-                sudo apt-get install -y postgresql-client
-
-                # Get DB connection string from Key Vault or output of previous step
-                PG_CONN_STRING=$(az functionapp config appsettings list -g $(RESOURCE_GROUP_NAME) -n $(BASE_NAME)-api --query "[?name=='DATABASE_URL'].value" -o tsv)
-
-                echo "Running database migrations..."
-                psql "$PG_CONN_STRING" -f $(WORKING_DIRECTORY)/migrations/002_extensions.sql
-                psql "$PG_CONN_STRING" -f $(WORKING_DIRECTORY)/migrations/001_init_schema.sql
-                psql "$PG_CONN_STRING" -f $(WORKING_DIRECTORY)/seeds/sample_data.sql
+              targetType: 'inline'
+              script: |
+                echo "Database migration step removed: database should be provisioned and migrated using your managed database provider (for example, Supabase) or run migration scripts outside Azure Pipelines."
 
           - task: AzureFunctionApp@1
             displayName: 'Deploy Azure Function App'

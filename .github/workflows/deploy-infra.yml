@@ -21,7 +21,7 @@ jobs:
           subscriptionId: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
           resourceGroupName: ${{ secrets.AZURE_RG_NAME }}
           template: ./infra/main.bicep
-          parameters: 'postgresAdmin=${{ secrets.POSTGRES_ADMIN }} postgresAdminPassword=${{ secrets.POSTGRES_ADMIN_PASSWORD }}'
+          # PostgreSQL parameters removed — database managed externally
           failOnStdErr: false
 
       - name: Verify Deployment

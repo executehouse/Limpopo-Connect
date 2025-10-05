@@ -4,9 +4,7 @@
 CREATE EXTENSION IF NOT EXISTS "pgcrypto";
 
 -- For geospatial queries
--- Note: On Azure Database for PostgreSQL, you might need to enable this
--- via the Azure Portal or CLI if this command fails.
--- az postgres flexible-server parameter set --resource-group <rg> --server-name <server> --name azure.extensions --value PostGIS
+-- Note: Some managed Postgres providers may require enabling extensions via their console or CLI if the command fails.
 CREATE EXTENSION IF NOT EXISTS "postgis";
 
 -- For trigram-based text search

@@ -1,16 +1,10 @@
 # Fixes Summary
 
-This document summarizes the changes made to fix the Azure database name and workflow issues.
+This document summarizes the changes made to remove Azure PostgreSQL-specific configuration and to generalize database and workflow handling.
 
 ## Issues Fixed
 
 ### 1. Azure Database Name Configuration
-**Problem:** The Azure PostgreSQL database was configured to use the default database name "postgres" instead of "limpopoconnect-db" as specified by the user.
-
-**Solution:**
-- Updated `infra/db.bicep` to create a dedicated "limpopoconnect" database with proper charset and collation settings
-- Changed the connection string output to reference the "limpopoconnect" database instead of "postgres"
-- Updated `infra/main.bicep` to use a fixed PostgreSQL server name "limpopoconnect-db" instead of generating a dynamic name
 
 ### 2. Workflow Authentication Failure
 **Problem:** The `deploy.yml` workflow was failing with error: "Content is not a valid JSON object" because it was trying to use `AZURE_WEBAPP_PUBLISH_PROFILE` secret which was not properly configured.
@@ -21,12 +15,6 @@ This document summarizes the changes made to fix the Azure database name and wor
 
 ### 3. Database Connection Configuration
 **Problem:** The workflow was using incorrect database connection parameters:
-- Database name was "postgres" instead of "limpopoconnect"  
-- Username format included `@limpopoconnect-db` suffix which is not needed for Flexible Server
-
-**Solution:**
-- Updated `DB_NAME` from "postgres" to "limpopoconnect" in the deploy workflow
-- Changed `DB_USER` from "limpopoconnect_admin@limpopoconnect-db" to "limpopoconnect_admin" (Flexible Server doesn't need the @server suffix)
 
 ### 4. Invalid Workflow File
 **Problem:** The file `.github/workflows/main.yml` contained shell commands instead of a proper GitHub Actions workflow YAML, causing workflow failures.
@@ -37,8 +25,8 @@ This document summarizes the changes made to fix the Azure database name and wor
 ## Files Changed
 
 1. `.github/workflows/deploy.yml` - Fixed authentication and database configuration
-2. `infra/db.bicep` - Added limpopoconnect database creation and updated connection string
-3. `infra/main.bicep` - Set PostgreSQL server name to "limpopoconnect-db"
+2. `infra/db.bicep` - Removed Azure PostgreSQL resource definitions from active configuration (deleted)
+3. `infra/main.bicep` - Removed inline PostgreSQL deployment and parameters
 4. `.github/workflows/main.yml` - Removed (was invalid)
 
 ## Required Secret Configuration
@@ -65,10 +53,9 @@ az ad sp create-for-rbac --name "github-actions-limpopo-connect" \
 
 ## Database Configuration
 
-The infrastructure now creates:
-- **Server Name:** limpopoconnect-db
-- **Database Name:** limpopoconnect
-- **Connection String Format:** `postgresql://username:password@limpopoconnect-db.postgres.database.azure.com:5432/limpopoconnect?sslmode=require`
+The repository no longer creates or manages an Azure PostgreSQL server. Provision your database using your chosen provider (for example, Supabase) and store connection credentials securely with your secrets manager. A generic connection string format for Postgres is:
+
+- **Connection String Format:** `postgresql://username:password@host:5432/database`
 
 ## Next Steps
 
@@ -78,9 +65,7 @@ The infrastructure now creates:
    az deployment group create \
      --resource-group limpopoconnect-rg \
      --template-file infra/main.bicep \
-     --parameters postgresAdmin=limpopoconnect_admin \
-     --parameters postgresAdminPassword='<secure-password>' \
-     --parameters postgresServerName=limpopoconnect-db
+     --parameters baseName=limpopo
    ```
-3. Update the Key Vault secret `azure-postgres-admin-password` with the correct admin password
+3. Ensure any key/secret management is configured for your chosen database provider (e.g., Supabase service keys or external secrets manager)
 4. Test the workflow by pushing to main branch

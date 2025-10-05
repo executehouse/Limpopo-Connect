@@ -12,9 +12,7 @@ The infrastructure is managed via Bicep templates and the application is deploye
 2.  **Azure DevOps Setup:**
     *   Create a new project in Azure DevOps.
     *   Push the repository to Azure Repos.
-    *   Create a **Variable Group** named `LimpopoConnect-Prod` and add the following secret variables:
-        *   `POSTGRES_ADMIN_USER`: The desired admin username for the PostgreSQL server.
-        *   `POSTGRES_ADMIN_PASSWORD`: A strong password for the PostgreSQL admin user.
+    *   Create a **Variable Group** named `LimpopoConnect-Prod` and add the following secret variables (do not store managed-database admin passwords in pipeline variables; use your provider's secret management instead):
         *   `JWT_SECRET`: A long, strong, randomly generated string for signing JWTs.
         *   `STORAGE_ACCOUNT_NAME`: The name of the storage account you will create.
         *   `STORAGE_ACCOUNT_KEY`: The access key for the storage account.
@@ -47,20 +45,9 @@ Application health and performance are monitored using **Azure Application Insig
 
 ## 3. Backup and Restore
 
-### PostgreSQL Database
+### Database Backup & Restore (managed externally)
 
-The Azure Database for PostgreSQL Flexible Server is configured with Point-in-Time Restore (PITR) enabled by default.
-
-*   **Backup Retention:** Backups are retained for 7 days (configurable in `infra/db.bicep`).
-*   **Restore Procedure:**
-    1.  Navigate to the Azure Database for PostgreSQL Flexible Server resource in the Azure Portal.
-    2.  In the **Overview** blade, click **Restore**.
-    3.  Choose **Point-in-time restore**.
-    4.  Select a restore point (up to the last 5 minutes).
-    5.  Provide a name for the **new** server that will be created from the backup.
-    6.  Review and create the new server.
-    7.  Once the new server is provisioned, update the `DATABASE_URL` application setting in the Function App (or Key Vault) to point to the new database server.
-    8.  Restart the Function App.
+Database provisioning, backups, and restore procedures are managed by your chosen database provider (for example, Supabase or another managed Postgres provider). Follow the provider's documentation to configure backups, snapshot retention, and restore procedures. After restoring or changing database endpoints, update the `DATABASE_URL` or corresponding secret in your application's secrets store (Key Vault, environment variables, or provider secrets) and restart services if required.
 
 ### Blob Storage
 
@@ -72,14 +59,12 @@ The Azure Database for PostgreSQL Flexible Server is configured with Point-in-Ti
 Secrets such as the database password and JWT secret should be rotated periodically.
 
 1.  **Generate New Secret:** Generate a new strong password or secret key.
-2.  **Update Key Vault:**
-    *   Navigate to the Azure Key Vault resource in the Azure Portal.
-    *   Go to the **Secrets** blade.
-    *   Select the secret you want to update (e.g., `JwtSecret` or `PostgresAdminPassword`).
-    *   Click **+ New Version** and paste the new secret value.
-3.  **Update Dependent Service:**
-    *   For the **PostgreSQL password**, you must also update it on the PostgreSQL server itself via the "Reset admin password" feature in the Azure Portal.
-4.  **Restart Application:** Restart the Azure Function App to ensure it picks up the new secret versions from Key Vault.
+3.  **Update Key Vault or Secrets Manager:**
+    *   Navigate to your secrets manager (Azure Key Vault, Supabase secrets, etc.).
+    *   Update the secret value and create a new version where applicable.
+4.  **Update Dependent Service:**
+    *   Update the database credentials in the provider or application configuration as needed.
+5.  **Restart Application:** Restart the application or function app so it picks up new secret versions from the secrets store.
 
 ## 5. Incident Response
 

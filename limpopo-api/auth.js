@@ -15,7 +15,15 @@ const JWT_SECRET = process.env.JWT_SECRET || 'your-super-secret-key';
 app.use(cors());
 app.use(bodyParser.json());
 
-// Signup endpoint
+// Supabase Auth routes (prefixed)
+try {
+  const supabaseAuthRouter = require('./supabaseAuthRoutes');
+  app.use('/api/auth', supabaseAuthRouter);
+} catch (e) {
+  console.warn('Supabase auth router load failed:', e.message);
+}
+
+// Legacy Signup endpoint (to be deprecated)
 app.post('/api/auth/signup', async (req, res) => {
   const { name, email, password, role } = req.body;
 

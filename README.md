@@ -41,7 +41,7 @@ Limpopo Connect is a comprehensive community platform that serves as a digital h
 - **Build Tool**: Vite
 - **Routing**: React Router
 - **Icons**: Lucide React
-- **Backend**: Azure Functions + Azure PostgreSQL Flexible Server
+-- **Backend**: Azure Functions (API) and Supabase Postgres (managed database)
 - **Backend Ready**: Firebase (Authentication, Firestore, Storage)
 - **PWA**: Service Worker, Web App Manifest
 - **Deployment**: Vercel/Netlify ready
@@ -89,12 +89,12 @@ npm run preview          # Preview production build
 
 ## 🗄️ Backend Architecture & Setup
 
-The backend is a serverless API built with **Node.js, TypeScript, and Azure Functions**. It connects to an **Azure Database for PostgreSQL Flexible Server** and uses **Azure Blob Storage** for file uploads. The entire infrastructure is defined as code using **Bicep**.
+The backend is a serverless API built with **Node.js, TypeScript, and Azure Functions**. The project has migrated database responsibilities to a managed provider (for example, Supabase Postgres) and uses **Azure Blob Storage** for file uploads where applicable. The remaining infrastructure is defined as code using **Bicep**.
 
 **📖 Key Documentation:**
 
 -   **[Backend Local Setup Guide](./limpopo-api/README-backend.md)**: Step-by-step instructions for running the API on your local machine.
--   **[Database Setup Guide](./limpopo-api/setup-database.md)**: Instructions for provisioning and migrating the Azure PostgreSQL database.
+--   **[Database Setup Guide](./SUPABASE_SETUP.md)**: Instructions for provisioning and migrating the database to Supabase or other managed database providers.
 -   **[Operational Runbook](./OPERATIONAL.md)**: A guide for deploying, monitoring, restoring, and maintaining the production environment.
 -   **[Security Policy](./SECURITY.md)**: An overview of the threat model, password policies, and key management procedures.
 -   **[API Specification (OpenAPI)](./openapi.yaml)**: A complete OpenAPI 3.0 specification for all API endpoints.
@@ -125,7 +125,7 @@ limpopo-api/
 
 infra/
 ├── main.bicep          # Infrastructure: Main Bicep file
-├── db.bicep            # Infrastructure: PostgreSQL module
+├── (db.bicep removed)  # PostgreSQL infra removed from repository; database is managed externally (Supabase or other)
 ├── storage.bicep       # Infrastructure: Storage Account module
 └── ...                 # etc.
 

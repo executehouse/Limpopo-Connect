@@ -55,8 +55,7 @@ The workflow requires the following secrets to be configured in the GitHub repos
     ```
 -   `AZURE_SUBSCRIPTION_ID`: The ID of the Azure subscription where resources will be deployed.
 -   `AZURE_RG_NAME`: The name of the Azure resource group for the deployment.
--   `POSTGRES_ADMIN`: The desired administrator username for the PostgreSQL server.
--   `POSTGRES_ADMIN_PASSWORD`: The secure password for the PostgreSQL administrator.
+-   Database provisioning and admin credentials are managed outside these repository workflows; configure your provider's secret management (for example, Supabase or other managed database provider).
 
 ## Azure Key Vault Secrets Sync
 

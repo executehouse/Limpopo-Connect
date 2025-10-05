@@ -16,9 +16,7 @@ This directory contains GitHub Actions workflows for the Limpopo Connect project
 ### Deploy Limpopo Connect with Key Vault (`deploy.yml`)
 - **Trigger**: Push to `main` branch
 - **Purpose**: Deploy the application to Azure Web App with Key Vault integration
-- **Azure CLI Action**: Uses `Azure/cli@v2.2.0` for:
-  - Fetching secrets from Azure Key Vault
-  - Verifying deployment status
+- **Azure CLI Action**: Uses `Azure/cli@v2.2.0` for verifying deployment status and other Key Vault interactions (DB secret retrieval removed)
 
 ### Build and Deploy Node.js App (`main_limpoconnect-webapp.yml`)
 - **Trigger**: Push to `main` branch or manual
@@ -51,7 +49,6 @@ The workflows require the following GitHub secrets to be configured:
 - `AZURE_CREDENTIALS`: Azure service principal credentials (JSON format)
 - `AZURE_SUBSCRIPTION_ID`: Azure subscription ID
 - `AZURE_RG_NAME`: Azure resource group name
-- `POSTGRES_ADMIN`: PostgreSQL admin username
-- `POSTGRES_ADMIN_PASSWORD`: PostgreSQL admin password
+<!-- PostgreSQL admin secrets removed from workflow requirements -->
 
 For more details on deployment, see the [DEPLOYMENT.md](../../DEPLOYMENT.md) file.

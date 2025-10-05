@@ -4,16 +4,7 @@ param baseName string = 'limpopo${uniqueString(resourceGroup().id)}'
 @description('The location for all resources.')
 param location string = resourceGroup().location
 
-@description('The admin username for the PostgreSQL server.')
-@secure()
-param postgresAdmin string
-
-@description('The admin password for the PostgreSQL server.')
-@secure()
-param postgresAdminPassword string
-
-@description('The PostgreSQL server name.')
-param postgresServerName string = 'limpopoconnect-db'
+// PostgreSQL server removed from infra. Database managed externally (Supabase or other).
 
 var storageAccountName = '${baseName}sa'
 var functionAppName = '${baseName}-api'
@@ -50,16 +41,7 @@ module storage 'storage.bicep' = {
   }
 }
 
-// PostgreSQL Server
-module db 'db.bicep' = {
-  name: 'dbDeployment'
-  params: {
-    location: location
-    serverName: postgresServerName
-    adminUsername: postgresAdmin
-    adminPassword: postgresAdminPassword
-  }
-}
+// PostgreSQL Server module removed.
 
 // Function App
 module functions 'functions.bicep' = {
@@ -70,7 +52,7 @@ module functions 'functions.bicep' = {
     storageAccountName: storageAccountName
     appInsightsConnectionString: appInsights.outputs.connectionString
     keyVaultName: keyVault.outputs.name
-    dbConnectionString: db.outputs.connectionString
+    // Database connection string is expected to be provided via Key Vault or environment variables
   }
 }
 
@@ -91,4 +73,3 @@ resource functionAppRoleAssignment 'Microsoft.Authorization/roleAssignments@2022
 output functionAppPrincipalId string = functions.outputs.principalId
 output functionAppName string = functionAppName
 output apiUrl string = 'https://${functionAppName}.azurewebsites.net/api'
-output dbConnectionString string = db.outputs.connectionString
