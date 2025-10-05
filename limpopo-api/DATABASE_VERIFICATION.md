@@ -46,43 +46,45 @@ DATABASE_URL=postgresql://USERNAME:PASSWORD@SERVER.postgres.database.azure.com:5
 
 ## ✅ Database Connection Test
 
-### 1. Run Connection Test
+A simple way to test the database connection is to start one of the backend services. These services rely on the database connection to operate.
+
+### 1. Start a Backend Service
+From the project root directory, run one of the following commands:
+
+To test the authentication service:
 ```bash
-cd limpopo-api
-npm run test:connection
+npm run dev:api:auth
 ```
 
-**Expected Output:**
-```
-=== Azure PostgreSQL Flexible Server Connection Test ===
-
-Connection Details:
-  Host: your-server.postgres.database.azure.com
-  Port: 5432
-  Database: limpopoconnect
-  Username: your-username
-  SSL Mode: require
-
-⏳ Testing connection...
-✅ Connection successful! (XXms)
-
-Server Information:
-  Time: YYYY-MM-DD HH:MM:SS
-  Version: PostgreSQL X.X
-
-⏳ Checking database schema...
-⚠️  No tables found in database.
-   Run setup-database.sql to create the schema:
-
-   psql $DATABASE_URL -f setup-database.sql
-
-=== All tests passed! Database is ready to use. ===
+Or, to test the business listings service:
+```bash
+npm run dev:api:businesses
 ```
 
-### 2. Connection Test Checklist
-- [ ] Connection successful (no timeout or auth errors)
-- [ ] Server information displayed correctly
-- [ ] Write permissions confirmed
+### 2. Check for Errors
+If the service starts successfully (e.g., you see `Auth service running on port 3001`), it means the application was able to load its modules, including the database module (`db.js`).
+
+However, a true connection test happens when an API endpoint is called. If there is a problem with your `DATABASE_URL` (wrong password, host, or firewall issue), the application will log an error when you try to perform a database operation.
+
+For example, after starting the `businesses` service, you can try to fetch listings:
+```bash
+# In a new terminal
+curl http://localhost:3002/api/businesses
+```
+
+**Expected Output (if successful):**
+An empty JSON array `[]` or an array of business listings.
+
+**If it fails:**
+You will likely see an error in the terminal where the service is running. Common errors include:
+- `error: password authentication failed for user...`
+- `error: getaddrinfo ENOTFOUND ...` (incorrect hostname)
+- `Error: connect ETIMEDOUT ...` (firewall issue or server not running)
+
+### 3. Connection Test Checklist
+- [ ] Backend service starts without crashing.
+- [ ] API calls to endpoints that use the database do not return connection errors.
+- [ ] Check the service logs for any database-related error messages.
 
 ## ✅ Database Schema Setup
 
@@ -95,19 +97,24 @@ psql $DATABASE_URL -f setup-database.sql
 **Note:** If `psql` is not installed, you can use Azure Data Studio or pgAdmin to run the SQL file.
 
 ### 2. Verify Schema Creation
-Run the connection test again:
+To verify that the tables were created, you can connect to the database with `psql` and list the tables.
+
 ```bash
-npm run test:connection
+psql $DATABASE_URL -c "\dt"
 ```
 
 **Expected Output:**
+You should see a list of the tables that were created by the script, for example:
 ```
-✅ Found 5 table(s):
-   - events
-   - listings
-   - marketplace_items
-   - tourism_attractions
-   - users
+                 List of relations
+ Schema |         Name          | Type  |  Owner
+--------+-----------------------+-------+----------
+ public | events                | table | myuser
+ public | listings              | table | myuser
+ public | marketplace_items     | table | myuser
+ public | tourism_attractions   | table | myuser
+ public | users                 | table | myuser
+(5 rows)
 ```
 
 ### 3. Schema Verification Checklist
