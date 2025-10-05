@@ -36,21 +36,23 @@ jobs:
 
       # 6️⃣ Fetch DB secrets from Key Vault
       - name: Fetch DB settings from Key Vault
+        uses: Azure/cli@v2.2.0
         id: kv
-        run: |
-          VAULT_NAME="limpopoconnect-kv-801"
-          export DB_HOST="limpopoconnect-db.postgres.database.azure.com"
-          export DB_NAME="limpopoconnect"
-          export DB_USER="limpopoconnect_admin"
-          export DB_PORT="5432"
-          export DB_PASSWORD=$(az keyvault secret show --vault-name $VAULT_NAME --name azure-postgres-admin-password --query value -o tsv)
+        with:
+          inlineScript: |
+            VAULT_NAME="limpopoconnect-kv-801"
+            export DB_HOST="limpopoconnect-db.postgres.database.azure.com"
+            export DB_NAME="limpopoconnect"
+            export DB_USER="limpopoconnect_admin"
+            export DB_PORT="5432"
+            export DB_PASSWORD=$(az keyvault secret show --vault-name $VAULT_NAME --name azure-postgres-admin-password --query value -o tsv)
 
-          # Make all DB vars available as GitHub Actions env
-          echo "DB_HOST=$DB_HOST" >> $GITHUB_ENV
-          echo "DB_NAME=$DB_NAME" >> $GITHUB_ENV
-          echo "DB_USER=$DB_USER" >> $GITHUB_ENV
-          echo "DB_PORT=$DB_PORT" >> $GITHUB_ENV
-          echo "DB_PASSWORD=$DB_PASSWORD" >> $GITHUB_ENV
+            # Make all DB vars available as GitHub Actions env
+            echo "DB_HOST=$DB_HOST" >> $GITHUB_ENV
+            echo "DB_NAME=$DB_NAME" >> $GITHUB_ENV
+            echo "DB_USER=$DB_USER" >> $GITHUB_ENV
+            echo "DB_PORT=$DB_PORT" >> $GITHUB_ENV
+            echo "DB_PASSWORD=$DB_PASSWORD" >> $GITHUB_ENV
 
       # 7️⃣ Deploy to Azure Web App
       - name: Deploy to Azure Web App
@@ -62,6 +64,8 @@ jobs:
 
       # 8️⃣ Confirm deployment
       - name: Confirm deployment
-        run: |
-          echo "Deployment complete!"
-          az webapp show -g limpopoconnect-rg -n limpoconnect-webapp --query "{name:name, state:state, defaultHostName:defaultHostName}"
+        uses: Azure/cli@v2.2.0
+        with:
+          inlineScript: |
+            echo "Deployment complete!"
+            az webapp show -g limpopoconnect-rg -n limpoconnect-webapp --query "{name:name, state:state, defaultHostName:defaultHostName}"
