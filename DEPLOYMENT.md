@@ -54,3 +54,19 @@ The workflow requires the following secrets to be configured in the GitHub repos
 -   `AZURE_RG_NAME`: The name of the Azure resource group for the deployment.
 -   `POSTGRES_ADMIN`: The desired administrator username for the PostgreSQL server.
 -   `POSTGRES_ADMIN_PASSWORD`: The secure password for the PostgreSQL administrator.
+
+## Azure Key Vault Secrets Sync
+
+A dedicated workflow syncs secrets from Azure Key Vault to GitHub repository secrets, enabling automated secret management.
+
+### Workflow
+- **Name**: `Sync Azure Key Vault Secrets`
+- **Trigger**: Manual (`workflow_dispatch`) or weekly schedule (Sundays at 00:00 UTC)
+- **File**: `.github/workflows/sync-keyvault-secrets.yml`
+
+This workflow pulls secrets from Azure Key Vault and stores them as GitHub repository secrets, making them available for use in other workflows.
+
+### Required Secrets
+-   `AZURE_CREDENTIALS`: Same as above for Azure authentication
+-   `AZURE_KEYVAULT_NAME`: The name of the Azure Key Vault (e.g., `limpopo-kv` or the full Key Vault name from your infrastructure)
+-   `GH_PAT`: A GitHub Personal Access Token with `repo` scope for writing repository secrets
