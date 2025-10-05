@@ -1,0 +1,25 @@
+name: Deploy Infrastructure
+
+on:
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Log in to Azure
+        uses: azure/login@v1
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      - name: Deploy Bicep File
+        uses: azure/arm-deploy@v1
+        with:
+          subscriptionId: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+          resourceGroupName: ${{ secrets.AZURE_RG_NAME }}
+          template: ./infra/main.bicep
+          parameters: 'postgresAdmin=${{ secrets.POSTGRES_ADMIN }} postgresAdminPassword=${{ secrets.POSTGRES_ADMIN_PASSWORD }}'
+          failOnStdErr: false
