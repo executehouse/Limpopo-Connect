@@ -3,7 +3,7 @@ const express = require('express');
 const cors = require('cors');
 const bodyParser = require('body-parser');
 const { query } = require('./db');
-const bcrypt = require('bcrypt');
+const argon2 = require('argon2');
 const jwt = require('jsonwebtoken');
 const { v4: uuidv4 } = require('uuid');
 const crypto = require('crypto');
@@ -27,7 +27,7 @@ app.post('/api/auth/signup', async (req, res) => {
   const userRole = role && allowedRoles.includes(role) ? role : 'citizen';
 
   try {
-    const hashedPassword = await bcrypt.hash(password, 10);
+    const hashedPassword = await argon2.hash(password);
     const id = uuidv4();
 
     const result = await query(
@@ -64,7 +64,7 @@ app.post('/api/auth/login', async (req, res) => {
       return res.status(401).json({ error: 'Invalid credentials.' });
     }
 
-    const isPasswordCorrect = await bcrypt.compare(password, user.password_hash);
+    const isPasswordCorrect = await argon2.verify(user.password_hash, password);
 
     if (!isPasswordCorrect) {
       return res.status(401).json({ error: 'Invalid credentials.' });
