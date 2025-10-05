@@ -4,11 +4,15 @@ import { validateEmail, sanitizeInput } from '../lib/validation';
 import { query } from '../lib/db';
 import { v4 as uuidv4 } from 'uuid';
 
+interface ForgotPasswordRequest {
+    email: string;
+}
+
 export async function authForgotPassword(request: HttpRequest, context: InvocationContext): Promise<HttpResponseInit> {
     context.log(`Http function processed request for url "${request.url}"`);
 
     try {
-        const body = await request.json() as any;
+        const body = await request.json() as ForgotPasswordRequest;
         const { email } = body;
 
         if (!email) {

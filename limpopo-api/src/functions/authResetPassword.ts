@@ -4,11 +4,16 @@ import { validatePassword } from '../lib/validation';
 import { query } from '../lib/db';
 import argon2 from 'argon2';
 
+interface ResetPasswordRequest {
+    token: string;
+    password: string;
+}
+
 export async function authResetPassword(request: HttpRequest, context: InvocationContext): Promise<HttpResponseInit> {
     context.log(`Http function processed request for url "${request.url}"`);
 
     try {
-        const body = await request.json() as any;
+        const body = await request.json() as ResetPasswordRequest;
         const { token, password } = body;
 
         if (!token || !password) {

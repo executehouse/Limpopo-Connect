@@ -1,4 +1,4 @@
-import { app, input, InvocationContext } from "@azure/functions";
+import { app, InvocationContext } from "@azure/functions";
 import { BlobServiceClient } from '@azure/storage-blob';
 import sharp from 'sharp';
 import { query } from '../lib/db';

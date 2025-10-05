@@ -2,10 +2,19 @@ import { app, HttpResponseInit, InvocationContext } from "@azure/functions";
 import { withAuth, AuthenticatedRequest } from '../lib/auth';
 import { createMarketItem } from '../models/marketItem';
 
+interface CreateMarketItemRequest {
+    title: string;
+    description?: string;
+    price: number;
+    currency?: string;
+    stock?: number;
+    shipping_info?: Record<string, unknown> | null;
+}
+
 const marketItemsCreate = async (request: AuthenticatedRequest, context: InvocationContext): Promise<HttpResponseInit> => {
     context.log(`Http function processed request for url "${request.url}"`);
 
-    const body = await request.json() as any;
+    const body = await request.json() as CreateMarketItemRequest;
     const { title, description, price, currency = 'ZAR', stock, shipping_info } = body;
 
     if (!title || price === undefined) {

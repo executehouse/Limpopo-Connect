@@ -37,10 +37,11 @@ class PaymentService {
     return intent;
   }
 
-  async handlePaymentWebhook(payload: any): Promise<boolean> {
+  async handlePaymentWebhook(payload: Record<string, unknown>): Promise<boolean> {
     // In a real scenario, you would verify the webhook signature here.
     const eventType = payload.type;
-    const paymentIntent = payload.data.object as PaymentIntent;
+    const data = payload.data as { object?: unknown };
+    const paymentIntent = data?.object as PaymentIntent;
 
     if (eventType === 'payment_intent.succeeded') {
       const orderId = paymentIntent.metadata.orderId;
@@ -61,4 +62,4 @@ class PaymentService {
   }
 }
 
-export const paymentService = new PaymentService(process.env.PAYMENT_PROVIDER as any || 'stub');
+export const paymentService = new PaymentService((process.env.PAYMENT_PROVIDER as 'stripe' | 'stub') || 'stub');

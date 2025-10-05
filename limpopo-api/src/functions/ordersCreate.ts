@@ -2,10 +2,20 @@ import { app, HttpResponseInit, InvocationContext } from "@azure/functions";
 import { withAuth, AuthenticatedRequest } from '../lib/auth';
 import { createOrder } from '../models/order';
 
+interface OrderItem {
+    market_item_id: string;
+    quantity: number;
+}
+
+interface CreateOrderRequest {
+    items: OrderItem[];
+    shippingAddress?: Record<string, unknown> | null;
+}
+
 const ordersCreate = async (request: AuthenticatedRequest, context: InvocationContext): Promise<HttpResponseInit> => {
     context.log(`Http function processed request for url "${request.url}"`);
 
-    const body = await request.json() as any;
+    const body = await request.json() as CreateOrderRequest;
     const { items, shippingAddress } = body;
 
     if (!items || !Array.isArray(items) || items.length === 0) {
@@ -15,7 +25,12 @@ const ordersCreate = async (request: AuthenticatedRequest, context: InvocationCo
     const buyerId = request.authedUser!.id;
 
     try {
-        const newOrder = await createOrder(buyerId, items, shippingAddress);
+        // Map the items to the format expected by createOrder
+        const orderItems = items.map(item => ({
+            itemId: item.market_item_id,
+            qty: item.quantity
+        }));
+        const newOrder = await createOrder(buyerId, orderItems, shippingAddress);
         return {
             status: 201,
             jsonBody: newOrder

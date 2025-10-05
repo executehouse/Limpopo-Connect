@@ -3,11 +3,18 @@ import { findUserByEmail, createUser } from '../models/user';
 import { generateTokens } from '../lib/auth';
 import { validateEmail, validatePassword, validateName, sanitizeInput } from '../lib/validation';
 
+interface RegisterRequest {
+    email: string;
+    password: string;
+    name: string;
+    role?: string;
+}
+
 export async function authRegister(request: HttpRequest, context: InvocationContext): Promise<HttpResponseInit> {
     context.log(`Http function processed request for url "${request.url}"`);
 
     try {
-        const body = await request.json() as any;
+        const body = await request.json() as RegisterRequest;
         const { email, password, name, role } = body;
 
         // Validation
@@ -62,7 +69,7 @@ export async function authRegister(request: HttpRequest, context: InvocationCont
 
         const { accessToken, refreshToken } = await generateTokens(newUser);
 
-        const { password_hash, ...userResponse } = newUser;
+        const { password_hash: _password_hash, ...userResponse } = newUser;
 
         context.log(`User registered successfully: ${newUser.id}`);
 

@@ -2,11 +2,22 @@ import { app, HttpResponseInit, InvocationContext } from "@azure/functions";
 import { withAuth, AuthenticatedRequest } from '../lib/auth';
 import { findEventById, updateEvent } from '../models/event';
 
+interface UpdateEventRequest {
+    title?: string;
+    description?: string;
+    start_at?: string;
+    end_at?: string;
+    address?: string;
+    lat?: number;
+    lng?: number;
+    capacity?: number;
+}
+
 const eventsUpdate = async (request: AuthenticatedRequest, context: InvocationContext): Promise<HttpResponseInit> => {
     context.log(`Http function processed request for url "${request.url}"`);
 
     const id = request.params.id;
-    const updates = await request.json() as any;
+    const updates = await request.json() as UpdateEventRequest;
 
     if (!id) {
         return { status: 400, jsonBody: { error: 'Event ID is required' } };
@@ -23,7 +34,14 @@ const eventsUpdate = async (request: AuthenticatedRequest, context: InvocationCo
             return { status: 403, jsonBody: { error: 'Forbidden: You do not have permission to update this event.' } };
         }
 
-        const updatedEvent = await updateEvent(id, updates);
+        // Convert date strings to Date objects if provided
+        const processedUpdates = {
+            ...updates,
+            start_at: updates.start_at ? new Date(updates.start_at) : undefined,
+            end_at: updates.end_at ? new Date(updates.end_at) : undefined,
+        };
+
+        const updatedEvent = await updateEvent(id, processedUpdates);
 
         return {
             jsonBody: updatedEvent

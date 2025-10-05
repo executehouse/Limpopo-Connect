@@ -1,11 +1,22 @@
 import { app, HttpResponseInit, InvocationContext } from "@azure/functions";
 import { withAuth, AuthenticatedRequest } from '../lib/auth';
-import { createEvent, Event } from '../models/event';
+import { createEvent } from '../models/event';
+
+interface CreateEventRequest {
+    title: string;
+    description?: string;
+    start_at: string;
+    end_at?: string;
+    address?: string;
+    lat?: number;
+    lng?: number;
+    capacity?: number;
+}
 
 const eventsCreate = async (request: AuthenticatedRequest, context: InvocationContext): Promise<HttpResponseInit> => {
     context.log(`Http function processed request for url "${request.url}"`);
 
-    const body = await request.json() as any;
+    const body = await request.json() as CreateEventRequest;
     const { title, description, start_at, end_at, address, lat, lng, capacity } = body;
 
     if (!title || !start_at) {
@@ -27,7 +38,7 @@ const eventsCreate = async (request: AuthenticatedRequest, context: InvocationCo
             created_by,
         };
 
-        const newEvent = await createEvent(eventData as any);
+        const newEvent = await createEvent(eventData);
 
         return {
             status: 201,

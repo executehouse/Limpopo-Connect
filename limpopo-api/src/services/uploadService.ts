@@ -45,7 +45,7 @@ export interface SignedUploadUrlResponse {
   expiresAt: Date;
 }
 
-export const generateSignedUploadUrl = async (request: SignedUploadUrlRequest, userId: string): Promise<SignedUploadUrlResponse> => {
+export const generateSignedUploadUrl = async (request: SignedUploadUrlRequest, _userId: string): Promise<SignedUploadUrlResponse> => {
   // Validate file type
   const allowedTypes = ['image/jpeg', 'image/png', 'image/webp'];
   if (!allowedTypes.includes(request.contentType)) {

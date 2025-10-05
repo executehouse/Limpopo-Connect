@@ -6,7 +6,7 @@ export interface Order {
   buyer_id: string;
   total: number;
   status: 'pending' | 'paid' | 'shipped' | 'completed' | 'cancelled';
-  shipping_address?: any;
+  shipping_address?: Record<string, unknown> | null;
   created_at: Date;
   updated_at: Date;
 }
@@ -22,7 +22,7 @@ export interface OrderItem {
 export const createOrder = async (
   buyerId: string,
   items: { itemId: string; qty: number }[],
-  shippingAddress?: any
+  shippingAddress?: Record<string, unknown> | null
 ): Promise<Order> => {
   const client = await pool.connect();
   try {

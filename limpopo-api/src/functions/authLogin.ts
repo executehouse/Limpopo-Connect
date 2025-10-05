@@ -3,11 +3,16 @@ import { findUserByEmail, verifyPassword } from '../models/user';
 import { generateTokens } from '../lib/auth';
 import { validateEmail, sanitizeInput } from '../lib/validation';
 
+interface LoginRequest {
+    email: string;
+    password: string;
+}
+
 export async function authLogin(request: HttpRequest, context: InvocationContext): Promise<HttpResponseInit> {
     context.log(`Http function processed request for url "${request.url}"`);
 
     try {
-        const body = await request.json() as any;
+        const body = await request.json() as LoginRequest;
         const { email, password } = body;
 
         if (!email || !password) {
@@ -47,7 +52,7 @@ export async function authLogin(request: HttpRequest, context: InvocationContext
 
         const { accessToken, refreshToken } = await generateTokens(user);
 
-        const { password_hash, ...userResponse } = user;
+        const { password_hash: _password_hash, ...userResponse } = user;
 
         context.log(`User logged in successfully: ${user.id}`);
 

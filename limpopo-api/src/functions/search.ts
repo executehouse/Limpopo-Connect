@@ -1,6 +1,13 @@
 import { app, HttpRequest, HttpResponseInit, InvocationContext } from "@azure/functions";
 import { searchAll } from '../models/search';
 
+interface SearchOptions {
+    types?: Array<'business' | 'event' | 'market_item'>;
+    near?: { lat: number; lng: number };
+    limit: number;
+    offset: number;
+}
+
 export async function search(request: HttpRequest, context: InvocationContext): Promise<HttpResponseInit> {
     context.log(`Http function processed request for url "${request.url}"`);
 
@@ -14,10 +21,10 @@ export async function search(request: HttpRequest, context: InvocationContext): 
     const limit = parseInt(request.query.get('limit') || '20', 10);
     const offset = parseInt(request.query.get('offset') || '0', 10);
 
-    const options: any = { limit, offset };
+    const options: SearchOptions = { limit, offset };
 
     if (typesParam) {
-        options.types = typesParam.split(',');
+        options.types = typesParam.split(',') as Array<'business' | 'event' | 'market_item'>;
     }
 
     if (nearParam) {
