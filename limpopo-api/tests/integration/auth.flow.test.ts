@@ -1,21 +1,22 @@
 import request from 'supertest';
+import { describe, it, expect, beforeAll, beforeEach, vi } from 'vitest';
 
 // Mock the database module
-jest.mock('../../src/lib/db', () => ({
-  query: jest.fn(),
+vi.mock('../../src/lib/db', () => ({
+  query: vi.fn(),
 }));
 
 // Mock the user model
-jest.mock('../../src/models/user', () => ({
-  findUserByEmail: jest.fn(),
-  createUser: jest.fn(),
-  findUserById: jest.fn(),
-  verifyPassword: jest.fn(),
+vi.mock('../../src/models/user', () => ({
+  findUserByEmail: vi.fn(),
+  createUser: vi.fn(),
+  findUserById: vi.fn(),
+  verifyPassword: vi.fn(),
 }));
 
 
-const mockQuery = require('../../src/lib/db').query;
-const mockUserModel = require('../../src/models/user');
+import { query } from '../../src/lib/db';
+import { findUserByEmail, createUser, findUserById, verifyPassword } from '../../src/models/user';
 
 // NOTE: Auth Flow Integration tests disabled after migration away from Azure Functions implementation.
 describe.skip('Auth Flow Integration (disabled post-Azure migration)', () => {
@@ -27,7 +28,7 @@ describe.skip('Auth Flow Integration (disabled post-Azure migration)', () => {
   });
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     process.env.JWT_SECRET = 'test-secret-key-for-integration-test';
     delete process.env.KEY_VAULT_URL; // Use env variable for tests
   });
@@ -35,7 +36,7 @@ describe.skip('Auth Flow Integration (disabled post-Azure migration)', () => {
   describe('POST /api/auth/register', () => {
     it('should register a new user successfully', async () => {
       // Mock no existing user
-      mockUserModel.findUserByEmail.mockResolvedValue(null);
+      vi.mocked(findUserByEmail).mockResolvedValue(null);
       
       // Mock successful user creation
       const mockUser = {
@@ -47,7 +48,7 @@ describe.skip('Auth Flow Integration (disabled post-Azure migration)', () => {
         created_at: new Date(),
         updated_at: new Date(),
       };
-      mockUserModel.createUser.mockResolvedValue(mockUser);
+      vi.mocked(createUser).mockResolvedValue(mockUser);
 
       const registerData = {
         email: 'test@example.com',
@@ -59,12 +60,12 @@ describe.skip('Auth Flow Integration (disabled post-Azure migration)', () => {
       // we'll test the function handlers directly
       const { authRegister } = await import('../../src/functions/authRegister');
       const mockRequest = {
-        json: jest.fn().mockResolvedValue(registerData),
-        headers: { get: jest.fn() },
+        json: vi.fn().mockResolvedValue(registerData),
+        headers: { get: vi.fn() },
         url: '/api/auth/register'
       };
       const mockContext = {
-        log: jest.fn()
+        log: vi.fn()
       };
 
       const result = await authRegister(mockRequest as any, mockContext as any);
@@ -78,16 +79,16 @@ describe.skip('Auth Flow Integration (disabled post-Azure migration)', () => {
     it('should return validation errors for invalid input', async () => {
       const { authRegister } = await import('../../src/functions/authRegister');
       const mockRequest = {
-        json: jest.fn().mockResolvedValue({
+        json: vi.fn().mockResolvedValue({
           email: 'invalid-email',
           password: 'weak',
           name: 'A'
         }),
-        headers: { get: jest.fn() },
+        headers: { get: vi.fn() },
         url: '/api/auth/register'
       };
       const mockContext = {
-        log: jest.fn()
+        log: vi.fn()
       };
 
       const result = await authRegister(mockRequest as any, mockContext as any);
@@ -100,23 +101,23 @@ describe.skip('Auth Flow Integration (disabled post-Azure migration)', () => {
 
     it('should return error for duplicate email', async () => {
       // Mock existing user
-      mockUserModel.findUserByEmail.mockResolvedValue({
+      vi.mocked(findUserByEmail).mockResolvedValue({
         id: 'existing-user-id',
         email: 'test@example.com'
       });
 
       const { authRegister } = await import('../../src/functions/authRegister');
       const mockRequest = {
-        json: jest.fn().mockResolvedValue({
+        json: vi.fn().mockResolvedValue({
           email: 'test@example.com',
           password: 'StrongPass123!',
           name: 'Test User'
         }),
-        headers: { get: jest.fn() },
+        headers: { get: vi.fn() },
         url: '/api/auth/register'
       };
       const mockContext = {
-        log: jest.fn()
+        log: vi.fn()
       };
 
       const result = await authRegister(mockRequest as any, mockContext as any);
@@ -139,20 +140,20 @@ describe.skip('Auth Flow Integration (disabled post-Azure migration)', () => {
         updated_at: new Date(),
       };
       
-      mockUserModel.findUserByEmail.mockResolvedValue(mockUser);
-      mockUserModel.verifyPassword.mockResolvedValue(true);
+      vi.mocked(findUserByEmail).mockResolvedValue(mockUser);
+      vi.mocked(verifyPassword).mockResolvedValue(true);
 
       const { authLogin } = await import('../../src/functions/authLogin');
       const mockRequest = {
-        json: jest.fn().mockResolvedValue({
+        json: vi.fn().mockResolvedValue({
           email: 'test@example.com',
           password: 'StrongPass123!'
         }),
-        headers: { get: jest.fn() },
+        headers: { get: vi.fn() },
         url: '/api/auth/login'
       };
       const mockContext = {
-        log: jest.fn()
+        log: vi.fn()
       };
 
       const result = await authLogin(mockRequest as any, mockContext as any);
@@ -164,19 +165,19 @@ describe.skip('Auth Flow Integration (disabled post-Azure migration)', () => {
     });
 
     it('should reject invalid credentials', async () => {
-      mockUserModel.findUserByEmail.mockResolvedValue(null);
+      vi.mocked(findUserByEmail).mockResolvedValue(null);
 
       const { authLogin } = await import('../../src/functions/authLogin');
       const mockRequest = {
-        json: jest.fn().mockResolvedValue({
+        json: vi.fn().mockResolvedValue({
           email: 'nonexistent@example.com',
           password: 'wrongpassword'
         }),
-        headers: { get: jest.fn() },
+        headers: { get: vi.fn() },
         url: '/api/auth/login'
       };
       const mockContext = {
-        log: jest.fn()
+        log: vi.fn()
       };
 
       const result = await authLogin(mockRequest as any, mockContext as any);
@@ -188,15 +189,15 @@ describe.skip('Auth Flow Integration (disabled post-Azure migration)', () => {
     it('should reject invalid email format', async () => {
       const { authLogin } = await import('../../src/functions/authLogin');
       const mockRequest = {
-        json: jest.fn().mockResolvedValue({
+        json: vi.fn().mockResolvedValue({
           email: 'invalid-email',
           password: 'password'
         }),
-        headers: { get: jest.fn() },
+        headers: { get: vi.fn() },
         url: '/api/auth/login'
       };
       const mockContext = {
-        log: jest.fn()
+        log: vi.fn()
       };
 
       const result = await authLogin(mockRequest as any, mockContext as any);
@@ -218,7 +219,7 @@ describe.skip('Auth Flow Integration (disabled post-Azure migration)', () => {
         updated_at: new Date(),
       };
       
-      mockUserModel.findUserById.mockResolvedValue(mockUser);
+      vi.mocked(findUserById).mockResolvedValue(mockUser);
 
       // Generate a valid refresh token for testing
       const jwt = require('jsonwebtoken');
@@ -238,12 +239,12 @@ describe.skip('Auth Flow Integration (disabled post-Azure migration)', () => {
 
       const { authRefresh } = await import('../../src/functions/authRefresh');
       const mockRequest = {
-        json: jest.fn().mockResolvedValue({ refreshToken }),
-        headers: { get: jest.fn() },
+        json: vi.fn().mockResolvedValue({ refreshToken }),
+        headers: { get: vi.fn() },
         url: '/api/auth/refresh'
       };
       const mockContext = {
-        log: jest.fn()
+        log: vi.fn()
       };
 
       const result = await authRefresh(mockRequest as any, mockContext as any);
@@ -256,12 +257,12 @@ describe.skip('Auth Flow Integration (disabled post-Azure migration)', () => {
     it('should reject invalid refresh token', async () => {
       const { authRefresh } = await import('../../src/functions/authRefresh');
       const mockRequest = {
-        json: jest.fn().mockResolvedValue({ refreshToken: 'invalid-token' }),
-        headers: { get: jest.fn() },
+        json: vi.fn().mockResolvedValue({ refreshToken: 'invalid-token' }),
+        headers: { get: vi.fn() },
         url: '/api/auth/refresh'
       };
       const mockContext = {
-        log: jest.fn()
+        log: vi.fn()
       };
 
       const result = await authRefresh(mockRequest as any, mockContext as any);

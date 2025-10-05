@@ -1,34 +1,36 @@
+import { describe, it, expect, beforeEach, vi } from 'vitest';
+
 // Mock dependencies
-jest.mock('../../src/lib/db', () => ({
-  query: jest.fn(),
+vi.mock('../../src/lib/db', () => ({
+  query: vi.fn(),
 }));
 
-jest.mock('../../src/models/business', () => ({
-  createBusiness: jest.fn(),
-  findBusinessById: jest.fn(),
-  findBusinesses: jest.fn(),
-  updateBusiness: jest.fn(),
-  softDeleteBusiness: jest.fn(),
+vi.mock('../../src/models/business', () => ({
+  createBusiness: vi.fn(),
+  findBusinessById: vi.fn(),
+  findBusinesses: vi.fn(),
+  updateBusiness: vi.fn(),
+  softDeleteBusiness: vi.fn(),
 }));
 
-jest.mock('../../src/models/businessCategory', () => ({
-  findCategoryById: jest.fn(),
-  findAllCategories: jest.fn(),
+vi.mock('../../src/models/businessCategory', () => ({
+  findCategoryById: vi.fn(),
+  findAllCategories: vi.fn(),
 }));
 
-jest.mock('../../src/models/businessPhoto', () => ({
-  findBusinessPhotos: jest.fn(),
+vi.mock('../../src/models/businessPhoto', () => ({
+  findBusinessPhotos: vi.fn(),
 }));
 
 
-const mockBusiness = require('../../src/models/business');
-const mockBusinessCategory = require('../../src/models/businessCategory');
-const mockBusinessPhoto = require('../../src/models/businessPhoto');
+import { createBusiness, findBusinessById, findBusinesses } from '../../src/models/business';
+import { findCategoryById } from '../../src/models/businessCategory';
+import { findBusinessPhotos } from '../../src/models/businessPhoto';
 
 // NOTE: Azure Functions based integration tests disabled after migration to Supabase / Express
 describe.skip('Business API Integration (disabled post-Azure migration)', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     process.env.JWT_SECRET = 'test-secret-key-for-integration-test';
     delete process.env.KEY_VAULT_URL;
   });
@@ -36,7 +38,7 @@ describe.skip('Business API Integration (disabled post-Azure migration)', () => 
   describe('POST /api/businesses (Create Business)', () => {
     it('should create a new business successfully', async () => {
       // Mock valid category
-      mockBusinessCategory.findCategoryById.mockResolvedValue({
+      vi.mocked(findCategoryById).mockResolvedValue({
         id: 1,
         name: 'Restaurant',
         slug: 'restaurant'
@@ -60,11 +62,11 @@ describe.skip('Business API Integration (disabled post-Azure migration)', () => 
         version: 1
       };
       
-      mockBusiness.createBusiness.mockResolvedValue(mockCreatedBusiness);
+      vi.mocked(createBusiness).mockResolvedValue(mockCreatedBusiness);
 
       const { businessesCreate } = await import('../../src/functions/businessesCreate');
       const mockRequest = {
-        json: jest.fn().mockResolvedValue({
+        json: vi.fn().mockResolvedValue({
           name: 'Test Restaurant',
           category_id: 1,
           description: 'Great food',
@@ -79,25 +81,25 @@ describe.skip('Business API Integration (disabled post-Azure migration)', () => 
           id: 'user-uuid',
           role: 'business'
         },
-        headers: { get: jest.fn() },
+        headers: { get: vi.fn() },
         url: '/api/businesses'
       };
       const mockContext = {
-        log: jest.fn()
+        log: vi.fn()
       };
 
       const result = await businessesCreate(mockRequest as any, mockContext as any);
 
       expect(result.status).toBe(201);
       expect(result.jsonBody.name).toBe('Test Restaurant');
-      expect(mockBusiness.createBusiness).toHaveBeenCalled();
+      expect(createBusiness).toHaveBeenCalled();
     });
 
     it('should return validation errors for invalid data', async () => {
       const businessesCreateModule = await import('../../src/functions/businessesCreate');
       const businessesCreate = businessesCreateModule.businessesCreate;
       const mockRequest = {
-        json: jest.fn().mockResolvedValue({
+        json: vi.fn().mockResolvedValue({
           name: 'A', // Too short
           category_id: 999, // Invalid category
           address: '',
@@ -108,15 +110,15 @@ describe.skip('Business API Integration (disabled post-Azure migration)', () => 
           id: 'user-uuid',
           role: 'business'
         },
-        headers: { get: jest.fn() },
+        headers: { get: vi.fn() },
         url: '/api/businesses'
       };
       const mockContext = {
-        log: jest.fn()
+        log: vi.fn()
       };
 
       // Mock category not found
-      mockBusinessCategory.findCategoryById.mockResolvedValue(null);
+      vi.mocked(findCategoryById).mockResolvedValue(null);
 
       const result = await businessesCreate(mockRequest as any, mockContext as any);
 
@@ -150,12 +152,12 @@ describe.skip('Business API Integration (disabled post-Azure migration)', () => 
         }
       ];
       
-      mockBusiness.findBusinesses.mockResolvedValue(mockBusinesses);
+      vi.mocked(findBusinesses).mockResolvedValue(mockBusinesses);
 
       const { businessesList } = await import('../../src/functions/businessesList');
       const mockRequest = {
         query: {
-          get: jest.fn((key: string) => {
+          get: vi.fn((key: string) => {
             const params: any = {
               near: '-23.9045,29.4689,5',
               limit: '10',
@@ -164,11 +166,11 @@ describe.skip('Business API Integration (disabled post-Azure migration)', () => 
             return params[key];
           })
         },
-        headers: { get: jest.fn() },
+        headers: { get: vi.fn() },
         url: '/api/businesses?near=-23.9045,29.4689,5'
       };
       const mockContext = {
-        log: jest.fn()
+        log: vi.fn()
       };
 
       const result = await businessesList(mockRequest as any, mockContext as any);
@@ -176,7 +178,7 @@ describe.skip('Business API Integration (disabled post-Azure migration)', () => 
       expect(result.status).toBe(200);
       expect(result.jsonBody.businesses).toHaveLength(2);
       expect(result.jsonBody.pagination.limit).toBe(10);
-      expect(mockBusiness.findBusinesses).toHaveBeenCalledWith({
+      expect(findBusinesses).toHaveBeenCalledWith({
         limit: 10,
         offset: 0,
         near: { lat: -23.9045, lng: 29.4689, radius: 5 }
@@ -188,16 +190,16 @@ describe.skip('Business API Integration (disabled post-Azure migration)', () => 
       const businessesList = businessesListModule.businessesList;
       const mockRequest = {
         query: {
-          get: jest.fn((key: string) => {
+          get: vi.fn((key: string) => {
             if (key === 'near') return 'invalid-coordinates';
             return null;
           })
         },
-        headers: { get: jest.fn() },
+        headers: { get: vi.fn() },
         url: '/api/businesses?near=invalid-coordinates'
       };
       const mockContext = {
-        log: jest.fn()
+        log: vi.fn()
       };
 
       const result = await businessesList(mockRequest as any, mockContext as any);
@@ -231,17 +233,17 @@ describe.skip('Business API Integration (disabled post-Azure migration)', () => 
         }
       ];
       
-      mockBusiness.findBusinessById.mockResolvedValue(mockBusinessDetails);
-      mockBusinessPhoto.findBusinessPhotos.mockResolvedValue(mockPhotos);
+      vi.mocked(findBusinessById).mockResolvedValue(mockBusinessDetails);
+      vi.mocked(findBusinessPhotos).mockResolvedValue(mockPhotos);
 
       const { businessesGet } = await import('../../src/functions/businessesGet');
       const mockRequest = {
         params: { id: 'business-uuid' },
-        headers: { get: jest.fn() },
+        headers: { get: vi.fn() },
         url: '/api/businesses/business-uuid'
       };
       const mockContext = {
-        log: jest.fn()
+        log: vi.fn()
       };
 
       const result = await businessesGet(mockRequest as any, mockContext as any);
@@ -249,22 +251,22 @@ describe.skip('Business API Integration (disabled post-Azure migration)', () => 
       expect(result.status).toBe(200);
       expect(result.jsonBody.name).toBe('Test Restaurant');
       expect(result.jsonBody.photos).toHaveLength(1);
-      expect(mockBusiness.findBusinessById).toHaveBeenCalledWith('business-uuid');
-      expect(mockBusinessPhoto.findBusinessPhotos).toHaveBeenCalledWith('business-uuid');
+      expect(findBusinessById).toHaveBeenCalledWith('business-uuid');
+      expect(findBusinessPhotos).toHaveBeenCalledWith('business-uuid');
     });
 
     it('should return 404 for non-existent business', async () => {
-      mockBusiness.findBusinessById.mockResolvedValue(null);
+      vi.mocked(findBusinessById).mockResolvedValue(null);
 
       const businessesGetModule = await import('../../src/functions/businessesGet');
       const businessesGet = businessesGetModule.businessesGet;
       const mockRequest = {
         params: { id: 'non-existent' },
-        headers: { get: jest.fn() },
+        headers: { get: vi.fn() },
         url: '/api/businesses/non-existent'
       };
       const mockContext = {
-        log: jest.fn()
+        log: vi.fn()
       };
 
       const result = await businessesGet(mockRequest as any, mockContext as any);

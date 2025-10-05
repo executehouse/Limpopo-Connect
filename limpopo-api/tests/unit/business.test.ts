@@ -1,11 +1,11 @@
+import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { validateBusinessName, validateCoordinates, validateUrl, validatePhone, validateMimeType } from '../../src/lib/validation';
+import { createBusiness } from '../../src/models/business';
 
 // Mock database
-jest.mock('../../src/lib/db', () => ({
-  query: jest.fn(),
+vi.mock('../../src/lib/db', () => ({
+  query: vi.fn(),
 }));
-
-const mockQuery = require('../../src/lib/db').query;
 
 describe('Business Validation', () => {
   describe('validateBusinessName', () => {
@@ -93,14 +93,13 @@ describe('Business Validation', () => {
 
 describe('Business Models', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('Business Model Functions', () => {
     it('should handle coordinate validation in createBusiness', async () => {
       // This would test the actual model functions
       // For now, just test that invalid coordinates throw errors
-      const { createBusiness } = require('../../src/models/business');
       
       const invalidBusinessData = {
         owner_id: 'test-user-id',
