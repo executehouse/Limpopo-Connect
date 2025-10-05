@@ -21,6 +21,12 @@ export default defineConfig({
     globals: true,
     environment: 'jsdom',
     setupFiles: './src/setupTests.ts',
+    exclude: [
+      '**/node_modules/**',
+      '**/dist/**',
+      '**/limpopo-api/tests/integration/**', // Skip Azure Functions integration tests
+      '**/limpopo-api/tests/unit/upload.test.ts', // Skip Azure Blob Storage tests
+    ],
   },
   // When running in GitHub Actions the GITHUB_REPOSITORY env var is available
   // (format: owner/repo). For GitHub Pages hosted from a repository the site
