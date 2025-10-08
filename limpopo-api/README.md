@@ -78,9 +78,40 @@ Supabase provides a managed Postgres instance with optional Row Level Security (
 
 ## Environment Variables
 
-| Variable | Description | Required |
-|----------|-------------|----------|
-| `DATABASE_URL` | PostgreSQL connection string | Yes |
+Primary configuration now uses Supabase. Copy `.env.example` to `.env` and supply the required values below. Avoid committing real secrets.
+
+### Required (Production)
+| Variable | Description |
+|----------|-------------|
+| `SUPABASE_URL` | Supabase project URL (https://<ref>.supabase.co) |
+| `SUPABASE_ANON_KEY` | Supabase anon (public) key for basic client operations |
+| `SUPABASE_SERVICE_ROLE_KEY` | Supabase service role key (server only, privileged) |
+| `JWT_SECRET` | Custom auth JWT signing secret (32+ random chars) |
+
+### Recommended
+| Variable | Description |
+|----------|-------------|
+| `NODE_ENV` | Runtime environment: development | production | test |
+| `PORT` | API port (defaults 3001) |
+| `PROJECT_URL` | Base URL of frontend (used for CORS / links) |
+
+### Optional / Integrations
+| Variable | Description |
+|----------|-------------|
+| `PAYMENT_PROVIDER` | Payment provider stub | stripe | payfast (current impl: stub) |
+| `GITHUB_TOKEN` | Token for GitHub Models (AI inference) |
+| `LOG_LEVEL` | Desired log verbosity (info|debug|warn|error) |
+
+### Legacy / Transitional
+| Variable | Description | Notes |
+|----------|-------------|-------|
+| `DATABASE_URL` | Legacy Postgres connection string | Used by older modules only; prefer Supabase client |
+| `AZURE_STORAGE_ACCOUNT_NAME` | Azure Blob Storage (uploads) | Remove once migrated to Supabase Storage |
+| `AZURE_STORAGE_ACCOUNT_KEY` | Azure Blob Storage key | Consider managed identity / removal |
+| `AzureWebJobsStorage` | Azure Functions binding storage connection | Only if Functions bindings still in use |
+| `KEY_VAULT_URL` | Azure Key Vault endpoint | Only if retrieving secrets from Vault |
+
+See `SUPABASE_SETUP.md` for detailed setup and `.env.example` for annotated guidance.
 
 ## Scripts
 

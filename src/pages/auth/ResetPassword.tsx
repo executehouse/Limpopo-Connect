@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Link, useSearchParams, useNavigate } from 'react-router-dom';
 import { MapPin, Lock, Eye, EyeOff } from 'lucide-react';
+import { getSupabase } from '../../lib/supabase';
 
 const ResetPassword = () => {
   const [password, setPassword] = useState('');
@@ -32,26 +33,59 @@ const ResetPassword = () => {
     setIsLoading(true);
 
     try {
-      const response = await fetch('/api/auth/reset-password', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ token, password }),
-      });
+      if (import.meta.env.VITE_SUPABASE_URL && import.meta.env.VITE_SUPABASE_ANON_KEY) {
+        // Supabase's password reset flow typically redirects back with a session in the URL.
+        // If a session is present (user is authenticated), we can call updateUser to set the new password.
+        try {
+          const supabase = getSupabase();
+          const { error } = await supabase.auth.updateUser({ password });
+          if (error) throw new Error(error.message || 'Unable to update password via Supabase');
+          setMessage('Password successfully reset! Redirecting to login...');
+          setTimeout(() => {
+            navigate('/login', { state: { message: 'Password successfully reset! Please log in.' } });
+          }, 2000);
+  } catch {
+          // If supabase update fails (for example no session), fall back to backend flow.
+          const response = await fetch('/api/auth/reset-password', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ token, password }),
+          });
 
-      const data = await response.json();
+          const data = await response.json();
 
-      if (!response.ok) {
-        throw new Error(data.error || 'An unexpected error occurred.');
+          if (!response.ok) {
+            throw new Error(data.error || 'An unexpected error occurred.');
+          }
+
+          setMessage(data.message);
+          setTimeout(() => {
+            navigate('/login', { state: { message: 'Password successfully reset! Please log in.' } });
+          }, 3000);
+        }
+      } else {
+        const response = await fetch('/api/auth/reset-password', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ token, password }),
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+          throw new Error(data.error || 'An unexpected error occurred.');
+        }
+
+        setMessage(data.message);
+        // Redirect to login after a short delay
+        setTimeout(() => {
+          navigate('/login', { state: { message: 'Password successfully reset! Please log in.' } });
+        }, 3000);
       }
-
-      setMessage(data.message);
-      // Redirect to login after a short delay
-      setTimeout(() => {
-        navigate('/login', { state: { message: 'Password successfully reset! Please log in.' } });
-      }, 3000);
-
     } catch (err) {
       setError(err instanceof Error ? err.message : 'An error occurred');
     } finally {

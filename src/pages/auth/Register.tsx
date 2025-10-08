@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { MapPin, Mail, Lock, User, Phone, Eye, EyeOff } from 'lucide-react';
+import { signUpWithEmail } from '../../lib/supabase';
 
 const Register: React.FC = () => {
   const [formData, setFormData] = useState({
@@ -40,28 +41,33 @@ const Register: React.FC = () => {
     setIsLoading(true);
 
     try {
-      const response = await fetch('/api/auth/signup', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          name: `${formData.firstName} ${formData.lastName}`,
-          email: formData.email,
-          password: formData.password,
-          role: formData.role,
-        }),
-      });
+      if (import.meta.env.VITE_SUPABASE_URL && import.meta.env.VITE_SUPABASE_ANON_KEY) {
+  const { error } = await signUpWithEmail(formData.email, formData.password);
+  if (error) throw new Error(error.message || 'Signup failed');
+        // Supabase may require email confirmation depending on your settings.
+        navigate('/login', { state: { message: 'Registration successful! Please check your email to confirm.' } });
+      } else {
+        const response = await fetch('/api/auth/signup', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            name: `${formData.firstName} ${formData.lastName}`,
+            email: formData.email,
+            password: formData.password,
+            role: formData.role,
+          }),
+        });
 
-      const data = await response.json();
+        const data = await response.json();
 
-      if (!response.ok) {
-        throw new Error(data.error || 'An unexpected error occurred.');
+        if (!response.ok) {
+          throw new Error(data.error || 'An unexpected error occurred.');
+        }
+
+        navigate('/login', { state: { message: 'Registration successful! Please log in.' } });
       }
-
-      // Redirect to login page with a success message
-      navigate('/login', { state: { message: 'Registration successful! Please log in.' } });
-
     } catch (err) {
       setError(err instanceof Error ? err.message : 'An error occurred');
     } finally {

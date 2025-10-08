@@ -8,7 +8,9 @@
     "dev:frontend": "vite",
     "dev:api:auth": "PORT=3001 npm --prefix limpopo-api run start:auth",
     "dev:api:businesses": "PORT=3002 npm --prefix limpopo-api run start:businesses",
-    "build": "tsc -b && vite build",
+  "build": "tsc -b && vite build",
+  "build:frontend": "vite build",
+  "deploy:gh-pages": "npm run build:frontend && npx gh-pages -d dist",
     "start": "node server.js",
     "lint": "eslint .",
     "test": "vitest",
@@ -23,7 +25,8 @@
     "lucide-react": "^0.544.0",
     "react": "^19.1.1",
     "react-dom": "^19.1.1",
-    "react-router-dom": "^7.9.2"
+    "react-router-dom": "^7.9.2",
+    "@supabase/supabase-js": "^2.31.0"
   },
   "devDependencies": {
     "@eslint/js": "^9.36.0",
@@ -47,4 +50,5 @@
     "vite": "^7.1.7",
     "vitest": "^3.2.4"
   }
+  
 }
