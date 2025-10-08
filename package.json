@@ -4,18 +4,16 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "dev": "npm-run-all --parallel dev:frontend dev:api:*",
-    "dev:frontend": "vite",
-    "dev:api:auth": "PORT=3001 npm --prefix limpopo-api run start:auth",
-    "dev:api:businesses": "PORT=3002 npm --prefix limpopo-api run start:businesses",
-  "build": "tsc -b && vite build",
-  "build:frontend": "vite build",
-  "deploy:gh-pages": "npm run build:frontend && npx gh-pages -d dist",
+    "dev": "vite",
     "start": "node server.js",
+    "build": "tsc -b && vite build",
+    "build:frontend": "vite build",
+    "preview": "vite preview",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
     "lint": "eslint .",
     "test": "vitest",
-    "preview": "vite preview",
-    "verify-build": "node scripts/verify-build.js"
+    "check": "npm run lint && npm run typecheck && npm test",
+    "deploy:gh-pages": "npm run build:frontend && npx gh-pages -d dist"
   },
   "dependencies": {
     "express": "^4.18.2",
