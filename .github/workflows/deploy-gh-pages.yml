@@ -1,8 +1,9 @@
-name: Deploy Frontend to GitHub Pages
+name: Deploy Frontend to GitHub Pages (Disabled - using deploy-pages.yml instead)
 
-on:
-  push:
-    branches: [ main ]
+# Disabled to avoid conflicts with deploy-pages.yml
+# on:
+#   push:
+#     branches: [ main ]
 
 jobs:
   build-and-deploy:
