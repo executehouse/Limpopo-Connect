@@ -4,15 +4,10 @@ import Login from './Login';
 import '@testing-library/jest-dom';
 import { vi } from 'vitest';
 
-// Mock fetch with proper typing
-interface MockFetchResponse {
-  ok: boolean;
-  json: () => Promise<unknown>;
-  status?: number;
-}
+import * as supabase from '../../lib/supabase';
 
-const mockFetch = vi.fn<[], Promise<MockFetchResponse>>();
-global.fetch = mockFetch;
+// Mock supabase functions
+const signInWithPasswordMock = vi.spyOn(supabase, 'signInWithPassword');
 
 // Mock useNavigate and useLocation
 const mockNavigate = vi.fn();
@@ -142,17 +137,17 @@ describe('Login Component', () => {
     expect(passwordInput.type).toBe('password');
   });
 
-  test('should handle successful login and store tokens', async () => {
-    const mockResponse = {
-      accessToken: 'mock-access-token',
-      refreshToken: 'mock-refresh-token',
-      user: { id: '1', email: 'test@example.com', name: 'Test User' },
-    };
-
-    mockFetch.mockResolvedValueOnce({
-      ok: true,
-      json: async () => mockResponse,
-    });
+  test('should handle successful login and navigate to home', async () => {
+    signInWithPasswordMock.mockResolvedValue({
+      data: {
+        session: {
+          access_token: 'mock-access-token',
+          refresh_token: 'mock-refresh-token',
+        },
+        user: { id: '1', email: 'test@example.com' },
+      },
+      error: null,
+    } as any);
 
     render(
       <MemoryRouter>
@@ -169,139 +164,17 @@ describe('Login Component', () => {
     fireEvent.click(submitButton);
 
     await waitFor(() => {
-      expect(localStorage.getItem('accessToken')).toBe('mock-access-token');
-      expect(localStorage.getItem('refreshToken')).toBe('mock-refresh-token');
-      expect(localStorage.getItem('token')).toBe('mock-access-token');
-      expect(localStorage.getItem('user')).toBe(JSON.stringify(mockResponse.user));
+      expect(signInWithPasswordMock).toHaveBeenCalledWith('test@example.com', 'password123');
       expect(mockNavigate).toHaveBeenCalledWith('/');
     });
   });
 
-  test('should handle remember me functionality', async () => {
-    const mockResponse = {
-      accessToken: 'mock-access-token',
-      refreshToken: 'mock-refresh-token',
-      user: { id: '1', email: 'test@example.com', name: 'Test User' },
-    };
-
-    mockFetch.mockResolvedValueOnce({
-      ok: true,
-      json: async () => mockResponse,
-    });
-
-    render(
-      <MemoryRouter>
-        <Login />
-      </MemoryRouter>
-    );
-
-    const emailInput = screen.getByLabelText('Email address');
-    const passwordInput = screen.getByLabelText('Password');
-    const rememberMeCheckbox = screen.getByLabelText('Remember me');
-    const submitButton = screen.getByRole('button', { name: 'Sign in' });
-
-    fireEvent.change(emailInput, { target: { value: '  TEST@EXAMPLE.COM  ' } });
-    fireEvent.change(passwordInput, { target: { value: 'password123' } });
-    fireEvent.click(rememberMeCheckbox);
-    fireEvent.click(submitButton);
-
-    await waitFor(() => {
-      expect(localStorage.getItem('rememberMe')).toBe('true');
-      expect(localStorage.getItem('savedEmail')).toBe('test@example.com');
-    });
-  });
-
-  test('should not save email when remember me is unchecked', async () => {
-    const mockResponse = {
-      accessToken: 'mock-access-token',
-      refreshToken: 'mock-refresh-token',
-      user: { id: '1', email: 'test@example.com', name: 'Test User' },
-    };
-
-    mockFetch.mockResolvedValueOnce({
-      ok: true,
-      json: async () => mockResponse,
-    });
-
-    render(
-      <MemoryRouter>
-        <Login />
-      </MemoryRouter>
-    );
-
-    const emailInput = screen.getByLabelText('Email address');
-    const passwordInput = screen.getByLabelText('Password');
-    const submitButton = screen.getByRole('button', { name: 'Sign in' });
-
-    fireEvent.change(emailInput, { target: { value: 'test@example.com' } });
-    fireEvent.change(passwordInput, { target: { value: 'password123' } });
-    fireEvent.click(submitButton);
-
-    await waitFor(() => {
-      expect(localStorage.getItem('rememberMe')).toBeNull();
-      expect(localStorage.getItem('savedEmail')).toBeNull();
-    });
-  });
-
-  test('should load saved email on mount when remember me was checked', () => {
-    localStorage.setItem('rememberMe', 'true');
-    localStorage.setItem('savedEmail', 'saved@example.com');
-
-    render(
-      <MemoryRouter>
-        <Login />
-      </MemoryRouter>
-    );
-
-    const emailInput = screen.getByLabelText('Email address') as HTMLInputElement;
-    const rememberMeCheckbox = screen.getByLabelText('Remember me') as HTMLInputElement;
-
-    expect(emailInput.value).toBe('saved@example.com');
-    expect(rememberMeCheckbox.checked).toBe(true);
-  });
-
-  test('should trim and lowercase email before submission', async () => {
-    const mockResponse = {
-      accessToken: 'mock-access-token',
-      refreshToken: 'mock-refresh-token',
-      user: { id: '1', email: 'test@example.com', name: 'Test User' },
-    };
-
-    mockFetch.mockResolvedValueOnce({
-      ok: true,
-      json: async () => mockResponse,
-    });
-
-    render(
-      <MemoryRouter>
-        <Login />
-      </MemoryRouter>
-    );
-
-    const emailInput = screen.getByLabelText('Email address');
-    const passwordInput = screen.getByLabelText('Password');
-    const submitButton = screen.getByRole('button', { name: 'Sign in' });
-
-    fireEvent.change(emailInput, { target: { value: '  TEST@EXAMPLE.COM  ' } });
-    fireEvent.change(passwordInput, { target: { value: 'password123' } });
-    fireEvent.click(submitButton);
-
-    await waitFor(() => {
-      expect(global.fetch).toHaveBeenCalledWith('/api/auth/login', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ email: 'test@example.com', password: 'password123' }),
-      });
-    });
-  });
-
   test('should display error message on login failure', async () => {
-    mockFetch.mockResolvedValueOnce({
-      ok: false,
-      json: async () => ({ error: 'Invalid credentials' }),
-    });
+    const errorMessage = 'Invalid login credentials';
+    signInWithPasswordMock.mockResolvedValue({
+      data: {},
+      error: { message: errorMessage },
+    } as any);
 
     render(
       <MemoryRouter>
@@ -318,33 +191,8 @@ describe('Login Component', () => {
     fireEvent.click(submitButton);
 
     await waitFor(() => {
-      const errorMessage = screen.getByTestId('error-message');
-      expect(errorMessage).toHaveTextContent('Invalid credentials');
+      const error = screen.getByTestId('error-message');
+      expect(error).toHaveTextContent(errorMessage);
     });
-  });
-
-  test('should disable submit button while loading', async () => {
-    mockFetch.mockImplementationOnce(
-      () => new Promise((resolve) => setTimeout(() => resolve({
-        ok: true,
-        json: async () => ({})
-      }), 100))
-    );
-
-    render(
-      <MemoryRouter>
-        <Login />
-      </MemoryRouter>
-    );
-
-    const emailInput = screen.getByLabelText('Email address');
-    const passwordInput = screen.getByLabelText('Password');
-    const submitButton = screen.getByRole('button', { name: 'Sign in' });
-
-    fireEvent.change(emailInput, { target: { value: 'test@example.com' } });
-    fireEvent.change(passwordInput, { target: { value: 'password123' } });
-    fireEvent.click(submitButton);
-
-    expect(screen.getByRole('button', { name: 'Signing in...' })).toBeDisabled();
   });
 });

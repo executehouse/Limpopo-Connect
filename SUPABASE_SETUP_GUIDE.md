@@ -58,38 +58,56 @@ VITE_SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFz
 3. **Copy and paste** this code:
 
 ```sql
--- Enable Row Level Security on auth.users
-CREATE TABLE IF NOT EXISTS public.profiles (
-  id UUID REFERENCES auth.users ON DELETE CASCADE PRIMARY KEY,
-  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-  updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-  full_name TEXT,
+-- Drop old trigger, function, and table if they exist, to ensure a clean setup.
+DROP TRIGGER IF EXISTS on_auth_user_created ON auth.users;
+DROP FUNCTION IF EXISTS public.handle_new_user();
+DROP TABLE IF EXISTS public.profiles;
+
+-- Create a table for public profiles
+-- This table will store user data that is safe to be publicly accessible.
+CREATE TABLE public.profiles (
+  id UUID REFERENCES auth.users ON DELETE CASCADE NOT NULL PRIMARY KEY,
+  updated_at TIMESTAMP WITH TIME ZONE,
+  first_name TEXT,
+  last_name TEXT,
+  phone TEXT,
   email TEXT,
   avatar_url TEXT,
-  user_type TEXT DEFAULT 'user' CHECK (user_type IN ('user', 'business', 'admin'))
+  role TEXT DEFAULT 'citizen'::text
 );
 
--- Enable RLS
-ALTER TABLE public.profiles ENABLE ROW LEVEL SECURITY;
+-- Set up Row Level Security (RLS)
+-- See https://supabase.com/docs/guides/auth/row-level-security for more details.
+ALTER TABLE public.profiles
+  ENABLE ROW LEVEL SECURITY;
 
--- Create policies
-CREATE POLICY "Users can view own profile" ON public.profiles
-  FOR SELECT USING (auth.uid() = id);
+CREATE POLICY "Public profiles are viewable by everyone." ON public.profiles
+  FOR SELECT USING (true);
 
-CREATE POLICY "Users can update own profile" ON public.profiles
+CREATE POLICY "Users can insert their own profile." ON public.profiles
+  FOR INSERT WITH CHECK (auth.uid() = id);
+
+CREATE POLICY "Users can update own profile." ON public.profiles
   FOR UPDATE USING (auth.uid() = id);
 
--- Create function to auto-create profile on signup
+-- This trigger automatically creates a profile for new users.
+-- See https://supabase.com/docs/guides/auth/managing-user-data for more details.
 CREATE OR REPLACE FUNCTION public.handle_new_user()
 RETURNS TRIGGER AS $$
 BEGIN
-  INSERT INTO public.profiles (id, email, full_name)
-  VALUES (new.id, new.email, new.raw_user_meta_data->>'full_name');
+  INSERT INTO public.profiles (id, email, first_name, last_name, phone, role)
+  VALUES (
+    new.id,
+    new.email,
+    new.raw_user_meta_data->>'first_name',
+    new.raw_user_meta_data->>'last_name',
+    new.raw_user_meta_data->>'phone',
+    new.raw_user_meta_data->>'role'
+  );
   RETURN new;
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
 
--- Create trigger
 CREATE TRIGGER on_auth_user_created
   AFTER INSERT ON auth.users
   FOR EACH ROW EXECUTE FUNCTION public.handle_new_user();
