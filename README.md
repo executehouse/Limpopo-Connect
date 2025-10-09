@@ -1,6 +1,6 @@
 # Limpopo Connect
 
-[![Deploy to GitHub Pages](https://github.com/Tshikwetamakole/Limpopo-Connect/actions/workflows/deploy-pages.yml/badge.svg)](https://github.com/Tshikwetamakole/Limpopo-Connect/actions/workflows/deploy-pages.yml)
+[![Deploy to GitHub Pages](https://github.com/Tshikwetamakole/Limpopo-Connect/actions/workflows/deploy.yml/badge.svg)](https://github.com/Tshikwetamakole/Limpopo-Connect/actions/workflows/deploy.yml)
 
 An accessible, mobile‑first community web application connecting residents, local businesses, visitors, and opportunities across Limpopo Province, South Africa.
 
@@ -110,12 +110,18 @@ Run the full test suite:
 npm test
 ```
 
-Example tests live in `src/components/layout/Header.test.tsx` and `src/auth/Login.test.tsx`.
+Run Supabase connection tests specifically:
+```bash
+npm test src/lib/supabase.test.ts
+```
+
+Example tests live in `src/components/layout/Header.test.tsx`, `src/auth/Login.test.tsx`, and `src/lib/supabase.test.ts`.
 
 Testing stack:
 - Vitest (fast TS-aware test runner)
 - React Testing Library + jsdom
 - `setupTests.ts` for global test config
+- Supabase connection validation tests
 
 Planned additions:
 - Coverage thresholds
@@ -125,18 +131,31 @@ Planned additions:
 ## 📜 Available Scripts
 
 ```bash
-npm run dev             # Start Vite dev server
-npm run build           # Type-check (tsc -b) then production build
-npm run build:frontend  # Build only (skip separate type build step)
-npm run preview         # Preview the production build locally
-npm run typecheck       # TypeScript diagnostics only (no emit)
-npm run lint            # ESLint static analysis
-npm test                # Vitest test suite
-npm run check           # Composite: lint + typecheck + tests
-npm run deploy:gh-pages # Build & publish /dist to gh-pages branch
+npm run dev              # Start Vite dev server
+npm run build            # Type-check (tsc -b) then production build
+npm run build:frontend   # Build only (skip separate type build step)
+npm run preview          # Preview the production build locally
+npm run typecheck        # TypeScript diagnostics only (no emit)
+npm run lint             # ESLint static analysis
+npm test                 # Vitest test suite
+npm run check            # Composite: lint + typecheck + tests
+npm run deploy:gh-pages  # Build & publish /dist to gh-pages branch
+npm run validate:supabase # Validate Supabase connection and configuration
 ```
 
 > Legacy API dev scripts were removed from `package.json` as the backend folder is no longer present.
+
+## 🚀 Deployment
+
+See [DEPLOYMENT_GUIDE.md](./DEPLOYMENT_GUIDE.md) for detailed instructions on deploying to GitHub Pages.
+
+**Quick deploy:**
+```bash
+npm run validate:supabase  # Validate Supabase connection first
+npm run deploy:gh-pages    # Deploy to GitHub Pages
+```
+
+The repository includes automated GitHub Actions deployment on push to `main` branch.
 
 ## 🔐 Environment & Secrets
 
