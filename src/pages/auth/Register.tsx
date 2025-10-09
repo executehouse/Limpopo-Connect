@@ -42,7 +42,12 @@ const Register: React.FC = () => {
 
     try {
       if (import.meta.env.VITE_SUPABASE_URL && import.meta.env.VITE_SUPABASE_ANON_KEY) {
-  const { error } = await signUpWithEmail(formData.email, formData.password);
+  const { error } = await signUpWithEmail(formData.email, formData.password, {
+    first_name: formData.firstName,
+    last_name: formData.lastName,
+    phone: formData.phone,
+    role: formData.role
+  });
   if (error) throw new Error(error.message || 'Signup failed');
         // Supabase may require email confirmation depending on your settings.
         navigate('/login', { state: { message: 'Registration successful! Please check your email to confirm.' } });
@@ -96,7 +101,7 @@ const Register: React.FC = () => {
           </div>
 
           {/* Form */}
-          <form onSubmit={handleSubmit} className="space-y-4">
+          <form onSubmit={handleSubmit} className="space-y-4" noValidate>
             {/* Role */}
             <div>
               <label htmlFor="role" className="block text-sm font-medium text-gray-700 mb-2">

@@ -20,9 +20,15 @@ export async function signInWithPassword(email: string, password: string) {
   return client.auth.signInWithPassword({ email, password });
 }
 
-export async function signUpWithEmail(email: string, password: string) {
+export async function signUpWithEmail(email: string, password: string, metadata?: Record<string, any>) {
   const client = getSupabase();
-  return client.auth.signUp({ email, password });
+  return client.auth.signUp({
+    email,
+    password,
+    options: {
+      data: metadata
+    }
+  });
 }
 
 export async function signOut() {
