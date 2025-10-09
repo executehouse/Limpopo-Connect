@@ -19,9 +19,12 @@ import ForgotPassword from './pages/auth/ForgotPassword';
 import ResetPassword from './pages/auth/ResetPassword';
 import './index.css';
 
+// Get the base path from Vite's base configuration
+const basename = import.meta.env.BASE_URL;
+
 function App() {
   return (
-    <Router>
+    <Router basename={basename}>
       <div className="App min-h-screen bg-gray-50">
         <Routes>
           <Route path="/login" element={<Login />} />
