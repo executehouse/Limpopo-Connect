@@ -3,190 +3,212 @@
 
 [![Deploy to GitHub Pages](https://github.com/Tshikwetamakole/Limpopo-Connect/actions/workflows/deploy-pages.yml/badge.svg)](https://github.com/Tshikwetamakole/Limpopo-Connect/actions/workflows/deploy-pages.yml)
 
-A responsive, accessible React+TypeScript web application connecting residents, businesses, and visitors across Limpopo Province, South Africa.
+An accessible, mobile‑first community web application connecting residents, local businesses, visitors, and opportunities across Limpopo Province, South Africa.
 
-🌐 **Live Site**: [https://limpopoconnect.site](https://limpopoconnect.site)
+🌐 **Live Site**: https://limpopoconnect.site
 
-## 🌍 About
+</div>
 
-Limpopo Connect is a comprehensive community platform that serves as a digital hub for the Limpopo Province. It enables residents, businesses, and visitors to:
+---
 
+## 🧭 Vision & Status
 
-- **Discover Local Businesses**: Searchable directory with maps, reviews, and detailed information
-- **Stay Updated**: Community events, festivals, and local news
-- **Trade Locally**: Marketplace for local products and services
-- **Explore Tourism**: Tourist attractions, accommodations, and experiences
-- **Connect**: Build relationships within the community
+Limpopo Connect aims to become a unified digital hub for the province: discovery of local businesses, promotion of events, tourism enablement, and community storytelling. The current repository contains the **frontend (React + TypeScript)**, a basic Node proxy server, and infrastructure templates. Backend service endpoints referenced in older docs have been removed/refactored – Supabase integration is being introduced incrementally for auth and data.
 
-## ✨ Features
+> STATUS: Active development (early stage). Expect rapid iteration and occasional breaking changes.
 
-### Core Functionality
-- 🔐 **Role-based Authentication**: Separate experiences for residents, business owners, and visitors
-- 🏢 **Business Directory**: Comprehensive listings with search, filters, maps, and reviews
-- 📅 **Community Calendar**: Local events, workshops, and gatherings
-- 🛒 **Local Marketplace**: Buy and sell local products and services
-- 🏞️ **Tourism Hub**: Attractions, accommodations, and travel information
-- 📰 **News Feed**: Local news and community updates
+## ✨ Feature Overview (Planned vs Current)
 
-### Technical Features
-- 📱 **Mobile-First Design**: Responsive design optimized for all devices
-- ♿ **Accessibility**: WCAG AA compliant for inclusive access
-- 🔌 **Offline Support**: PWA functionality for offline access
-- 🚀 **Modern Stack**: React 19, TypeScript, Tailwind CSS
-- 🔥 **Firebase Integration**: Ready for backend and authentication
-- ⚡ **Fast Performance**: Optimized build with Vite
+| Domain | Implemented | In Progress / Planned |
+| ------ | ----------- | --------------------- |
+| Authentication | Supabase client scaffolding | Role-based flows, session UI |
+| Business Directory | Basic page route | Search, filtering, reviews |
+| Events | Placeholder page | Calendar & registration |
+| Marketplace | Placeholder page | Listings, transactions (future) |
+| Tourism | Placeholder page | Attractions catalog |
+| News | Placeholder page | Curated feed |
+| Connections | Multiple themed connection pages | Matching & messaging |
+| PWA | Manifest + service worker scaffold | Offline caching strategy |
+| Accessibility | Semantic layout, Tailwind utilities | Automated a11y tests |
 
 ## 🛠️ Tech Stack
 
-- **Frontend**: React 19, TypeScript, Tailwind CSS
-- **Build Tool**: Vite
-- **Routing**: React Router
-- **Icons**: Lucide React
--- **Backend**: Azure Functions (API) and Supabase Postgres (managed database)
-- **Backend Ready**: Firebase (Authentication, Firestore, Storage)
-- **PWA**: Service Worker, Web App Manifest
-- **Deployment**: Vercel/Netlify ready
+| Layer | Tools |
+| ----- | ----- |
+| UI | React 19, TypeScript, Tailwind CSS |
+| Routing | react-router-dom v7 |
+| Icons | lucide-react |
+| State / Data | (Lightweight local state for now) |
+| Auth / Backend Integration | Supabase JS Client (scaffold) |
+| Build / Dev | Vite 7, TypeScript project refs |
+| Testing | Vitest, @testing-library/react, JSDOM |
+| Infra (IaC) | Azure Bicep modules in `infra/` |
+| Deployment | GitHub Pages (static) via workflow badge above |
+| Progressive Web App | `public/manifest.json`, `public/sw.js` |
+
+## 📂 Project Structure (Current)
+
+```
+├── server.js                 # Lightweight Express proxy/server (if needed)
+├── public/                   # Static assets (manifest, service worker)
+├── src/
+│  ├── App.tsx                # Root component
+│  ├── main.tsx               # Entry point
+│  ├── pages/                 # Route-level pages (directory, events, etc.)
+│  ├── components/
+│  │  └── layout/             # Layout primitives (Header, Footer, Layout)
+│  ├── lib/
+│  │  └── supabase.ts         # Supabase client factory
+│  ├── assets/                # (Reserved for images/media)
+│  └── setupTests.ts          # Vitest / RTL setup
+├── infra/                    # Azure Bicep deployment modules
+├── scripts/                  # Utility scripts
+└── README.md
+```
+
+Legacy references to `limpopo-api/` (Azure Functions backend) remain in commit history but are not part of this repository snapshot.
 
 ## 🚀 Quick Start
 
 ### Prerequisites
-- Node.js 18+ 
-- npm or yarn
+- Node.js 18+ (LTS recommended)
+- npm (bundled) – or adapt commands for pnpm/yarn
 
-### Installation
-
-1. **Clone the repository**
-   ```bash
-   git clone https://github.com/Tshikwetamakole/Limpopo-Connect.git
-   cd Limpopo-Connect
-   ```
-
-2. **Install dependencies**
-   ```bash
-   npm install
-   ```
-
-3. **Start development server**
-   To run the full development environment, including the frontend server and all backend API services, use the following command:
-   ```bash
-   npm run dev
-   ```
-   This single command starts the Vite frontend, the authentication API, and the business directory API in parallel.
-
-4. **Open in browser**
-   Navigate to `http://localhost:5173`
-
-### Available Scripts
-
+### 1. Clone & Install
 ```bash
-npm run dev              # Start all services (frontend + all backend APIs)
-npm run dev:frontend     # Start only the Vite frontend server
-npm run dev:api:auth     # Start only the authentication API
-npm run dev:api:businesses # Start only the businesses API
-npm run build            # Build for production
-npm run lint             # Run ESLint
-npm run preview          # Preview production build
+git clone https://github.com/Tshikwetamakole/Limpopo-Connect.git
+cd Limpopo-Connect
+npm install
 ```
 
-## 🗄️ Backend Architecture & Setup
-
-The backend is a serverless API built with **Node.js, TypeScript, and Azure Functions**. The project has migrated database responsibilities to a managed provider (for example, Supabase Postgres) and uses **Azure Blob Storage** for file uploads where applicable. The remaining infrastructure is defined as code using **Bicep**.
-
-**📖 Key Documentation:**
-
--   **[Backend Local Setup Guide](./limpopo-api/README-backend.md)**: Step-by-step instructions for running the API on your local machine.
---   **[Database Setup Guide](./SUPABASE_SETUP.md)**: Instructions for provisioning and migrating the database to Supabase or other managed database providers.
--   **[Operational Runbook](./OPERATIONAL.md)**: A guide for deploying, monitoring, restoring, and maintaining the production environment.
--   **[Security Policy](./SECURITY.md)**: An overview of the threat model, password policies, and key management procedures.
--   **[API Specification (OpenAPI)](./openapi.yaml)**: A complete OpenAPI 3.0 specification for all API endpoints.
-
-## 🏗️ Project Structure
-
+### 2. Environment Variables
+Create a `.env.local` (or export shell vars) for optional Supabase auth:
+```bash
+VITE_SUPABASE_URL=your_project_url
+VITE_SUPABASE_ANON_KEY=your_anon_public_key
 ```
-src/
-├── components/          # Frontend: Reusable UI components
-│   ├── layout/
-│   └── ui/
-├── pages/              # Frontend: Page components
-│   ├── Home.tsx
-│   └── ...
-├── App.tsx             # Frontend: Main app component
-└── main.tsx           # Frontend: App entry point
+If these are absent the app still builds; Supabase-powered features will throw when invoked.
 
-limpopo-api/
-├── src/                # Backend: TypeScript source code
-│   ├── functions/      # Backend: Individual Azure Function endpoints
-│   ├── lib/            # Backend: Shared libraries (auth, db connection)
-│   └── models/         # Backend: Database interaction models
-├── migrations/         # Backend: SQL database migration scripts
-├── seeds/              # Backend: SQL seed data
-├── tests/              # Backend: Jest tests
-├── package.json        # Backend: API dependencies
-└── README-backend.md   # Backend: Local setup guide
-
-infra/
-├── main.bicep          # Infrastructure: Main Bicep file
-├── (db.bicep removed)  # PostgreSQL infra removed from repository; database is managed externally (Supabase or other)
-├── storage.bicep       # Infrastructure: Storage Account module
-└── ...                 # etc.
-
-azure-pipelines.yml     # CI/CD pipeline definition
-openapi.yaml            # API specification
+### 3. Run Dev Server
+```bash
+npm run dev
 ```
+Open: http://localhost:5173
 
-## 🎨 Design System
-
-### Colors
-- **Limpopo Green**: `#2D5016` - Primary brand color
-- **Limpopo Gold**: `#FFD700` - Accent color
-- **Limpopo Blue**: `#1E40AF` - Secondary brand color
-
-### Components
-- **Buttons**: `.btn-primary`, `.btn-secondary`
-- **Cards**: `.card`
-- **Navigation**: `.nav-link`
-
-## 🌐 Deployment
-
-### Build for Production
+### 4. Build Production Bundle
 ```bash
 npm run build
 ```
-
-### Deploy to Vercel
+Preview locally:
 ```bash
-vercel
+npm run preview
 ```
 
-### Deploy to Netlify
+## 🧪 Testing
+
+Run the full test suite:
 ```bash
-netlify deploy --prod --dir=dist
+npm test
 ```
+
+Example tests live in `src/components/layout/Header.test.tsx` and `src/auth/Login.test.tsx`.
+
+Testing stack:
+- Vitest (fast TS-aware test runner)
+- React Testing Library + jsdom
+- `setupTests.ts` for global test config
+
+Planned additions:
+- Coverage thresholds
+- Accessibility (axe) checks
+- Snapshot or visual regression harness
+
+## 📜 Available Scripts
+
+```bash
+npm run dev             # Start Vite dev server
+npm run build           # Type-check (tsc -b) then production build
+npm run build:frontend  # Build only (skip separate type build step)
+npm run preview         # Preview the production build locally
+npm run typecheck       # TypeScript diagnostics only (no emit)
+npm run lint            # ESLint static analysis
+npm test                # Vitest test suite
+npm run check           # Composite: lint + typecheck + tests
+npm run deploy:gh-pages # Build & publish /dist to gh-pages branch
+```
+
+> Legacy API dev scripts were removed from `package.json` as the backend folder is no longer present.
+
+## 🔐 Environment & Secrets
+
+Current required at runtime: none (app renders static routes). Optional:
+
+| Variable | Purpose | Required |
+| -------- | ------- | -------- |
+| `VITE_SUPABASE_URL` | Supabase project base URL | Optional |
+| `VITE_SUPABASE_ANON_KEY` | Public anon key for client auth | Optional |
+
+Never commit service role keys or private JWT secrets. For production, prefer build-time secrets via GitHub Actions + environment protection.
+
+## 🌐 PWA Notes
+
+- `public/manifest.json` defines name, icons, theme color
+- `public/sw.js` placeholder for future offline caching strategy
+- Future: asset pre-caching & runtime strategies (e.g., Workbox integration)
+
+## 🧩 Design & UI
+
+Uses Tailwind CSS utility-first approach. High-level palette (subject to refinement):
+- Primary: `#2D5016` (Limpopo Green)
+- Accent: `#FFD700` (Gold)
+- Secondary: `#1E40AF` (Blue)
+
+## 🏗️ Infrastructure (Infra-as-Code)
+
+Azure Bicep modules in `infra/` include storage, key vault, and function scaffolding templates. These are forward-looking and may not all be actively deployed yet. See inline comments within each `.bicep` file.
+
+## 🔒 Security
+
+See `SECURITY.md` for disclosure policy & baseline practices. Planned improvements: dependency audit gating, security headers, and CSP tightening.
 
 ## 🤝 Contributing
 
-1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit changes (`git commit -m 'Add amazing feature'`)
-4. Push to branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
+Contributions welcome!
+1. Fork & branch (`feat/<short-description>`)
+2. Keep commits small & meaningful
+3. Ensure `npm run lint && npm test && npm run build` succeed
+4. Open PR with clear context / before-after screenshots if UI
+
+### Coding Guidelines
+- TypeScript strictness: keep types explicit for public exports
+- Prefer functional components + hooks
+- Keep components small & composable
+- Avoid premature abstraction
+
+## 🗺️ Roadmap (Excerpt)
+
+- [ ] Integrate Supabase auth flows (login, register, reset)
+- [ ] Business directory data model & search
+- [ ] Events calendar & subscription
+- [ ] Offline caching strategy
+- [ ] Accessibility automated checks
+- [ ] Theming & design tokens
 
 ## 📄 License
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+Released under the MIT License. See [LICENSE](./LICENSE).
 
-## 🙏 Acknowledgments
+## 🙏 Acknowledgements
 
-- Built for the vibrant community of Limpopo Province
-- Inspired by the need to connect local businesses and residents
-- Designed with accessibility and inclusivity in mind
+Built for the vibrant communities of Limpopo Province — with a focus on inclusion, access, and local economic empowerment.
 
-## 📞 Contact
+## 📬 Contact
 
-For questions, suggestions, or support:
-- Email: info@limpopoconnect.co.za
-- GitHub: [Tshikwetamakole](https://github.com/Tshikwetamakole)
+| Channel | Details |
+| ------- | ------- |
+| Email | info@limpopoconnect.co.za |
+| GitHub | https://github.com/Tshikwetamakole |
 
 ---
 
-**Limpopo Connect** - Connecting Communities, Growing Together 🌍
+**Limpopo Connect** — Connecting Communities, Growing Together 🌍
