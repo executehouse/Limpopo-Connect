@@ -110,12 +110,34 @@ async function apiCall<T>(endpoint: string, options: RequestInit = {}): Promise<
     },
   });
 
+  // Check if response is JSON before parsing
+  const contentType = response.headers.get('content-type');
+  const isJson = contentType && contentType.includes('application/json');
+
   if (!response.ok) {
-    const errorData = await response.json().catch(() => ({ error: 'Network error' }));
-    throw new Error(errorData.error || `HTTP ${response.status}`);
+    if (isJson) {
+      const errorData = await response.json().catch(() => ({ error: 'Network error' }));
+      throw new Error(errorData.error || `HTTP ${response.status}`);
+    } else {
+      // If response is not JSON (e.g., HTML from a failed proxy), provide a better error
+      const text = await response.text();
+      if (text.startsWith('<!DOCTYPE') || text.startsWith('<html')) {
+        throw new Error('API endpoint unavailable. Please ensure the backend server is running.');
+      }
+      throw new Error(`HTTP ${response.status}: ${text.substring(0, 100)}`);
+    }
   }
 
-  return response.json();
+  // Parse response as JSON only if content-type indicates JSON
+  if (isJson) {
+    return response.json();
+  } else {
+    const text = await response.text();
+    if (text.startsWith('<!DOCTYPE') || text.startsWith('<html')) {
+      throw new Error('API endpoint unavailable. Received HTML instead of JSON. Please ensure the backend server is running.');
+    }
+    throw new Error(`Expected JSON response but received: ${contentType || 'unknown content type'}`);
+  }
 }
 
 // Business API
