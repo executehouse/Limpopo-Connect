@@ -2,6 +2,18 @@
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 
+// Function to determine the base path for the application.
+// When deploying to GitHub Pages, the base path needs to be the repository name.
+// The GITHUB_REPOSITORY environment variable is available in GitHub Actions.
+// It has the format `owner/repo`. We extract the `repo` part.
+// For other environments (like local development), it defaults to '/'.
+const getBasePath = () => {
+  if (process.env.GITHUB_REPOSITORY) {
+    return `/${process.env.GITHUB_REPOSITORY.split('/')[1]}/`
+  }
+  return process.env.BASE_PATH || '/';
+}
+
 // https://vite.dev/config/
 export default defineConfig({
   plugins: [react()],
@@ -22,13 +34,7 @@ export default defineConfig({
     environment: 'jsdom',
     setupFiles: './src/setupTests.ts',
   },
-  // When running in GitHub Actions the GITHUB_REPOSITORY env var is available
-  // (format: owner/repo). For GitHub Pages hosted from a repository the site
-  // is typically served at /<repo>/ so we set the base automatically there.
-  // Locally this falls back to the BASE_PATH env var or '/'.
-  base: process.env.GITHUB_REPOSITORY
-    ? `/${process.env.GITHUB_REPOSITORY.split('/')[1]}/`
-    : (process.env.BASE_PATH || '/'),
+  base: getBasePath(),
   build: {
     outDir: 'dist',
     assetsDir: 'assets',
