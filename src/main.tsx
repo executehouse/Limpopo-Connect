@@ -12,7 +12,9 @@ createRoot(document.getElementById('root')!).render(
 // Register service worker for PWA functionality
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
-    navigator.serviceWorker.register('/sw.js')
+  const base = (import.meta as unknown as { env?: { BASE_URL?: string } }).env?.BASE_URL || '/'
+    const swUrl = (base.endsWith('/') ? base.slice(0, -1) : base) + '/sw.js'
+    navigator.serviceWorker.register(swUrl)
       .then((registration) => {
         console.log('SW registered: ', registration);
       })

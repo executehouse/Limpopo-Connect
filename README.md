@@ -4,7 +4,7 @@
 
 An accessible, mobile‑first community web application connecting residents, local businesses, visitors, and opportunities across Limpopo Province, South Africa.
 
-🌐 **Live Site**: https://limpopoconnect.site
+🌐 **Live Site**: <https://limpopoconnect.site>
 
 </div>
 
@@ -47,7 +47,7 @@ Limpopo Connect aims to become a unified digital hub for the province: discovery
 
 ## 📂 Project Structure (Current)
 
-```
+```text
 ├── server.js                 # Lightweight Express proxy/server (if needed)
 ├── public/                   # Static assets (manifest, service worker)
 ├── src/
@@ -70,10 +70,12 @@ Legacy references to `limpopo-api/` (Azure Functions backend) remain in commit h
 ## 🚀 Quick Start
 
 ### Prerequisites
+
 - Node.js 18+ (LTS recommended)
 - npm (bundled) – or adapt commands for pnpm/yarn
 
 ### 1. Clone & Install
+
 ```bash
 git clone https://github.com/Tshikwetamakole/Limpopo-Connect.git
 cd Limpopo-Connect
@@ -82,6 +84,7 @@ npm install
 
 ### 2. Environment Variables
 Create a `.env.local` (or export shell vars) for optional Supabase auth:
+
 ```bash
 VITE_SUPABASE_URL=your_project_url
 VITE_SUPABASE_ANON_KEY=your_anon_public_key
@@ -92,13 +95,14 @@ If these are absent the app still builds; Supabase-powered features will throw w
 ```bash
 npm run dev
 ```
-Open: http://localhost:5173
+Open: <http://localhost:5173>
 
 ### 4. Build Production Bundle
 ```bash
 npm run build
 ```
 Preview locally:
+
 ```bash
 npm run preview
 ```
@@ -106,6 +110,7 @@ npm run preview
 ## 🧪 Testing
 
 Run the full test suite:
+
 ```bash
 npm test
 ```
@@ -113,11 +118,13 @@ npm test
 Example tests live in `src/components/layout/Header.test.tsx` and `src/auth/Login.test.tsx`.
 
 Testing stack:
+
 - Vitest (fast TS-aware test runner)
 - React Testing Library + jsdom
 - `setupTests.ts` for global test config
 
 Planned additions:
+
 - Coverage thresholds
 - Accessibility (axe) checks
 - Snapshot or visual regression harness
@@ -133,7 +140,43 @@ npm run typecheck       # TypeScript diagnostics only (no emit)
 npm run lint            # ESLint static analysis
 npm test                # Vitest test suite
 npm run check           # Composite: lint + typecheck + tests
-npm run deploy:gh-pages # Build & publish /dist to gh-pages branch
+npm run deploy:gh-pages # (Optional) Build & publish /dist to gh-pages branch using gh-pages CLI
+```
+
+The repository also contains a GitHub Actions workflow that builds and deploys to GitHub Pages automatically on push to main.
+
+## 🌍 Deployment to GitHub Pages
+
+This project is configured to deploy a static build to GitHub Pages.
+
+- Workflow file: `.github/workflows/deploy-pages.yml`
+- Trigger: push to `main` (and manual dispatch)
+- Output: Pages site served by GitHub from the `github-pages` environment
+
+Key details:
+
+- Vite base path is set dynamically in `vite.config.ts`:
+	- If `public/CNAME` exists (custom domain), the base is `/`.
+	- Otherwise, on GitHub Pages project sites it becomes `/<repo>/` automatically.
+- A SPA-friendly `public/404.html` is included to ensure client-side routing works on direct URL loads.
+- Custom domain is declared via `public/CNAME` (currently `limpopoconnect.site`). If you change domains, update this file.
+
+### First-time setup (one-off)
+
+1. In GitHub, go to Settings → Pages and set Source to “GitHub Actions”.
+2. Ensure the repository has Actions enabled.
+3. If using a custom domain, add the domain under Settings → Pages and create DNS A/AAAA records pointing to GitHub Pages.
+
+### Manual run
+
+- Push to `main` or use the “Run workflow” button in the Actions tab for “Deploy to GitHub Pages”.
+
+### Local verification
+
+```bash
+npm ci
+npm run build
+npm run preview
 ```
 
 > Legacy API dev scripts were removed from `package.json` as the backend folder is no longer present.
@@ -206,7 +249,7 @@ Built for the vibrant communities of Limpopo Province — with a focus on inclus
 | Channel | Details |
 | ------- | ------- |
 | Email | info@limpopoconnect.co.za |
-| GitHub | https://github.com/Tshikwetamakole |
+| GitHub | <https://github.com/Tshikwetamakole> |
 
 ---
 

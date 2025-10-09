@@ -1,0 +1,34 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>Redirecting...</title>
+    <meta http-equiv="refresh" content="0; url=/%2F">
+    <script>
+      // Single Page App redirect for GitHub Pages
+      // https://gist.github.com/rafgraph/a1f0f6b3b296d394ebe010fdb0d4e0d1
+      (function(l) {
+        if (l.search) {
+          var q = {}
+          l.search.slice(1).split('&').forEach(function(v) {
+            var a = v.split('=')
+            q[a[0]] = a.slice(1).join('=')
+          })
+          if (q.p) {
+            window.history.replaceState(null, null, q.p + (q.q ? ('?' + q.q) : '') + l.hash)
+            return
+          }
+        }
+        // Fallback to root if no param present
+        var pathname = l.pathname
+        var search = l.search
+        var hash = l.hash
+        var url = '/' + '?p=' + encodeURIComponent(pathname) + (search ? '&q=' + encodeURIComponent(search.slice(1)) : '') + hash
+        l.replace(url)
+      })(window.location)
+    </script>
+  </head>
+  <body>
+    Redirecting...
+  </body>
+  </html>

@@ -1,6 +1,8 @@
 /// <reference types="vitest" />
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
+import { existsSync } from 'node:fs'
+import { resolve } from 'node:path'
 
 // Function to determine the base path for the application.
 // When deploying to GitHub Pages, the base path needs to be the repository name.
@@ -8,10 +10,17 @@ import react from '@vitejs/plugin-react'
 // It has the format `owner/repo`. We extract the `repo` part.
 // For other environments (like local development), it defaults to '/'.
 const getBasePath = () => {
+  // If a CNAME file exists (custom domain), serve from site root
+  const hasCNAME = existsSync(resolve(process.cwd(), 'public', 'CNAME'))
+  if (hasCNAME || process.env.CUSTOM_DOMAIN || process.env.GITHUB_PAGES_CNAME) {
+    return '/'
+  }
+  // Default GitHub Pages project site: https://<owner>.github.io/<repo>/
   if (process.env.GITHUB_REPOSITORY) {
     return `/${process.env.GITHUB_REPOSITORY.split('/')[1]}/`
   }
-  return process.env.BASE_PATH || '/';
+  // Fallback to provided BASE_PATH or root
+  return process.env.BASE_PATH || '/'
 }
 
 // https://vite.dev/config/
