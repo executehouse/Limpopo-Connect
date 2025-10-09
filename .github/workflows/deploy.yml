@@ -1,9 +1,7 @@
 name: Deploy Limpopo Connect with Key Vault
 
 on:
-  push:
-    branches:
-      - main
+  workflow_dispatch:
 
 jobs:
   build-and-deploy:
