@@ -4,8 +4,15 @@ import Login from './Login';
 import '@testing-library/jest-dom';
 import { vi } from 'vitest';
 
-// Mock fetch
-global.fetch = vi.fn();
+// Mock fetch with proper typing
+interface MockFetchResponse {
+  ok: boolean;
+  json: () => Promise<unknown>;
+  status?: number;
+}
+
+const mockFetch = vi.fn<[], Promise<MockFetchResponse>>();
+global.fetch = mockFetch;
 
 // Mock useNavigate and useLocation
 const mockNavigate = vi.fn();
@@ -142,7 +149,7 @@ describe('Login Component', () => {
       user: { id: '1', email: 'test@example.com', name: 'Test User' },
     };
 
-    (global.fetch as any).mockResolvedValueOnce({
+    mockFetch.mockResolvedValueOnce({
       ok: true,
       json: async () => mockResponse,
     });
@@ -177,7 +184,7 @@ describe('Login Component', () => {
       user: { id: '1', email: 'test@example.com', name: 'Test User' },
     };
 
-    (global.fetch as any).mockResolvedValueOnce({
+    mockFetch.mockResolvedValueOnce({
       ok: true,
       json: async () => mockResponse,
     });
@@ -211,7 +218,7 @@ describe('Login Component', () => {
       user: { id: '1', email: 'test@example.com', name: 'Test User' },
     };
 
-    (global.fetch as any).mockResolvedValueOnce({
+    mockFetch.mockResolvedValueOnce({
       ok: true,
       json: async () => mockResponse,
     });
@@ -260,7 +267,7 @@ describe('Login Component', () => {
       user: { id: '1', email: 'test@example.com', name: 'Test User' },
     };
 
-    (global.fetch as any).mockResolvedValueOnce({
+    mockFetch.mockResolvedValueOnce({
       ok: true,
       json: async () => mockResponse,
     });
@@ -291,7 +298,7 @@ describe('Login Component', () => {
   });
 
   test('should display error message on login failure', async () => {
-    (global.fetch as any).mockResolvedValueOnce({
+    mockFetch.mockResolvedValueOnce({
       ok: false,
       json: async () => ({ error: 'Invalid credentials' }),
     });
@@ -317,8 +324,11 @@ describe('Login Component', () => {
   });
 
   test('should disable submit button while loading', async () => {
-    (global.fetch as any).mockImplementationOnce(
-      () => new Promise((resolve) => setTimeout(resolve, 100))
+    mockFetch.mockImplementationOnce(
+      () => new Promise((resolve) => setTimeout(() => resolve({
+        ok: true,
+        json: async () => ({})
+      }), 100))
     );
 
     render(
