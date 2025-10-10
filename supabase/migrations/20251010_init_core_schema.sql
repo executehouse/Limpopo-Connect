@@ -194,7 +194,14 @@ create index if not exists idx_jobs_status_next_run on public.summary_jobs(statu
 -- Rooms policies
 drop policy if exists rooms_select_member on public.rooms;
 create policy rooms_select_member on public.rooms
-  for select using (created_by = auth.uid());
+  for select using (
+    -- Allow creators and members to view rooms
+    created_by = auth.uid() 
+    or exists (
+      select 1 from public.room_members rm 
+      where rm.room_id = rooms.id and rm.user_id = auth.uid()
+    )
+  );
 
 drop policy if exists rooms_insert_auth on public.rooms;
 create policy rooms_insert_auth on public.rooms
@@ -212,16 +219,16 @@ create policy rooms_delete_admin_or_creator on public.rooms
 drop policy if exists members_select_room_member on public.room_members;
 create policy members_select_room_member on public.room_members
   for select using (
-    -- Users can see their own memberships
+    -- Users can see their own memberships and all members of rooms they belong to
     user_id = auth.uid()
+    or exists (
+      select 1 from public.room_members rm 
+      where rm.room_id = room_members.room_id and rm.user_id = auth.uid()
+    )
   );
 
--- self join insert: allow user to join themselves
-drop policy if exists members_insert_self on public.room_members;
-create policy members_insert_self on public.room_members
-  for insert with check (
-    user_id = auth.uid() and exists (select 1 from public.rooms r where r.id = room_id)
-  );
+-- self join insert: removed - users should not be able to join rooms without invitation
+-- Instead, room creators can add members via members_insert_admin policy
 
 -- admin can add others
 drop policy if exists members_insert_admin on public.room_members;
@@ -264,11 +271,24 @@ create policy members_delete_admin_or_self on public.room_members
 -- Threads policies
 drop policy if exists threads_select_member on public.message_threads;
 create policy threads_select_member on public.message_threads
-  for select using (created_by = auth.uid());
+  for select using (
+    -- Allow thread creators and room members to view threads
+    created_by = auth.uid()
+    or exists (
+      select 1 from public.room_members rm 
+      where rm.room_id = message_threads.room_id and rm.user_id = auth.uid()
+    )
+  );
 
 drop policy if exists threads_insert_member on public.message_threads;
 create policy threads_insert_member on public.message_threads
-  for insert with check (created_by = auth.uid());
+  for insert with check (
+    created_by = auth.uid()
+    and exists (
+      select 1 from public.room_members rm 
+      where rm.room_id = message_threads.room_id and rm.user_id = auth.uid()
+    )
+  );
 
 drop policy if exists threads_update_admin_or_creator on public.message_threads;
 create policy threads_update_admin_or_creator on public.message_threads
@@ -277,11 +297,24 @@ create policy threads_update_admin_or_creator on public.message_threads
 -- Messages policies
 drop policy if exists messages_select_member on public.room_messages;
 create policy messages_select_member on public.room_messages
-  for select using (user_id = auth.uid());
+  for select using (
+    -- Allow message author and room members to view messages
+    user_id = auth.uid()
+    or exists (
+      select 1 from public.room_members rm 
+      where rm.room_id = room_messages.room_id and rm.user_id = auth.uid()
+    )
+  );
 
 drop policy if exists messages_insert_member on public.room_messages;
 create policy messages_insert_member on public.room_messages
-  for insert with check (user_id = auth.uid());
+  for insert with check (
+    user_id = auth.uid()
+    and exists (
+      select 1 from public.room_members rm 
+      where rm.room_id = room_messages.room_id and rm.user_id = auth.uid()
+    )
+  );
 
 drop policy if exists messages_update_author_or_admin on public.room_messages;
 create policy messages_update_author_or_admin on public.room_messages
