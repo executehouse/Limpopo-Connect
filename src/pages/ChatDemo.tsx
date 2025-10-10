@@ -11,7 +11,7 @@ import { useRooms, useRoomMessages } from '../lib/useRooms'
 
 const ChatDemo: React.FC = () => {
   const { user, profile, signOut } = useAuthContext()
-  const { rooms, loading: roomsLoading, createRoom, joinRoom } = useRooms()
+  const { rooms, loading: roomsLoading, createRoom } = useRooms()
   const [selectedRoomId, setSelectedRoomId] = useState<string | null>(null)
   const { messages, loading: messagesLoading, sendMessage } = useRoomMessages(selectedRoomId)
   

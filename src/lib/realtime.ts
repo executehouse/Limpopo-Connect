@@ -7,7 +7,7 @@
  * 3. Channel authentication and management
  */
 
-import { RealtimeChannel, RealtimePostgresChangesPayload } from '@supabase/supabase-js'
+import type { RealtimeChannel, RealtimePostgresChangesPayload } from '@supabase/supabase-js'
 import { supabase } from './supabase'
 
 // Types for realtime payloads
@@ -49,12 +49,17 @@ export function subscribeToRoomMessages(
     onBroadcast?: (payload: MessageBroadcast) => void
     onError?: (error: Error) => void
   }
-): RealtimeChannel {
+): RealtimeChannel | null {
   const channelName = `room:${roomId}:messages`
   
   // Remove existing channel if present
   if (activeChannels.has(channelName)) {
     unsubscribeFromRoom(roomId)
+  }
+  
+  if (!supabase) {
+    console.error('Supabase client not initialized')
+    return null
   }
   
   const channel = supabase
@@ -143,7 +148,7 @@ export function unsubscribeFromRoom(roomId: string): boolean {
   const channelName = `room:${roomId}:messages`
   const channel = activeChannels.get(channelName)
   
-  if (channel) {
+  if (channel && supabase) {
     supabase.removeChannel(channel)
     activeChannels.delete(channelName)
     console.log(`🔌 Unsubscribed from room ${roomId}`)
@@ -157,6 +162,8 @@ export function unsubscribeFromRoom(roomId: string): boolean {
  * Unsubscribe from all active channels
  */
 export function unsubscribeFromAll(): void {
+  if (!supabase) return
+  
   for (const [channelName, channel] of activeChannels.entries()) {
     supabase.removeChannel(channel)
     console.log(`🔌 Unsubscribed from ${channelName}`)
@@ -211,6 +218,7 @@ export async function broadcastToRoom(
  * Get realtime connection status
  */
 export function getRealtimeStatus(): string {
+  if (!supabase) return 'disconnected'
   return supabase.realtime.isConnected() ? 'connected' : 'disconnected'
 }
 
@@ -218,6 +226,7 @@ export function getRealtimeStatus(): string {
  * Force reconnect realtime connection
  */
 export function reconnectRealtime(): void {
+  if (!supabase) return
   supabase.realtime.disconnect()
   supabase.realtime.connect()
 }

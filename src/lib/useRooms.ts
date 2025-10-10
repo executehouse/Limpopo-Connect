@@ -6,7 +6,8 @@
 
 import { useState, useEffect, useCallback } from 'react'
 import { supabase } from './supabase'
-import { subscribeToRoomMessages, unsubscribeFromRoom, isSubscribedToRoom, MessageBroadcast, MessageChangePayload } from './realtime'
+import { subscribeToRoomMessages, unsubscribeFromRoom, isSubscribedToRoom } from './realtime'
+import type { MessageBroadcast, MessageChangePayload } from './realtime'
 import { useAuth } from './useAuth'
 
 // Types
@@ -280,7 +281,7 @@ export function useRoomMessages(roomId: string | null) {
     fetchThreads()
 
     // Subscribe to realtime updates
-    const channel = subscribeToRoomMessages(roomId, {
+    subscribeToRoomMessages(roomId, {
       onInsert: (payload: MessageChangePayload) => {
         const newMessage = payload.new as RoomMessage
         setMessages(prev => [...prev, newMessage])
