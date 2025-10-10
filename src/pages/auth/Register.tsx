@@ -1,7 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { MapPin, Mail, Lock, User, Phone, Eye, EyeOff } from 'lucide-react';
-import { signUpWithEmail } from '../../lib/supabase';
+import { useAuthContext } from '../../lib/AuthProvider';
 
 const Register: React.FC = () => {
   const [formData, setFormData] = useState({
@@ -18,6 +18,14 @@ const Register: React.FC = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const navigate = useNavigate();
+  const { signUp, isAuthenticated, loading } = useAuthContext();
+
+  // Redirect if already authenticated
+  useEffect(() => {
+    if (isAuthenticated && !loading) {
+      navigate('/');
+    }
+  }, [isAuthenticated, loading, navigate]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     setFormData({
@@ -42,13 +50,12 @@ const Register: React.FC = () => {
 
     try {
       if (import.meta.env.VITE_SUPABASE_URL && import.meta.env.VITE_SUPABASE_ANON_KEY) {
-  const { error } = await signUpWithEmail(formData.email, formData.password, {
-    first_name: formData.firstName,
-    last_name: formData.lastName,
-    phone: formData.phone,
-    role: formData.role
-  });
-  if (error) throw new Error(error.message || 'Signup failed');
+        await signUp(formData.email, formData.password, {
+          first_name: formData.firstName,
+          last_name: formData.lastName,
+          phone: formData.phone,
+          role: formData.role
+        });
         // Supabase may require email confirmation depending on your settings.
         navigate('/login', { state: { message: 'Registration successful! Please check your email to confirm.' } });
       } else {

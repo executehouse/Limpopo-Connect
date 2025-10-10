@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { MapPin, Mail, Lock, Eye, EyeOff } from 'lucide-react';
-import { signInWithPassword } from '../../lib/supabase';
+import { useAuthContext } from '../../lib/AuthProvider';
 
 const Login: React.FC = () => {
   const [email, setEmail] = useState('');
@@ -13,6 +13,7 @@ const Login: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const successMessage = location.state?.message;
+  const { signIn, isAuthenticated, loading } = useAuthContext();
 
   // Load saved email on mount if "Remember Me" was checked
   useEffect(() => {
@@ -24,6 +25,13 @@ const Login: React.FC = () => {
       setRememberMe(true);
     }
   }, []);
+
+  // Redirect if already authenticated
+  useEffect(() => {
+    if (isAuthenticated && !loading) {
+      navigate('/');
+    }
+  }, [isAuthenticated, loading, navigate]);
 
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -52,46 +60,8 @@ const Login: React.FC = () => {
     setIsLoading(true);
 
     try {
-      // If frontend Supabase is configured, use it directly for authentication.
-      if (import.meta.env.VITE_SUPABASE_URL && import.meta.env.VITE_SUPABASE_ANON_KEY) {
-        const { data, error } = await signInWithPassword(trimmedEmail, password);
-        if (error) throw new Error(error.message || 'Login failed');
-        // Supabase manages session persistence. Store user and access token for parity with existing flows.
-        if (data?.session?.access_token) {
-          localStorage.setItem('accessToken', data.session.access_token);
-          localStorage.setItem('refreshToken', data.session.refresh_token || '');
-          localStorage.setItem('token', data.session.access_token);
-        }
-        if (data?.user) localStorage.setItem('user', JSON.stringify(data.user));
-      } else {
-        const response = await fetch('/api/auth/login', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({ email: trimmedEmail, password }),
-        });
-
-        const data = await response.json();
-
-        if (!response.ok) {
-          throw new Error(data.error || 'Login failed. Please try again.');
-        }
-
-        // Store tokens and user info from backend
-        if (data.accessToken) {
-          localStorage.setItem('accessToken', data.accessToken);
-        }
-        if (data.refreshToken) {
-          localStorage.setItem('refreshToken', data.refreshToken);
-        }
-        if (data.accessToken) {
-          localStorage.setItem('token', data.accessToken);
-        }
-        if (data.user) {
-          localStorage.setItem('user', JSON.stringify(data.user));
-        }
-      }
+      // Use our auth context for authentication
+      await signIn(trimmedEmail, password);
 
       // Handle "Remember Me" functionality
       if (rememberMe) {
@@ -106,7 +76,7 @@ const Login: React.FC = () => {
       navigate('/');
 
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'An error occurred');
+      setError(err instanceof Error ? err.message : 'An error occurred during login');
     } finally {
       setIsLoading(false);
     }
