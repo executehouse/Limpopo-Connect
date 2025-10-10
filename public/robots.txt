@@ -1,0 +1,25 @@
+User-agent: *
+Allow: /
+
+# Sitemap
+Sitemap: https://limpopoconnect.site/sitemap.xml
+
+# Block indexing of authentication pages and API endpoints
+Disallow: /api/
+Disallow: /forgot-password
+Disallow: /reset-password
+Disallow: /_vite/
+Disallow: /src/
+
+# Allow important sections for SEO
+Allow: /
+Allow: /business-directory
+Allow: /events
+Allow: /connections
+Allow: /marketplace
+Allow: /tourism  
+Allow: /news
+Allow: /connections/*
+
+# Crawl delay to be respectful of server resources
+Crawl-delay: 1
