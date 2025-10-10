@@ -3,10 +3,8 @@ import { MemoryRouter } from 'react-router-dom';
 import Register from './Register';
 import '@testing-library/jest-dom';
 import { vi } from 'vitest';
-import * as supabase from '../../lib/supabase';
-
-// Mock supabase functions
-const signUpWithEmailMock = vi.spyOn(supabase, 'signUpWithEmail');
+import { AuthProvider } from '../../lib/AuthProvider';
+import { useAuth } from '../../lib/useAuth';
 
 // Mock useNavigate
 const mockNavigate = vi.fn();
@@ -17,18 +15,41 @@ vi.mock('react-router-dom', async () => {
     useNavigate: () => mockNavigate,
   };
 });
+vi.mock('../../lib/useAuth');
+
+const renderWithProviders = (ui: React.ReactElement) => {
+  return render(
+    <MemoryRouter>
+      <AuthProvider>
+        {ui}
+      </AuthProvider>
+    </MemoryRouter>
+  );
+};
 
 describe('Register Component', () => {
+  const mockSignUp = vi.fn();
+
   beforeEach(() => {
     vi.clearAllMocks();
+    vi.mocked(useAuth).mockReturnValue({
+      user: null,
+      session: null,
+      profile: null,
+      loading: false,
+      isAuthenticated: false,
+      signIn: vi.fn(),
+      signUp: mockSignUp,
+      signOut: vi.fn(),
+      resetPassword: vi.fn(),
+      updatePassword: vi.fn(),
+      updateProfile: vi.fn(),
+      refreshProfile: vi.fn(),
+    });
   });
 
   test('should render registration form with all fields', () => {
-    render(
-      <MemoryRouter>
-        <Register />
-      </MemoryRouter>
-    );
+    renderWithProviders(<Register />);
 
     expect(screen.getByLabelText('First Name')).toBeInTheDocument();
     expect(screen.getByLabelText('Last Name')).toBeInTheDocument();
@@ -40,11 +61,7 @@ describe('Register Component', () => {
   });
 
   test('should show validation error if passwords do not match', async () => {
-    render(
-      <MemoryRouter>
-        <Register />
-      </MemoryRouter>
-    );
+    renderWithProviders(<Register />);
 
     const passwordInput = screen.getByLabelText('Password');
     const confirmPasswordInput = screen.getByLabelText('Confirm Password');
@@ -59,14 +76,10 @@ describe('Register Component', () => {
     });
   });
 
-  test('should call signUpWithEmail with correct data on successful submission', async () => {
-    signUpWithEmailMock.mockResolvedValue({ data: {}, error: null } as any);
+  test('should call signUp with correct data on successful submission', async () => {
+    mockSignUp.mockResolvedValue({ data: {}, error: null });
 
-    render(
-      <MemoryRouter>
-        <Register />
-      </MemoryRouter>
-    );
+    renderWithProviders(<Register />);
 
     fireEvent.change(screen.getByLabelText('First Name'), { target: { value: 'John' } });
     fireEvent.change(screen.getByLabelText('Last Name'), { target: { value: 'Doe' } });
@@ -80,7 +93,7 @@ describe('Register Component', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Create account' }));
 
     await waitFor(() => {
-      expect(signUpWithEmailMock).toHaveBeenCalledWith(
+      expect(mockSignUp).toHaveBeenCalledWith(
         'john.doe@example.com',
         'password123',
         {
@@ -94,13 +107,9 @@ describe('Register Component', () => {
   });
 
   test('should navigate to login page with success message on successful registration', async () => {
-    signUpWithEmailMock.mockResolvedValue({ data: {}, error: null } as any);
+    mockSignUp.mockResolvedValue({ data: {}, error: null });
 
-    render(
-      <MemoryRouter>
-        <Register />
-      </MemoryRouter>
-    );
+    renderWithProviders(<Register />);
 
     fireEvent.change(screen.getByLabelText('First Name'), { target: { value: 'John' } });
     fireEvent.change(screen.getByLabelText('Last Name'), { target: { value: 'Doe' } });
@@ -120,13 +129,9 @@ describe('Register Component', () => {
 
   test('should display error message on registration failure', async () => {
     const errorMessage = 'Email already taken';
-    signUpWithEmailMock.mockResolvedValue({ data: {}, error: { message: errorMessage } } as any);
+    mockSignUp.mockRejectedValue(new Error(errorMessage));
 
-    render(
-      <MemoryRouter>
-        <Register />
-      </MemoryRouter>
-    );
+    renderWithProviders(<Register />);
 
     fireEvent.change(screen.getByLabelText('First Name'), { target: { value: 'John' } });
     fireEvent.change(screen.getByLabelText('Last Name'), { target: { value: 'Doe' } });

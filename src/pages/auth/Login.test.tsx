@@ -1,13 +1,12 @@
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import Login from './Login';
+import { AuthProvider } from '../../lib/AuthProvider';
 import '@testing-library/jest-dom';
 import { vi } from 'vitest';
 
 import * as supabase from '../../lib/supabase';
-
-// Mock supabase functions
-const signInWithPasswordMock = vi.spyOn(supabase, 'signInWithPassword');
+import { useAuth } from '../../lib/useAuth';
 
 // Mock useNavigate and useLocation
 const mockNavigate = vi.fn();
@@ -19,19 +18,44 @@ vi.mock('react-router-dom', async () => {
     useLocation: () => ({ state: null }),
   };
 });
+vi.mock('../../lib/useAuth');
+
+// Helper function to render with necessary providers
+const renderWithProviders = (ui: React.ReactElement) => {
+  return render(
+    <MemoryRouter>
+      <AuthProvider>
+        {ui}
+      </AuthProvider>
+    </MemoryRouter>
+  );
+};
 
 describe('Login Component', () => {
+  const mockSignIn = vi.fn();
+
   beforeEach(() => {
     vi.clearAllMocks();
     localStorage.clear();
+
+    vi.mocked(useAuth).mockReturnValue({
+      user: null,
+      session: null,
+      profile: null,
+      loading: false,
+      isAuthenticated: false,
+      signIn: mockSignIn,
+      signUp: vi.fn(),
+      signOut: vi.fn(),
+      resetPassword: vi.fn(),
+      updatePassword: vi.fn(),
+      updateProfile: vi.fn(),
+      refreshProfile: vi.fn(),
+    });
   });
 
   test('should render login form with all fields', () => {
-    render(
-      <MemoryRouter>
-        <Login />
-      </MemoryRouter>
-    );
+    renderWithProviders(<Login />);
 
     expect(screen.getByLabelText('Email address')).toBeInTheDocument();
     expect(screen.getByLabelText('Password')).toBeInTheDocument();
@@ -40,11 +64,7 @@ describe('Login Component', () => {
   });
 
   test('should show validation error for empty email', async () => {
-    render(
-      <MemoryRouter>
-        <Login />
-      </MemoryRouter>
-    );
+    renderWithProviders(<Login />);
 
     const submitButton = screen.getByRole('button', { name: 'Sign in' });
     fireEvent.click(submitButton);
@@ -56,11 +76,7 @@ describe('Login Component', () => {
   });
 
   test('should show validation error for invalid email format', async () => {
-    render(
-      <MemoryRouter>
-        <Login />
-      </MemoryRouter>
-    );
+    renderWithProviders(<Login />);
 
     const emailInput = screen.getByLabelText('Email address');
     const submitButton = screen.getByRole('button', { name: 'Sign in' });
@@ -75,11 +91,7 @@ describe('Login Component', () => {
   });
 
   test('should show validation error for empty password', async () => {
-    render(
-      <MemoryRouter>
-        <Login />
-      </MemoryRouter>
-    );
+    renderWithProviders(<Login />);
 
     const emailInput = screen.getByLabelText('Email address');
     const submitButton = screen.getByRole('button', { name: 'Sign in' });
@@ -94,11 +106,7 @@ describe('Login Component', () => {
   });
 
   test('should clear error when user types in email field', async () => {
-    render(
-      <MemoryRouter>
-        <Login />
-      </MemoryRouter>
-    );
+    renderWithProviders(<Login />);
 
     const emailInput = screen.getByLabelText('Email address');
     const submitButton = screen.getByRole('button', { name: 'Sign in' });
@@ -118,11 +126,7 @@ describe('Login Component', () => {
   });
 
   test('should toggle password visibility', () => {
-    render(
-      <MemoryRouter>
-        <Login />
-      </MemoryRouter>
-    );
+    renderWithProviders(<Login />);
 
     const passwordInput = screen.getByLabelText('Password') as HTMLInputElement;
     const toggleButton = screen.getByLabelText('Show password');
@@ -138,7 +142,7 @@ describe('Login Component', () => {
   });
 
   test('should handle successful login and navigate to home', async () => {
-    signInWithPasswordMock.mockResolvedValue({
+    mockSignIn.mockResolvedValue({
       data: {
         session: {
           access_token: 'mock-access-token',
@@ -147,13 +151,9 @@ describe('Login Component', () => {
         user: { id: '1', email: 'test@example.com' },
       },
       error: null,
-    } as any);
+    });
 
-    render(
-      <MemoryRouter>
-        <Login />
-      </MemoryRouter>
-    );
+    renderWithProviders(<Login />);
 
     const emailInput = screen.getByLabelText('Email address');
     const passwordInput = screen.getByLabelText('Password');
@@ -164,23 +164,16 @@ describe('Login Component', () => {
     fireEvent.click(submitButton);
 
     await waitFor(() => {
-      expect(signInWithPasswordMock).toHaveBeenCalledWith('test@example.com', 'password123');
+      expect(mockSignIn).toHaveBeenCalledWith('test@example.com', 'password123');
       expect(mockNavigate).toHaveBeenCalledWith('/');
     });
   });
 
   test('should display error message on login failure', async () => {
     const errorMessage = 'Invalid login credentials';
-    signInWithPasswordMock.mockResolvedValue({
-      data: {},
-      error: { message: errorMessage },
-    } as any);
+    mockSignIn.mockRejectedValue(new Error(errorMessage));
 
-    render(
-      <MemoryRouter>
-        <Login />
-      </MemoryRouter>
-    );
+    renderWithProviders(<Login />);
 
     const emailInput = screen.getByLabelText('Email address');
     const passwordInput = screen.getByLabelText('Password');
