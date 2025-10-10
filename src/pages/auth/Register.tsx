@@ -17,6 +17,7 @@ const Register: React.FC = () => {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [passwordStrength, setPasswordStrength] = useState<'weak' | 'medium' | 'strong' | null>(null);
   const navigate = useNavigate();
   const { signUp, isAuthenticated, loading } = useAuthContext();
 
@@ -28,18 +29,54 @@ const Register: React.FC = () => {
   }, [isAuthenticated, loading, navigate]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+    const { name, value } = e.target;
     setFormData({
       ...formData,
-      [e.target.name]: e.target.value
+      [name]: value
     });
     if (error) {
       setError(null);
     }
+
+    if (name === 'password') {
+      const strength = getPasswordStrength(value);
+      setPasswordStrength(strength);
+    }
+  };
+
+  const getPasswordStrength = (password: string): 'weak' | 'medium' | 'strong' => {
+    if (password.length < 6) return 'weak';
+    
+    let strength = 0;
+    if (password.length >= 8) strength++;
+    if (/[a-z]/.test(password) && /[A-Z]/.test(password)) strength++;
+    if (/\d/.test(password)) strength++;
+    if (/[^a-zA-Z\d]/.test(password)) strength++;
+    
+    if (strength >= 3) return 'strong';
+    if (strength >= 2) return 'medium';
+    return 'weak';
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
+
+    if (!formData.firstName.trim() || !formData.lastName.trim()) {
+      setError('First name and last name are required.');
+      return;
+    }
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(formData.email)) {
+      setError('Please enter a valid email address.');
+      return;
+    }
+
+    if (formData.password.length < 6) {
+      setError('Password must be at least 6 characters long.');
+      return;
+    }
 
     if (formData.password !== formData.confirmPassword) {
       setError('Passwords do not match.');
@@ -228,6 +265,29 @@ const Register: React.FC = () => {
                   {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
                 </button>
               </div>
+              {formData.password && passwordStrength && (
+                <div className="mt-2">
+                  <div className="flex items-center gap-2">
+                    <div className={`h-2 flex-1 rounded ${
+                      passwordStrength === 'weak' ? 'bg-red-500' : 
+                      passwordStrength === 'medium' ? 'bg-yellow-500' : 
+                      'bg-green-500'
+                    }`} />
+                    <span className={`text-sm ${
+                      passwordStrength === 'weak' ? 'text-red-600' : 
+                      passwordStrength === 'medium' ? 'text-yellow-600' : 
+                      'text-green-600'
+                    }`}>
+                      {passwordStrength === 'weak' ? 'Weak' : 
+                       passwordStrength === 'medium' ? 'Medium' : 
+                       'Strong'}
+                    </span>
+                  </div>
+                  <p className="text-xs text-gray-600 mt-1">
+                    Use 8+ characters with uppercase, lowercase, numbers, and symbols
+                  </p>
+                </div>
+              )}
             </div>
 
             {/* Confirm Password */}
