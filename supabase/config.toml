@@ -1,0 +1,11 @@
+# Supabase local project config
+# Source: https://supabase.com/docs/guides/cli/local-development
+project_id = "limpopo-connect-local"
+
+[functions]
+# Deno deploy edge functions
+[functions.import_map]
+imports = { }
+
+[api]
+port = 54321
