@@ -1,232 +1,183 @@
-# Limpopo Connect
+# Supabase CLI
 
-[![Deploy to GitHub Pages](https://github.com/Tshikwetamakole/Limpopo-Connect/actions/workflows/deploy.yml/badge.svg)](https://github.com/Tshikwetamakole/Limpopo-Connect/actions/workflows/deploy.yml)
+[![Coverage Status](https://coveralls.io/repos/github/supabase/cli/badge.svg?branch=main)](https://coveralls.io/github/supabase/cli?branch=main) [![Bitbucket Pipelines](https://img.shields.io/bitbucket/pipelines/supabase-cli/setup-cli/master?style=flat-square&label=Bitbucket%20Canary)](https://bitbucket.org/supabase-cli/setup-cli/pipelines) [![Gitlab Pipeline Status](https://img.shields.io/gitlab/pipeline-status/sweatybridge%2Fsetup-cli?label=Gitlab%20Canary)
+](https://gitlab.com/sweatybridge/setup-cli/-/pipelines)
 
-An accessible, mobile‑first community web application connecting residents, local businesses, visitors, and opportunities across Limpopo Province, South Africa.
+[Supabase](https://supabase.io) is an open source Firebase alternative. We're building the features of Firebase using enterprise-grade open source tools.
 
-🌐 **Live Site**: https://limpopoconnect.site
+This repository contains all the functionality for Supabase CLI.
 
-</div>
+- [x] Running Supabase locally
+- [x] Managing database migrations
+- [x] Creating and deploying Supabase Functions
+- [x] Generating types directly from your database schema
+- [x] Making authenticated HTTP requests to [Management API](https://supabase.com/docs/reference/api/introduction)
 
----
+## Getting started
 
-## 🧭 Vision & Status
+### Install the CLI
 
-Limpopo Connect aims to become a unified digital hub for the province: discovery of local businesses, promotion of events, tourism enablement, and community storytelling. The current repository contains the **frontend (React + TypeScript)**, a basic Node proxy server, and infrastructure templates. Backend service endpoints referenced in older docs have been removed/refactored – Supabase integration is being introduced incrementally for auth and data.
-
-> STATUS: Active development (early stage). Expect rapid iteration and occasional breaking changes.
-
-## ✨ Feature Overview (Planned vs Current)
-
-| Domain | Implemented | In Progress / Planned |
-| ------ | ----------- | --------------------- |
-| Authentication | Supabase client scaffolding | Role-based flows, session UI |
-| Business Directory | Basic page route | Search, filtering, reviews |
-| Events | Placeholder page | Calendar & registration |
-| Marketplace | Placeholder page | Listings, transactions (future) |
-| Tourism | Placeholder page | Attractions catalog |
-| News | Placeholder page | Curated feed |
-| Connections | Multiple themed connection pages | Matching & messaging |
-| PWA | Manifest + service worker scaffold | Offline caching strategy |
-| Accessibility | Semantic layout, Tailwind utilities | Automated a11y tests |
-
-## 🛠️ Tech Stack
-
-| Layer | Tools |
-| ----- | ----- |
-| UI | React 19, TypeScript, Tailwind CSS |
-| Routing | react-router-dom v7 |
-| Icons | lucide-react |
-| State / Data | (Lightweight local state for now) |
-| Auth / Backend Integration | Supabase JS Client (scaffold) |
-| Build / Dev | Vite 7, TypeScript project refs |
-| Testing | Vitest, @testing-library/react, JSDOM |
-| Infra (IaC) | Azure Bicep modules in `infra/` |
-| Deployment | GitHub Pages (static) via workflow badge above |
-| Progressive Web App | `public/manifest.json`, `public/sw.js` |
-
-## 📂 Project Structure (Current)
-
-```
-├── server.js                 # Lightweight Express proxy/server (if needed)
-├── public/                   # Static assets (manifest, service worker)
-├── src/
-│  ├── App.tsx                # Root component
-│  ├── main.tsx               # Entry point
-│  ├── pages/                 # Route-level pages (directory, events, etc.)
-│  ├── components/
-│  │  └── layout/             # Layout primitives (Header, Footer, Layout)
-│  ├── lib/
-│  │  └── supabase.ts         # Supabase client factory
-│  ├── assets/                # (Reserved for images/media)
-│  └── setupTests.ts          # Vitest / RTL setup
-├── infra/                    # Azure Bicep deployment modules
-├── scripts/                  # Utility scripts
-└── README.md
-```
-
-Legacy references to `limpopo-api/` (Azure Functions backend) remain in commit history but are not part of this repository snapshot.
-
-## 🚀 Quick Start
-
-### Prerequisites
-- Node.js 18+ (LTS recommended)
-- npm (bundled) – or adapt commands for pnpm/yarn
-
-### 1. Clone & Install
-```bash
-git clone https://github.com/Tshikwetamakole/Limpopo-Connect.git
-cd Limpopo-Connect
-npm install
-```
-
-### 2. Environment Variables
-Create a `.env.local` (or export shell vars) for optional Supabase auth:
-```bash
-VITE_SUPABASE_URL=your_project_url
-VITE_SUPABASE_ANON_KEY=your_anon_public_key
-```
-If these are absent the app still builds; Supabase-powered features will throw when invoked.
-
-### 3. Run Dev Server
-```bash
-npm run dev
-```
-Open: http://localhost:5173
-
-### 4. Build Production Bundle
-```bash
-npm run build
-```
-Preview locally:
-```bash
-npm run preview
-```
-
-## 🧪 Testing
-
-Run the full test suite:
-```bash
-npm test
-```
-
-Run Supabase connection tests specifically:
-```bash
-npm test src/lib/supabase.test.ts
-```
-
-Example tests live in `src/components/layout/Header.test.tsx`, `src/auth/Login.test.tsx`, and `src/lib/supabase.test.ts`.
-
-Testing stack:
-- Vitest (fast TS-aware test runner)
-- React Testing Library + jsdom
-- `setupTests.ts` for global test config
-- Supabase connection validation tests
-
-Planned additions:
-- Coverage thresholds
-- Accessibility (axe) checks
-- Snapshot or visual regression harness
-
-## 📜 Available Scripts
+Available via [NPM](https://www.npmjs.com) as dev dependency. To install:
 
 ```bash
-npm run dev              # Start Vite dev server
-npm run build            # Type-check (tsc -b) then production build
-npm run build:frontend   # Build only (skip separate type build step)
-npm run preview          # Preview the production build locally
-npm run typecheck        # TypeScript diagnostics only (no emit)
-npm run lint             # ESLint static analysis
-npm test                 # Vitest test suite
-npm run check            # Composite: lint + typecheck + tests
-npm run deploy:gh-pages  # Build & publish /dist to gh-pages branch
-npm run validate:supabase # Validate Supabase connection and configuration
+npm i supabase --save-dev
 ```
 
-> Legacy API dev scripts were removed from `package.json` as the backend folder is no longer present.
+To install the beta release channel:
 
-## 🚀 Deployment
-
-See [DEPLOYMENT_GUIDE.md](./DEPLOYMENT_GUIDE.md) for detailed instructions on deploying to GitHub Pages.
-
-**Quick deploy:**
 ```bash
-npm run validate:supabase  # Validate Supabase connection first
-npm run deploy:gh-pages    # Deploy to GitHub Pages
+npm i supabase@beta --save-dev
 ```
 
-The repository includes automated GitHub Actions deployment on push to `main` branch.
+When installing with yarn 4, you need to disable experimental fetch with the following nodejs config.
 
-## 🔐 Environment & Secrets
+```
+NODE_OPTIONS=--no-experimental-fetch yarn add supabase
+```
 
-Current required at runtime: none (app renders static routes). Optional:
+> **Note**
+For Bun versions below v1.0.17, you must add `supabase` as a [trusted dependency](https://bun.sh/guides/install/trusted) before running `bun add -D supabase`.
 
-| Variable | Purpose | Required |
-| -------- | ------- | -------- |
-| `VITE_SUPABASE_URL` | Supabase project base URL | Optional |
-| `VITE_SUPABASE_ANON_KEY` | Public anon key for client auth | Optional |
+<details>
+  <summary><b>macOS</b></summary>
 
-Never commit service role keys or private JWT secrets. For production, prefer build-time secrets via GitHub Actions + environment protection.
+  Available via [Homebrew](https://brew.sh). To install:
 
-## 🌐 PWA Notes
+  ```sh
+  brew install supabase/tap/supabase
+  ```
 
-- `public/manifest.json` defines name, icons, theme color
-- `public/sw.js` placeholder for future offline caching strategy
-- Future: asset pre-caching & runtime strategies (e.g., Workbox integration)
+  To install the beta release channel:
+  
+  ```sh
+  brew install supabase/tap/supabase-beta
+  brew link --overwrite supabase-beta
+  ```
+  
+  To upgrade:
 
-## 🧩 Design & UI
+  ```sh
+  brew upgrade supabase
+  ```
+</details>
 
-Uses Tailwind CSS utility-first approach. High-level palette (subject to refinement):
-- Primary: `#2D5016` (Limpopo Green)
-- Accent: `#FFD700` (Gold)
-- Secondary: `#1E40AF` (Blue)
+<details>
+  <summary><b>Windows</b></summary>
 
-## 🏗️ Infrastructure (Infra-as-Code)
+  Available via [Scoop](https://scoop.sh). To install:
 
-Azure Bicep modules in `infra/` include storage, key vault, and function scaffolding templates. These are forward-looking and may not all be actively deployed yet. See inline comments within each `.bicep` file.
+  ```powershell
+  scoop bucket add supabase https://github.com/supabase/scoop-bucket.git
+  scoop install supabase
+  ```
 
-## 🔒 Security
+  To upgrade:
 
-See `SECURITY.md` for disclosure policy & baseline practices. Planned improvements: dependency audit gating, security headers, and CSP tightening.
+  ```powershell
+  scoop update supabase
+  ```
+</details>
 
-## 🤝 Contributing
+<details>
+  <summary><b>Linux</b></summary>
 
-Contributions welcome!
-1. Fork & branch (`feat/<short-description>`)
-2. Keep commits small & meaningful
-3. Ensure `npm run lint && npm test && npm run build` succeed
-4. Open PR with clear context / before-after screenshots if UI
+  Available via [Homebrew](https://brew.sh) and Linux packages.
 
-### Coding Guidelines
-- TypeScript strictness: keep types explicit for public exports
-- Prefer functional components + hooks
-- Keep components small & composable
-- Avoid premature abstraction
+  #### via Homebrew
 
-## 🗺️ Roadmap (Excerpt)
+  To install:
 
-- [ ] Integrate Supabase auth flows (login, register, reset)
-- [ ] Business directory data model & search
-- [ ] Events calendar & subscription
-- [ ] Offline caching strategy
-- [ ] Accessibility automated checks
-- [ ] Theming & design tokens
+  ```sh
+  brew install supabase/tap/supabase
+  ```
 
-## 📄 License
+  To upgrade:
 
-Released under the MIT License. See [LICENSE](./LICENSE).
+  ```sh
+  brew upgrade supabase
+  ```
 
-## 🙏 Acknowledgements
+  #### via Linux packages
 
-Built for the vibrant communities of Limpopo Province — with a focus on inclusion, access, and local economic empowerment.
+  Linux packages are provided in [Releases](https://github.com/supabase/cli/releases). To install, download the `.apk`/`.deb`/`.rpm`/`.pkg.tar.zst` file depending on your package manager and run the respective commands.
 
-## 📬 Contact
+  ```sh
+  sudo apk add --allow-untrusted <...>.apk
+  ```
 
-| Channel | Details |
-| ------- | ------- |
-| Email | info@limpopoconnect.co.za |
-| GitHub | https://github.com/Tshikwetamakole |
+  ```sh
+  sudo dpkg -i <...>.deb
+  ```
 
----
+  ```sh
+  sudo rpm -i <...>.rpm
+  ```
 
-**Limpopo Connect** — Connecting Communities, Growing Together 🌍
+  ```sh
+  sudo pacman -U <...>.pkg.tar.zst
+  ```
+</details>
+
+<details>
+  <summary><b>Other Platforms</b></summary>
+
+  You can also install the CLI via [go modules](https://go.dev/ref/mod#go-install) without the help of package managers.
+
+  ```sh
+  go install github.com/supabase/cli@latest
+  ```
+
+  Add a symlink to the binary in `$PATH` for easier access:
+
+  ```sh
+  ln -s "$(go env GOPATH)/bin/cli" /usr/bin/supabase
+  ```
+
+  This works on other non-standard Linux distros.
+</details>
+
+<details>
+  <summary><b>Community Maintained Packages</b></summary>
+
+  Available via [pkgx](https://pkgx.sh/). Package script [here](https://github.com/pkgxdev/pantry/blob/main/projects/supabase.com/cli/package.yml).
+  To install in your working directory:
+
+  ```bash
+  pkgx install supabase
+  ```
+
+  Available via [Nixpkgs](https://nixos.org/). Package script [here](https://github.com/NixOS/nixpkgs/blob/master/pkgs/development/tools/supabase-cli/default.nix).
+</details>
+
+### Run the CLI
+
+```bash
+supabase bootstrap
+```
+
+Or using npx:
+
+```bash
+npx supabase bootstrap
+```
+
+The bootstrap command will guide you through the process of setting up a Supabase project using one of the [starter](https://github.com/supabase-community/supabase-samples/blob/main/samples.json) templates.
+
+## Docs
+
+Command & config reference can be found [here](https://supabase.com/docs/reference/cli/about).
+
+## Breaking changes
+
+We follow semantic versioning for changes that directly impact CLI commands, flags, and configurations.
+
+However, due to dependencies on other service images, we cannot guarantee that schema migrations, seed.sql, and generated types will always work for the same CLI major version. If you need such guarantees, we encourage you to pin a specific version of CLI in package.json.
+
+## Developing
+
+To run from source:
+
+```sh
+# Go >= 1.22
+go run . help
+```

@@ -43,4 +43,7 @@ export async function sendResetEmail(email: string, redirectTo?: string) {
 
 export type { Session, User };
 
+// Export the configured supabase client for other modules
+export { supabase };
+
 export default supabase;
