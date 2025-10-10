@@ -86,7 +86,7 @@ export interface TourismAttraction {
 }
 
 // API Base URL - defaults to current origin for production, can be overridden
-const API_BASE_URL = (import.meta as any).env?.VITE_API_BASE_URL || `${window.location.origin}/api`;
+const API_BASE_URL = import.meta.env?.VITE_API_BASE_URL || `${window.location.origin}/api`;
 
 // Generic API fetch wrapper
 async function apiCall<T>(endpoint: string, options: RequestInit = {}): Promise<T> {

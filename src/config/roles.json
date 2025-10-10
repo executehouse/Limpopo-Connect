@@ -1,0 +1,86 @@
+{
+  "visitor": {
+    "label": "Visitor",
+    "color": "gray",
+    "defaultLanding": "/dashboard/visitor",
+    "routes": ["/explore", "/business-directory", "/tourism", "/events", "/marketplace"],
+    "permissions": {
+      "canViewPublicContent": true,
+      "canCreateContent": false,
+      "canJoinRooms": false,
+      "canContactBusinesses": false,
+      "requiresVerification": false
+    },
+    "description": "Unregistered users or users exploring the platform",
+    "quickActions": [
+      { "label": "Sign Up", "path": "/register", "icon": "UserPlus" },
+      { "label": "Explore Businesses", "path": "/business-directory", "icon": "Building" },
+      { "label": "View Events", "path": "/events", "icon": "Calendar" }
+    ]
+  },
+  "citizen": {
+    "label": "Citizen",
+    "color": "blue",
+    "defaultLanding": "/dashboard/citizen",
+    "routes": ["/home", "/connections", "/chat-demo", "/reports", "/profile"],
+    "permissions": {
+      "canViewPublicContent": true,
+      "canCreateContent": true,
+      "canJoinRooms": true,
+      "canContactBusinesses": true,
+      "requiresVerification": false
+    },
+    "description": "Registered community members and residents",
+    "quickActions": [
+      { "label": "My Reports", "path": "/reports", "icon": "AlertTriangle" },
+      { "label": "Join Discussions", "path": "/chat-demo", "icon": "MessageCircle" },
+      { "label": "Find Connections", "path": "/connections", "icon": "Users" }
+    ]
+  },
+  "business": {
+    "label": "Business",
+    "color": "orange",
+    "defaultLanding": "/dashboard/business",
+    "routes": ["/business-dashboard", "/listings", "/leads", "/analytics"],
+    "permissions": {
+      "canViewPublicContent": true,
+      "canCreateContent": true,
+      "canJoinRooms": true,
+      "canContactBusinesses": true,
+      "canManageListings": true,
+      "canViewAnalytics": true,
+      "requiresVerification": true
+    },
+    "description": "Verified business owners and representatives",
+    "quickActions": [
+      { "label": "Manage Listings", "path": "/listings", "icon": "Store" },
+      { "label": "View Leads", "path": "/leads", "icon": "Target" },
+      { "label": "Analytics", "path": "/analytics", "icon": "BarChart3" }
+    ]
+  },
+  "admin": {
+    "label": "Administrator",
+    "color": "red",
+    "defaultLanding": "/dashboard/admin",
+    "routes": ["/admin", "/admin/users", "/admin/content", "/admin/reports", "/admin/audit"],
+    "permissions": {
+      "canViewPublicContent": true,
+      "canCreateContent": true,
+      "canJoinRooms": true,
+      "canContactBusinesses": true,
+      "canManageListings": true,
+      "canViewAnalytics": true,
+      "canModerateContent": true,
+      "canManageUsers": true,
+      "canViewAuditLogs": true,
+      "canAccessAdminPanel": true,
+      "requiresVerification": false
+    },
+    "description": "Platform administrators and moderators",
+    "quickActions": [
+      { "label": "User Management", "path": "/admin/users", "icon": "Users" },
+      { "label": "Content Moderation", "path": "/admin/content", "icon": "Shield" },
+      { "label": "System Audit", "path": "/admin/audit", "icon": "FileText" }
+    ]
+  }
+}

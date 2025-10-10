@@ -5,7 +5,7 @@ import { AuthProvider } from '../../lib/AuthProvider';
 import '@testing-library/jest-dom';
 import { vi } from 'vitest';
 
-import * as supabase from '../../lib/supabase';
+// Tests for Login component
 import { useAuth } from '../../lib/useAuth';
 
 // Mock useNavigate and useLocation

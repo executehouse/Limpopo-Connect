@@ -3,7 +3,7 @@
  */
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Users, ArrowLeft, MapPin, Calendar, Heart, TrendingUp, Smile, Share2 } from 'lucide-react';
+import { Users, ArrowLeft, MapPin, Calendar, Heart, Smile, Share2 } from 'lucide-react';
 import SEO from '../../components/SEO';
 import Breadcrumbs from '../../components/Breadcrumbs';
 

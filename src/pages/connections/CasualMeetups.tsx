@@ -3,7 +3,7 @@
  */
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Coffee, ArrowLeft, MapPin, Clock, Users, Calendar, MessageCircle, Sun } from 'lucide-react';
+import { Coffee, ArrowLeft, MapPin, Clock, Users, MessageCircle, Sun } from 'lucide-react';
 import SEO from '../../components/SEO';
 import Breadcrumbs from '../../components/Breadcrumbs';
 

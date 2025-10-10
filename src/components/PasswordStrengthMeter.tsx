@@ -120,27 +120,4 @@ export const PasswordStrengthMeter: React.FC<PasswordStrengthMeterProps> = ({
 /**
  * Hook to check if password meets minimum requirements
  */
-export const usePasswordValidation = (password: string) => {
-  return useMemo(() => {
-    if (!password) {
-      return { isValid: false, score: 0 }
-    }
-
-    const analysis = zxcvbn(password)
-    const meetsLength = password.length >= 8
-    const hasUppercase = /[A-Z]/.test(password)
-    const hasLowercase = /[a-z]/.test(password)
-    const hasNumber = /\d/.test(password)
-    
-    // Minimum requirements: 8 chars, upper, lower, number, and score >= 2
-    const isValid = meetsLength && hasUppercase && hasLowercase && hasNumber && analysis.score >= 2
-
-    return {
-      isValid,
-      score: analysis.score,
-      feedback: analysis.feedback
-    }
-  }, [password])
-}
-
 export default PasswordStrengthMeter

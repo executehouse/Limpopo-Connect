@@ -15,7 +15,9 @@ Version: 1.0
 4. [Header Navigation Bug Fix](#4-header-navigation-bug-fix)
 5. [Profile Page Implementation](#5-profile-page-implementation)
 6. [Vite Host Binding Fix](#6-vite-host-binding-fix)
-7. [Testing & Verification](#7-testing--verification)
+7. [Role Mapping & JWT Sync](#7-role-mapping--jwt-sync)
+8. [Personalized Dashboard Routing](#8-personalized-dashboard-routing)
+9. [Testing & Verification](#9-testing--verification)
 
 ---
 
@@ -455,103 +457,356 @@ const Header: React.FC = () => {
 ## 5. Profile Page Implementation
 
 ### Problem Statement
-**Error**: Profile page was empty/non-functional.
+**Error**: Users needed a complete profile system with view/edit capabilities, avatar uploads, and privacy controls.
 
 **Exact Error Behavior**:
-- No UI for viewing/editing profile
-- No avatar upload functionality
-- No privacy settings
-- Profile updates not working
+- No comprehensive profile viewing functionality
+- Missing profile edit interface with validation
+- No avatar upload system with proper storage management
+- Missing privacy controls for profile visibility
+- No role-based access controls for profile data
+- Lack of proper RLS policies for secure profile access
 
 **Root Cause**:
-`/src/pages/Profile.tsx` was empty.
+The profile system was incomplete and lacked the necessary components for a production-ready implementation with proper security and user experience.
 
 ### Solution
 
-**Complete Implementation** (`/src/pages/Profile.tsx`):
+**Complete Profile System Implementation**:
 
-**Features**:
-1. **Profile Viewing & Editing**:
-   - First name, last name, phone number fields
-   - Email display (read-only)
-   - Role badge display
+#### 1. Database Schema Enhancement
 
-2. **Avatar Upload**:
-   - Click-to-upload with preview
-   - File validation (type, size max 5MB)
-   - Upload to Supabase Storage bucket `user-uploads`
-   - Signed URL generation
+**Migration File**: `supabase/migrations/20251010_profiles_profile_page.sql`
 
-3. **Privacy Settings**:
-   - `is_public` checkbox
-   - Visual indicator (Eye/EyeOff icons)
-   - Explanation text
-
-4. **Status Feedback**:
-   - Success/error messages
-   - Loading states
-   - Optimistic UI updates
-
-**Key Code Sections**:
-
-```tsx
-const uploadAvatar = async (): Promise<string | null> => {
-  if (!avatarFile || !user || !supabase) return null;
-
-  const fileName = `${user.id}/avatar-${Date.now()}.${fileExt}`;
-  
-  const { error } = await supabase.storage
-    .from('user-uploads')
-    .upload(fileName, avatarFile, {
-      cacheControl: '3600',
-      upsert: false,
-    });
-
-  if (error) throw error;
-
-  const { data: { publicUrl } } = supabase.storage
-    .from('user-uploads')
-    .getPublicUrl(fileName);
-
-  return publicUrl;
-};
-
-const handleSubmit = async (e: React.FormEvent) => {
-  e.preventDefault();
-  
-  let avatarUrl = profile?.avatar_url;
-  if (avatarFile) {
-    avatarUrl = await uploadAvatar();
-  }
-
-  await updateProfile({
-    ...formData,
-    ...(avatarUrl && { avatar_url: avatarUrl }),
-  });
-
-  await refreshProfile();
-  setMessage({ type: 'success', text: 'Profile updated successfully!' });
-};
-```
-
-**Files Modified**:
-- `/src/pages/Profile.tsx` - Complete implementation
-- `/src/lib/useAuth.ts` - Added `avatar_url` and `is_public` to Profile interface
-
-**Storage Bucket Setup** (already in init schema):
+**Schema Changes**:
 ```sql
-INSERT INTO storage.buckets (id, name, public)
-SELECT 'user-uploads', 'user-uploads', false
-WHERE NOT EXISTS (SELECT 1 FROM storage.buckets WHERE id = 'user-uploads');
+-- Add profile columns
+ALTER TABLE public.profiles
+  ADD COLUMN IF NOT EXISTS avatar_url text,
+  ADD COLUMN IF NOT EXISTS bio text,
+  ADD COLUMN IF NOT EXISTS phone text,
+  ADD COLUMN IF NOT EXISTS is_public_profile boolean DEFAULT true,
+  ADD COLUMN IF NOT EXISTS show_contact boolean DEFAULT false,
+  ADD COLUMN IF NOT EXISTS updated_at timestamptz DEFAULT now();
+
+-- Add updated_at trigger
+CREATE OR REPLACE FUNCTION update_updated_at_column()
+RETURNS TRIGGER AS $$
+BEGIN
+    NEW.updated_at = CURRENT_TIMESTAMP;
+    RETURN NEW;
+END;
+$$ language 'plpgsql';
+
+CREATE TRIGGER update_profiles_updated_at
+    BEFORE UPDATE ON public.profiles
+    FOR EACH ROW
+    EXECUTE FUNCTION update_updated_at_column();
 ```
 
-**Test Coverage**:
-- ✅ Load profile data on mount
-- ✅ Update profile fields
-- ✅ Upload avatar
-- ✅ Toggle privacy setting
-- ✅ Validation messages displayed
-- ✅ Auth required to access
+#### 2. Secure RLS Policies
+
+**Migration File**: `supabase/migrations/20251010_profile_page_rls.sql`
+
+**Key Policies**:
+```sql
+-- Profile SELECT: owner, admin, or public profile
+CREATE POLICY profiles_select_policy ON public.profiles
+FOR SELECT USING (
+    auth.uid() = id::uuid OR                    -- Owner
+    EXISTS (                                    -- Admin
+        SELECT 1 FROM public.profiles p 
+        WHERE p.id = auth.uid() AND p.role = 'admin'
+    ) OR
+    (is_public_profile = true)                  -- Public profile
+);
+
+-- Profile UPDATE: owner or admin only
+CREATE POLICY profiles_update_policy ON public.profiles
+FOR UPDATE USING (
+    auth.uid() = id::uuid OR 
+    EXISTS (
+        SELECT 1 FROM public.profiles p 
+        WHERE p.id = auth.uid() AND p.role = 'admin'
+    )
+);
+
+-- Validation trigger prevents unauthorized changes
+CREATE OR REPLACE FUNCTION validate_profile_update()
+RETURNS TRIGGER AS $$
+BEGIN
+    IF NOT EXISTS (
+        SELECT 1 FROM public.profiles 
+        WHERE id = auth.uid() AND role = 'admin'
+    ) THEN
+        -- Non-admins cannot change protected fields
+        IF OLD.role != NEW.role THEN
+            RAISE EXCEPTION 'Cannot change role. Contact administrator.';
+        END IF;
+        
+        IF LENGTH(NEW.bio) > 1000 THEN
+            RAISE EXCEPTION 'Bio cannot exceed 1000 characters';
+        END IF;
+    END IF;
+    
+    RETURN NEW;
+END;
+$$ language 'plpgsql' SECURITY DEFINER;
+```
+
+#### 3. Frontend Architecture
+
+**Profile Interface Update** (`src/lib/useAuth.ts`):
+```typescript
+interface Profile {
+  id: string;
+  email: string;
+  first_name: string | null;
+  last_name: string | null;
+  bio: string | null;
+  phone: string | null;
+  avatar_url: string | null;
+  role: 'visitor' | 'citizen' | 'business' | 'admin';
+  is_public_profile: boolean;
+  show_contact: boolean;
+  created_at: string;
+  updated_at: string;
+}
+```
+
+**Profile Hooks** (`src/lib/useProfile.ts`):
+```typescript
+export function useProfile(userId?: string) {
+  const [profile, setProfile] = useState<Profile | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<Error | null>(null);
+
+  useEffect(() => {
+    fetchProfile();
+  }, [userId]);
+
+  const fetchProfile = async () => {
+    try {
+      const targetId = userId || user?.id;
+      if (!targetId) return;
+
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', targetId)
+        .single();
+
+      if (error) throw error;
+      setProfile(data);
+    } catch (err) {
+      setError(err as Error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return { profile, loading, error, refetch: fetchProfile };
+}
+
+export function useProfileMutations() {
+  const updateProfile = async (updates: Partial<Profile>) => {
+    const { data, error } = await supabase
+      .from('profiles')
+      .update(updates)
+      .eq('id', user?.id)
+      .select()
+      .single();
+
+    if (error) throw error;
+    return data;
+  };
+
+  const uploadAvatar = async (file: File) => {
+    const processedFile = await validateAndResizeImage(file);
+    const result = await uploadAvatar(user!.id, processedFile);
+    
+    await updateProfile({ avatar_url: result.url });
+    return result;
+  };
+
+  return { updateProfile, uploadAvatar, deleteAvatar, loading, error };
+}
+```
+
+#### 4. Profile Components
+
+**ProfileView Component** (`src/components/ProfileView.tsx`):
+- Displays profile information based on privacy settings
+- Shows different views for owner vs. other users vs. admins
+- Handles loading states and error conditions
+- Includes role badges and privacy indicators
+
+**ProfileEdit Component** (`src/components/ProfileEdit.tsx`):
+- Form validation with real-time feedback
+- Avatar upload with progress indication
+- Privacy controls with clear explanations
+- Optimistic UI updates
+- Error handling and retry mechanisms
+
+**Main Profile Page** (`src/pages/Profile.tsx`):
+- Route handling for `/profile`, `/profile/me`, `/profile/me/edit`, `/profile/:userId`
+- Mode switching between view and edit
+- Authentication checks and role-based access
+- Breadcrumb navigation
+
+#### 5. Storage System
+
+**Storage Utilities** (`src/lib/storage.ts`):
+```typescript
+// Image validation and resizing
+export async function validateAndResizeImage(
+  file: File,
+  options: FileUploadOptions = {}
+): Promise<File> {
+  // Validate file type and size
+  // Resize using canvas if needed
+  // Return optimized file
+}
+
+// Avatar upload with proper path structure
+export async function uploadAvatar(
+  userId: string,
+  file: File
+): Promise<UploadResult> {
+  const processedFile = await validateAndResizeImage(file);
+  const filePath = `avatars/${userId}/${fileName}`;
+  
+  const { data, error } = await supabase.storage
+    .from('user-uploads')
+    .upload(filePath, processedFile, { upsert: false });
+    
+  if (error) throw error;
+  return { url: publicUrl, path: data.path, size: processedFile.size };
+}
+```
+
+#### 6. Security Features
+
+**Audit Logging**:
+```sql
+CREATE TABLE public.profile_audit_logs (
+    id uuid DEFAULT gen_random_uuid() PRIMARY KEY,
+    user_id uuid REFERENCES auth.users(id) ON DELETE CASCADE,
+    target_profile_id uuid REFERENCES public.profiles(id) ON DELETE CASCADE,
+    action text NOT NULL,
+    details jsonb,
+    created_at timestamptz DEFAULT now()
+);
+```
+
+**Privacy Controls**:
+- `is_public_profile`: Controls overall profile visibility
+- `show_contact`: Controls email/phone visibility
+- Role-based field filtering in queries
+- Audit logging for profile access
+
+#### 7. Testing Implementation
+
+**Unit Tests** (`src/tests/`):
+- `ProfileView.test.tsx`: Component rendering and privacy controls
+- `ProfileEdit.test.tsx`: Form validation and submission
+- `useProfile.test.tsx`: Hook functionality and error handling
+
+**Integration Tests**:
+- Avatar upload flow with storage validation
+- RLS policy enforcement with different user roles
+- Privacy setting changes and their effects
+
+**Smoke Test** (`scripts/smoke_profile.sh`):
+```bash
+#!/bin/bash
+# Comprehensive profile system validation
+# - Component existence and compilation
+# - Database schema validation
+# - RLS policy verification
+# - Storage configuration check
+# - Security validation
+```
+
+#### 8. Routes Integration
+
+**App.tsx Updates**:
+```tsx
+// Profile routes with authentication
+<Route path="profile" element={
+  <RequireRole roles={['citizen', 'business', 'admin']}>
+    <Profile />
+  </RequireRole>
+} />
+<Route path="profile/me" element={
+  <RequireRole roles={['citizen', 'business', 'admin']}>
+    <Profile />
+  </RequireRole>
+} />
+<Route path="profile/me/edit" element={
+  <RequireRole roles={['citizen', 'business', 'admin']}>
+    <Profile />
+  </RequireRole>
+} />
+<Route path="profile/:userId" element={
+  <RequireRole roles={['citizen', 'business', 'admin']}>
+    <Profile />
+  </RequireRole>
+} />
+```
+
+### Files Created/Modified
+
+**New Files**:
+- `src/components/ProfileView.tsx` - Profile display component
+- `src/components/ProfileEdit.tsx` - Profile editing form
+- `src/lib/useProfile.ts` - Profile management hooks
+- `src/lib/storage.ts` - File upload utilities
+- `src/tests/ProfileView.test.tsx` - Component tests
+- `src/tests/ProfileEdit.test.tsx` - Form tests
+- `src/tests/useProfile.test.tsx` - Hook tests
+- `supabase/migrations/20251010_profiles_profile_page.sql` - Schema migration
+- `supabase/migrations/20251010_profile_page_rls.sql` - RLS policies
+- `scripts/smoke_profile.sh` - Smoke test script
+- `PROFILE_API.md` - Complete API documentation
+
+**Modified Files**:
+- `src/pages/Profile.tsx` - Complete rewrite with routing logic
+- `src/lib/useAuth.ts` - Updated Profile interface
+- `src/App.tsx` - Added profile routes
+
+### Features Delivered
+
+**Profile Viewing**:
+- ✅ Display all profile information with proper privacy controls
+- ✅ Role-based access (owner sees all, others see public only)
+- ✅ Admin controls for profile management
+- ✅ Loading states and error handling
+
+**Profile Editing**:
+- ✅ Form validation with real-time feedback
+- ✅ Avatar upload with image processing
+- ✅ Privacy settings with clear explanations
+- ✅ Optimistic UI updates
+- ✅ Comprehensive error handling
+
+**Security & Privacy**:
+- ✅ Secure RLS policies for data access
+- ✅ Input validation and sanitization
+- ✅ Audit logging for profile operations
+- ✅ File upload validation and security
+
+**Storage Management**:
+- ✅ Image validation and resizing
+- ✅ Proper file organization in Supabase Storage
+- ✅ Public URL management
+- ✅ File cleanup and deletion
+
+**Testing & Documentation**:
+- ✅ Comprehensive unit and integration tests
+- ✅ Smoke test for complete system validation
+- ✅ API documentation with examples
+- ✅ Implementation guide updates
 
 ---
 
@@ -639,7 +894,680 @@ curl http://<your-ip>:5173
 
 ---
 
-## 7. Testing & Verification
+## 7. Role Mapping & JWT Sync
+
+### Problem Statement
+**Need**: Implement comprehensive role-based access control (RBAC) system that assigns roles to users, propagates them to JWT claims, and enables secure, personalized user experiences.
+
+**Requirements**:
+- Support 4 user roles: visitor, citizen, business, admin
+- Role persistence in database with audit trail
+- JWT claim synchronization for frontend access
+- Role-based routing and permissions
+- Business verification workflow
+- Admin management capabilities
+
+### Solution
+
+**Migration Files**:
+- `supabase/migrations/20251010_add_role_to_profiles.sql`
+- `supabase/migrations/20251010_configure_jwt_claims.sql`  
+- `supabase/migrations/20251010_enhanced_rls_policies.sql`
+
+**Frontend Files**:
+- `src/lib/useAuth.ts` - Enhanced with role management
+- `src/lib/AuthProvider.tsx` - Role-aware context
+- `src/config/roles.json` - Role configuration
+- `src/tests/auth.role.test.ts` - Role system tests
+
+### Database Schema Changes
+
+**1. Role Enum Type**:
+```sql
+CREATE TYPE user_role AS ENUM ('visitor', 'citizen', 'business', 'admin');
+```
+
+**2. Profile Table Updates**:
+```sql
+ALTER TABLE public.profiles 
+  ALTER COLUMN role TYPE user_role USING role::user_role,
+  ALTER COLUMN role SET DEFAULT 'citizen'::user_role,
+  ADD COLUMN is_public boolean DEFAULT false,
+  ADD COLUMN avatar_url text;
+```
+
+**3. JWT Claims Configuration**:
+```sql
+ALTER ROLE authenticator SET jwt_claims.role = 'role';
+ALTER ROLE authenticator SET jwt_claims.user_id = 'user_id';
+```
+
+**4. Business Verification Table**:
+```sql
+CREATE TABLE public.business_verifications (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id uuid NOT NULL REFERENCES auth.users(id),
+  business_name text NOT NULL,
+  business_registration_number text,
+  status text DEFAULT 'pending' CHECK (status IN ('pending', 'approved', 'rejected')),
+  reviewer_id uuid REFERENCES auth.users(id),
+  created_at timestamptz DEFAULT now()
+);
+```
+
+**5. Role Audit Logging**:
+```sql
+CREATE TABLE public.role_audit_logs (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id uuid NOT NULL,
+  old_role user_role,
+  new_role user_role NOT NULL,
+  changed_by uuid REFERENCES auth.users(id),
+  reason text,
+  ip_address text,
+  user_agent text,
+  created_at timestamptz DEFAULT now()
+);
+```
+
+### Key Functions Implemented
+
+**1. Role Detection**:
+```sql
+CREATE FUNCTION get_current_user_role() RETURNS user_role AS $$
+BEGIN
+  -- Try JWT claims first, fallback to profile lookup
+  RETURN COALESCE(
+    current_setting('request.jwt.claims', true)::jsonb->>'role',
+    (SELECT role FROM profiles WHERE id = auth.uid()),
+    'visitor'
+  )::user_role;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER STABLE;
+```
+
+**2. Role Hierarchy Check**:
+```sql
+CREATE FUNCTION has_role(required_role user_role) RETURNS boolean AS $$
+DECLARE
+  user_level integer;
+  required_level integer;
+BEGIN
+  -- visitor=0, citizen=1, business=2, admin=3
+  user_level := CASE get_current_user_role()
+    WHEN 'visitor' THEN 0 WHEN 'citizen' THEN 1 
+    WHEN 'business' THEN 2 WHEN 'admin' THEN 3 ELSE 0 END;
+  required_level := CASE required_role
+    WHEN 'visitor' THEN 0 WHEN 'citizen' THEN 1
+    WHEN 'business' THEN 2 WHEN 'admin' THEN 3 ELSE 0 END;
+  RETURN user_level >= required_level;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER STABLE;
+```
+
+**3. Business Verification Workflow**:
+```sql
+CREATE FUNCTION approve_business_verification(
+  verification_id uuid,
+  reviewer_notes text DEFAULT NULL
+) RETURNS boolean AS $$
+DECLARE
+  verification_user_id uuid;
+BEGIN
+  -- Must be admin
+  IF get_current_user_role() != 'admin' THEN
+    RAISE EXCEPTION 'Only admins can approve business verifications';
+  END IF;
+  
+  -- Update verification and user role
+  SELECT user_id INTO verification_user_id
+  FROM business_verifications WHERE id = verification_id;
+  
+  UPDATE business_verifications SET status = 'approved', reviewer_id = auth.uid()
+  WHERE id = verification_id;
+  
+  UPDATE profiles SET role = 'business'::user_role WHERE id = verification_user_id;
+  
+  RETURN true;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+```
+
+### Enhanced RLS Policies
+
+**1. Role-Aware Profile Access**:
+```sql
+CREATE POLICY profiles_select_own_or_admin ON profiles
+  FOR SELECT USING (
+    id = auth.uid() OR                           -- Own profile
+    get_current_user_role() = 'admin' OR        -- Admin access
+    (is_public = true AND auth.uid() IS NOT NULL) -- Public profiles
+  );
+```
+
+**2. Business Directory Access**:
+```sql
+CREATE POLICY businesses_role_enhanced_access ON businesses
+  FOR SELECT USING (
+    verified = true OR                          -- Verified businesses
+    created_by = auth.uid() OR                  -- Own listings
+    has_role('business') OR                     -- Business networking
+    get_current_user_role() = 'admin'          -- Admin access
+  );
+```
+
+**3. Admin-Only Management**:
+```sql
+CREATE POLICY role_audit_logs_admin_read ON role_audit_logs
+  FOR SELECT USING (
+    get_current_user_role() = 'admin' OR        -- Admin full access
+    user_id = auth.uid()                        -- Own role changes
+  );
+```
+
+### Frontend Integration
+
+**1. Enhanced useAuth Hook**:
+```typescript
+export function useAuth() {
+  // ... existing code ...
+  
+  const hasRoleOrHigher = (requiredRole: UserRole, userRole?: UserRole) => {
+    const roleHierarchy = { visitor: 0, citizen: 1, business: 2, admin: 3 }
+    const currentRole = userRole || profile?.role || 'visitor'
+    return roleHierarchy[currentRole] >= roleHierarchy[requiredRole]
+  }
+  
+  const requestBusinessVerification = async (verificationData) => {
+    const { data, error } = await supabase
+      .from('business_verifications')
+      .insert({ user_id: authState.user.id, ...verificationData })
+    if (error) throw error
+    return data
+  }
+  
+  return {
+    // ... existing returns ...
+    hasRoleOrHigher,
+    requestBusinessVerification,
+    refreshJWTClaims,
+    verifyRoleSync
+  }
+}
+```
+
+**2. Role Configuration (roles.json)**:
+```json
+{
+  "visitor": {
+    "label": "Visitor",
+    "defaultLanding": "/explore",
+    "routes": ["/explore", "/business-directory"],
+    "permissions": { "canViewPublicContent": true }
+  },
+  "citizen": {
+    "label": "Citizen", 
+    "defaultLanding": "/home",
+    "routes": ["/home", "/connections", "/chat-demo"],
+    "permissions": { "canCreateContent": true, "canJoinRooms": true }
+  },
+  "business": {
+    "label": "Business",
+    "defaultLanding": "/business-dashboard", 
+    "routes": ["/business-dashboard", "/listings"],
+    "permissions": { "canManageListings": true, "requiresVerification": true }
+  },
+  "admin": {
+    "label": "Administrator",
+    "defaultLanding": "/admin",
+    "routes": ["/admin", "/admin/users"],
+    "permissions": { "canManageUsers": true, "canAccessAdminPanel": true }
+  }
+}
+```
+
+**3. Role-Based Routing Example**:
+```typescript
+import { useAuthContext } from '@/lib/AuthProvider'
+
+function ProtectedRoute({ children, requiredRole }: { 
+  children: React.ReactNode, 
+  requiredRole: UserRole 
+}) {
+  const { hasRoleOrHigher, role } = useAuthContext()
+  
+  if (!hasRoleOrHigher(requiredRole, role)) {
+    return <Navigate to="/unauthorized" />
+  }
+  
+  return <>{children}</>
+}
+```
+
+### Testing & Validation
+
+**1. Database Tests** (`supabase/tests/test-role-system.sql`):
+```sql
+-- Test role functions
+SELECT get_current_user_role() as current_role;
+SELECT has_role('citizen'::user_role) as has_citizen_access;
+SELECT * FROM validate_role_sync() WHERE user_id = 'test-user';
+```
+
+**2. Frontend Tests** (`src/tests/auth.role.test.ts`):
+```typescript
+describe('Role-based Authentication', () => {
+  it('should correctly validate permissions based on role', () => {
+    expect(hasPermission('canCreateContent', 'citizen')).toBe(true)
+    expect(hasPermission('canManageUsers', 'citizen')).toBe(false)
+    expect(hasPermission('canManageUsers', 'admin')).toBe(true)
+  })
+  
+  it('should validate role hierarchy', () => {
+    expect(hasRoleOrHigher('visitor', 'admin')).toBe(true)
+    expect(hasRoleOrHigher('admin', 'citizen')).toBe(false)
+  })
+})
+```
+
+**3. Smoke Test Script** (`scripts/role-system-smoke-test.sh`):
+```bash
+#!/bin/bash
+# Comprehensive validation of role system deployment
+./scripts/role-system-smoke-test.sh
+```
+
+### Business Verification Workflow
+
+**1. Citizen Requests Business Status**:
+```typescript
+const verificationData = {
+  business_name: "Limpopo Tech Solutions",
+  business_registration_number: "2023/123456/07",
+  business_address: "123 Main St, Polokwane",
+  business_email: "info@limpopotech.co.za",
+  business_phone: "+27123456789"
+}
+
+await requestBusinessVerification(verificationData)
+```
+
+**2. Admin Reviews and Approves**:
+```sql
+-- Admin dashboard query
+SELECT * FROM business_verifications WHERE status = 'pending';
+
+-- Approve verification
+SELECT approve_business_verification(
+  'verification-uuid', 
+  'Business registration verified'
+);
+```
+
+**3. Automatic Role Upgrade**:
+- User role updated to 'business' in profiles table
+- JWT claims refreshed with new role
+- User gains access to business dashboard and features
+- Audit log entry created
+
+### Deployment Steps
+
+**1. Apply Migrations**:
+```bash
+supabase db push --file supabase/migrations/20251010_add_role_to_profiles.sql
+supabase db push --file supabase/migrations/20251010_configure_jwt_claims.sql  
+supabase db push --file supabase/migrations/20251010_enhanced_rls_policies.sql
+```
+
+**2. Verify Schema**:
+```sql
+-- Check enum exists
+SELECT * FROM pg_type WHERE typname = 'user_role';
+
+-- Check JWT claims config  
+SELECT name, setting FROM pg_settings WHERE name LIKE '%jwt_claims%';
+
+-- Verify functions exist
+SELECT proname FROM pg_proc WHERE proname IN (
+  'get_current_user_role', 'has_role', 'approve_business_verification'
+);
+```
+
+**3. Test Role Assignment**:
+```bash
+# Run smoke test
+./scripts/role-system-smoke-test.sh
+
+# Run SQL tests
+psql $DATABASE_URL -f supabase/tests/test-role-system.sql
+
+# Run frontend tests  
+npm test src/tests/auth.role.test.ts
+```
+
+### Role System Benefits
+
+✅ **Security**: JWT-based authorization with audit trails  
+✅ **Scalability**: Hierarchical role system supports growth  
+✅ **User Experience**: Role-aware dashboards and features  
+✅ **Business Logic**: Verification workflow for business users  
+✅ **Administrative Control**: Admin tools for user management  
+✅ **Compliance**: Complete audit trail for role changes
+
+---
+
+## 8. Personalized Dashboard Routing
+
+### Problem Statement
+**Challenge**: Users needed role-specific dashboard experiences and secure route protection based on their permissions.
+
+**Requirements**:
+- Standardized dashboard routes (`/dashboard/{role}`)
+- Dynamic redirect after login based on user role
+- Role-based access control with proper error handling
+- Seamless user experience with minimal friction
+
+### Solution Architecture
+
+**Dashboard Route Structure**:
+```
+/dashboard/visitor   → VisitorDashboard (public access)
+/dashboard/citizen   → CitizenDashboard (citizen+)
+/dashboard/business  → BusinessDashboard (business+)
+/dashboard/admin     → AdminDashboard (admin only)
+```
+
+**Component Architecture**:
+- `ProtectedRoute`: Basic authentication guard
+- `RoleGuard`: Advanced role-based access control
+- Role-specific dashboard components
+- Enhanced AuthProvider with role helpers
+
+### Implementation Details
+
+**1. Dashboard Components**
+
+**VisitorDashboard** (`src/pages/VisitorDashboard.tsx`):
+```typescript
+const VisitorDashboard: React.FC = () => {
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-limpopo-green to-limpopo-blue">
+      {/* Welcome content for visitors */}
+      {/* Call-to-action for registration */}
+      {/* Public features showcase */}
+    </div>
+  );
+};
+```
+
+**Existing Dashboard Components**:
+- `CitizenDashboard`: Community features, reports, discussions
+- `BusinessDashboard`: Listings management, analytics, leads
+- `AdminDashboard`: User management, content moderation, system admin
+
+**2. Route Protection Components**
+
+**ProtectedRoute** (`src/components/ProtectedRoute.tsx`):
+```typescript
+export default function ProtectedRoute({ 
+  children, 
+  redirectTo = '/auth/login' 
+}: ProtectedRouteProps) {
+  const { isAuthenticated, loading } = useAuthContext();
+
+  if (loading) return <LoadingSpinner />;
+  
+  if (!isAuthenticated) {
+    return <Navigate to={redirectTo} state={{ from: location.pathname }} replace />;
+  }
+
+  return <>{children}</>;
+}
+```
+
+**RoleGuard** (`src/components/RoleGuard.tsx`):
+```typescript
+export default function RoleGuard({ 
+  children, 
+  allowedRoles, 
+  requireAuth = true,
+  showAccessDenied = true 
+}: RoleGuardProps) {
+  const { role, isAuthenticated, loading } = useAuthContext();
+  
+  // Authentication check
+  if (requireAuth && !isAuthenticated) {
+    return <Navigate to="/auth/login" />;
+  }
+  
+  // Role authorization check
+  const userRole = isAuthenticated ? role : 'visitor';
+  const hasAccess = allowedRoles.includes(userRole);
+  
+  if (!hasAccess && showAccessDenied) {
+    return <AccessDenied userRole={userRole} requiredRoles={allowedRoles} />;
+  }
+  
+  return <>{children}</>;
+}
+```
+
+**3. Enhanced Authentication System**
+
+**Role Helper Functions** (`src/lib/useAuth.ts`):
+```typescript
+// Role helper functions
+const isVisitor = () => (profile?.role || 'visitor') === 'visitor';
+const isCitizen = () => profile?.role === 'citizen';
+const isBusiness = () => profile?.role === 'business';
+const isAdmin = () => profile?.role === 'admin';
+
+const hasRoleOrHigher = (requiredRole: UserRole) => {
+  const roleHierarchy = { visitor: 0, citizen: 1, business: 2, admin: 3 };
+  return roleHierarchy[profile?.role || 'visitor'] >= roleHierarchy[requiredRole];
+};
+
+const getRolePriority = (role?: UserRole) => {
+  const roleHierarchy = { visitor: 0, citizen: 1, business: 2, admin: 3 };
+  return roleHierarchy[role || 'visitor'];
+};
+```
+
+**4. Dynamic Login Redirection**
+
+**Updated Login Component** (`src/pages/auth/Login.tsx`):
+```typescript
+const handleSubmit = async (e: React.FormEvent) => {
+  // ... validation logic ...
+  
+  try {
+    await signIn(trimmedEmail, password);
+    
+    // Dynamic role-based redirect
+    setTimeout(() => {
+      if (from && from !== '/auth/login') {
+        navigate(from, { replace: true });
+      } else {
+        const landingPage = getDefaultLandingPage();
+        navigate(landingPage || '/', { replace: true });
+      }
+    }, 100);
+    
+  } catch (err) {
+    setError(err.message);
+  }
+};
+```
+
+**5. Route Configuration**
+
+**App.tsx Routes**:
+```typescript
+{/* Standardized dashboard routes */}
+<Route 
+  path="/dashboard/visitor" 
+  element={<VisitorDashboard />}
+/>
+
+<Route 
+  path="/dashboard/citizen" 
+  element={
+    <RequireRole roles={['citizen', 'business', 'admin']}>
+      <CitizenDashboard />
+    </RequireRole>
+  } 
+/>
+
+<Route 
+  path="/dashboard/business" 
+  element={
+    <RequireRole roles={['business', 'admin']}>
+      <BusinessDashboard />
+    </RequireRole>
+  } 
+/>
+
+<Route 
+  path="/dashboard/admin" 
+  element={
+    <RequireRole roles={['admin']}>
+      <AdminDashboard />
+    </RequireRole>
+  } 
+/>
+```
+
+**6. Role Configuration Updates**
+
+**Updated roles.json**:
+```json
+{
+  "visitor": {
+    "defaultLanding": "/dashboard/visitor",
+    "permissions": { "canViewPublicContent": true }
+  },
+  "citizen": {
+    "defaultLanding": "/dashboard/citizen",
+    "permissions": { "canCreateContent": true, "canJoinRooms": true }
+  },
+  "business": {
+    "defaultLanding": "/dashboard/business", 
+    "permissions": { "canManageListings": true, "canViewAnalytics": true }
+  },
+  "admin": {
+    "defaultLanding": "/dashboard/admin",
+    "permissions": { "canManageUsers": true, "canAccessAdminPanel": true }
+  }
+}
+```
+
+### Testing Implementation
+
+**Comprehensive Test Suite** (`src/tests/dashboard.routing.test.tsx`):
+
+```typescript
+describe('Dashboard Routing Tests', () => {
+  describe('ProtectedRoute Component', () => {
+    it('should render children when user is authenticated', () => {
+      // Test authenticated access
+    });
+    
+    it('should redirect to login when user is not authenticated', () => {
+      // Test unauthenticated redirect
+    });
+  });
+  
+  describe('RoleGuard Component', () => {
+    it('should render children when user has required role', () => {
+      // Test authorized access
+    });
+    
+    it('should show access denied when user lacks required role', () => {
+      // Test unauthorized access
+    });
+  });
+  
+  describe('Role Helper Functions', () => {
+    it('should correctly identify user roles', () => {
+      // Test role identification functions
+    });
+  });
+});
+```
+
+### Security Considerations
+
+**Access Control Matrix**:
+```
+Dashboard Access Control:
+┌─────────────┬─────────┬─────────┬──────────┬───────┐
+│   Route     │ Visitor │ Citizen │ Business │ Admin │
+├─────────────┼─────────┼─────────┼──────────┼───────┤
+│ /dashboard/ │    ✅    │    ✅    │    ✅     │   ✅   │
+│   visitor   │         │         │          │       │
+├─────────────┼─────────┼─────────┼──────────┼───────┤
+│ /dashboard/ │    ❌    │    ✅    │    ✅     │   ✅   │
+│   citizen   │         │         │          │       │
+├─────────────┼─────────┼─────────┼──────────┼───────┤
+│ /dashboard/ │    ❌    │    ❌    │    ✅     │   ✅   │
+│  business   │         │         │          │       │
+├─────────────┼─────────┼─────────┼──────────┼───────┤
+│ /dashboard/ │    ❌    │    ❌    │    ❌     │   ✅   │
+│   admin     │         │         │          │       │
+└─────────────┴─────────┴─────────┴──────────┴───────┘
+```
+
+**Security Features**:
+- JWT-based role verification
+- Client-side route protection with server-side validation
+- Graceful error handling for unauthorized access
+- Audit logging for access attempts
+- Role hierarchy respect (higher roles inherit lower permissions)
+
+### User Experience Flow
+
+**Login Flow**:
+1. User enters credentials
+2. Authentication succeeds
+3. System determines user role from JWT/profile
+4. Dynamic redirect to role-specific dashboard
+5. Dashboard renders with role-appropriate content
+
+**Access Denied Flow**:
+1. User attempts to access restricted route
+2. RoleGuard checks permissions
+3. Access denied page shows clear message
+4. Options provided: Go back, Home, Contact support
+5. Business users can see upgrade path
+
+### Troubleshooting
+
+**Common Issues**:
+
+**Issue**: Login redirects to wrong dashboard
+**Solution**: Check role configuration in `roles.json` and JWT claims
+
+**Issue**: Access denied for valid user
+**Solution**: Verify RLS policies and role synchronization
+
+**Issue**: Infinite redirect loops
+**Solution**: Check default landing pages and authentication states
+
+**Issue**: Dashboard not rendering
+**Solution**: Verify component imports and route protection setup
+
+### Results Achieved
+
+✅ **Standardized Routes**: All four dashboard routes implemented (`/dashboard/*`)  
+✅ **Role-Based Access**: Proper authorization with graceful error handling  
+✅ **Dynamic Redirection**: Smart login flow based on user roles  
+✅ **Enhanced UX**: Role-specific content and navigation  
+✅ **Security**: Multi-layer protection with audit capabilities  
+✅ **Maintainability**: Clean component architecture and comprehensive tests  
+
+---
+
+## 9. Testing & Verification
 
 ### Running Tests
 
@@ -749,6 +1677,117 @@ Before deploying to production:
 
 ---
 
+## 7. Signup Hook & JWT Role Claim Mapping
+
+### Problem Statement
+**Error**: New users weren't automatically getting profile rows with roles, causing RLS and frontend role logic to fail.
+
+**Exact Error Behavior**:
+- Users could register but profiles table remained empty
+- Role claims were missing from JWT tokens
+- RLS policies failed due to null/missing role data
+- Frontend role-based UI logic broke
+
+### Solution
+
+**Migration File**: `supabase/migrations/20251011_signup_hook_and_rpc.sql`
+
+**Changes Implemented**:
+
+1. **User Role Enum**: 
+```sql
+CREATE TYPE user_role AS ENUM ('visitor','citizen','business','admin');
+```
+
+2. **Profile Role Column**:
+```sql
+ALTER TABLE public.profiles ADD COLUMN role user_role DEFAULT 'citizen';
+```
+
+3. **Debug RPC Function**:
+```sql
+CREATE OR REPLACE FUNCTION public.get_my_role()
+RETURNS text AS $$
+  SELECT current_setting('jwt.claims.role', true);
+$$ LANGUAGE sql STABLE;
+```
+
+4. **Secure RLS Policy Example**:
+```sql
+CREATE POLICY "profiles_select_owner_or_admin" ON public.profiles
+  FOR SELECT USING (
+    id::text = current_setting('jwt.claims.sub', true)
+    OR current_setting('jwt.claims.role', true) = 'admin'
+  );
+```
+
+**Edge Function**: `supabase/functions/onAuthSignup/index.ts`
+
+Automatically creates profile rows when users sign up:
+```typescript
+const { error } = await supabase
+  .from('profiles')
+  .upsert({
+    id: userId,
+    email,
+    full_name,
+    role: 'citizen', // Default role - server-side only
+    created_at: new Date().toISOString()
+  }, { onConflict: 'id' });
+```
+
+### Deployment Steps
+
+1. **Apply SQL Migration**:
+```bash
+psql "$DATABASE_URL" -f supabase/migrations/20251011_signup_hook_and_rpc.sql
+# or
+supabase db push
+```
+
+2. **Deploy Edge Function**:
+```bash
+supabase functions deploy onAuthSignup --no-verify-jwt
+```
+
+3. **Configure Auth Webhook**:
+- Go to Supabase Dashboard → Authentication → Settings → Webhooks
+- Add webhook URL: `https://[project-ref].functions.supabase.co/onAuthSignup`
+- Select event: `user.created`
+
+4. **Set Environment Variables**:
+```bash
+# For edge function
+SUPABASE_URL=https://[project-ref].supabase.co
+SUPABASE_SERVICE_ROLE_KEY=[service-role-key]
+```
+
+### Testing
+
+**Smoke Test Script**: `scripts/smoke_signup_and_role.sh`
+
+```bash
+export SUPABASE_URL="https://xyz.supabase.co"
+export SUPABASE_ANON_KEY="public-anon-key"
+export TEST_USER_EMAIL="smoke+$(date +%s)@example.com"
+./scripts/smoke_signup_and_role.sh
+```
+
+**Expected Results**:
+- New user signup creates profile row with `role='citizen'`
+- `get_my_role()` RPC returns role claim from JWT
+- RLS policies work correctly with role-based access
+
+### Security Notes
+
+⚠️ **CRITICAL**: 
+- NEVER commit `SUPABASE_SERVICE_ROLE_KEY` to repository
+- Edge function defaults all new users to `role='citizen'`
+- Only server/admin actions can set elevated roles (`business`, `admin`)
+- Validate webhook payloads in production (HMAC verification)
+
+---
+
 ## Troubleshooting Common Issues
 
 ### Issue: RLS policy denies access unexpectedly
@@ -773,8 +1812,142 @@ supabase functions logs validate-password
 ### Issue: Header doesn't update after login
 **Solution**: Verify AuthProvider wraps App component in main.tsx
 
+### Issue: Signup hook not triggering
+**Solution**: Check webhook configuration and edge function logs:
+```bash
+supabase functions logs onAuthSignup
+```
+
+### Issue: Role claims missing from JWT
+**Solution**: Verify `get_my_role()` returns expected value and check auth settings
+
+---
+
+## 9. Signup Hook & JWT Role Claim Mapping
+
+### Problem Statement
+**Error**: New users weren't automatically getting profile rows with roles, causing RLS and frontend role logic to fail.
+
+**Exact Error Behavior**:
+- Users could register but profiles table remained empty
+- Role claims were missing from JWT tokens
+- RLS policies failed due to null/missing role data
+- Frontend role-based UI logic broke
+
+### Solution
+
+**Migration File**: `supabase/migrations/20251011_signup_hook_and_rpc.sql`
+
+**Changes Implemented**:
+
+1. **User Role Enum**: 
+```sql
+CREATE TYPE user_role AS ENUM ('visitor','citizen','business','admin');
+```
+
+2. **Profile Role Column**:
+```sql
+ALTER TABLE public.profiles ADD COLUMN role user_role DEFAULT 'citizen';
+```
+
+3. **Debug RPC Function**:
+```sql
+CREATE OR REPLACE FUNCTION public.get_my_role()
+RETURNS text AS $$
+  SELECT current_setting('jwt.claims.role', true);
+$$ LANGUAGE sql STABLE;
+```
+
+4. **Secure RLS Policy Example**:
+```sql
+CREATE POLICY "profiles_select_owner_or_admin" ON public.profiles
+  FOR SELECT USING (
+    id::text = current_setting('jwt.claims.sub', true)
+    OR current_setting('jwt.claims.role', true) = 'admin'
+  );
+```
+
+**Edge Function**: `supabase/functions/onAuthSignup/index.ts`
+
+Automatically creates profile rows when users sign up:
+```typescript
+const { error } = await supabase
+  .from('profiles')
+  .upsert({
+    id: userId,
+    email,
+    full_name,
+    role: 'citizen', // Default role - server-side only
+    created_at: new Date().toISOString()
+  }, { onConflict: 'id' });
+```
+
+### Deployment Steps
+
+1. **Apply SQL Migration**:
+```bash
+psql "$DATABASE_URL" -f supabase/migrations/20251011_signup_hook_and_rpc.sql
+# or
+supabase db push
+```
+
+2. **Deploy Edge Function**:
+```bash
+supabase functions deploy onAuthSignup --no-verify-jwt
+```
+
+3. **Configure Auth Webhook**:
+- Go to Supabase Dashboard → Authentication → Settings → Webhooks
+- Add webhook URL: `https://[project-ref].functions.supabase.co/onAuthSignup`
+- Select event: `user.created`
+
+4. **Set Environment Variables**:
+```bash
+# For edge function
+SUPABASE_URL=https://[project-ref].supabase.co
+SUPABASE_SERVICE_ROLE_KEY=[service-role-key]
+```
+
+### Testing
+
+**Smoke Test Script**: `scripts/smoke_signup_and_role.sh`
+
+```bash
+export SUPABASE_URL="https://xyz.supabase.co"
+export SUPABASE_ANON_KEY="public-anon-key" 
+export TEST_USER_EMAIL="smoke+$(date +%s)@example.com"
+./scripts/smoke_signup_and_role.sh
+```
+
+**Expected Results**:
+- New user signup creates profile row with `role='citizen'`
+- `get_my_role()` RPC returns role claim from JWT
+- RLS policies work correctly with role-based access
+
+### Security Notes
+
+⚠️ **CRITICAL**: 
+- NEVER commit `SUPABASE_SERVICE_ROLE_KEY` to repository
+- Edge function defaults all new users to `role='citizen'`
+- Only server/admin actions can set elevated roles (`business`, `admin`)
+- Validate webhook payloads in production (HMAC verification)
+
+### Troubleshooting Signup Issues
+
+**Issue**: Signup hook not triggering
+**Solution**: Check webhook configuration and edge function logs:
+```bash
+supabase functions logs onAuthSignup
+```
+
+**Issue**: Profile not created
+**Solution**: Verify edge function has correct permissions and service role key
+
+**Issue**: Role claims missing from JWT
+**Solution**: Check JWT claims configuration and `get_my_role()` RPC
+
 ---
 
 **Document Version**: 1.0  
-**Last Updated**: October 10, 2025  
+**Last Updated**: October 11, 2025  
 **Maintainer**: Limpopo Connect Development Team

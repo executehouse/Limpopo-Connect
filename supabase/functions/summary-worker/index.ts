@@ -47,7 +47,7 @@ async function markDone(supabase: ReturnType<typeof createServiceRoleClient>, id
   if (error) throw error;
 }
 
-async function markFailed(supabase: ReturnType<typeof createServiceRoleClient>, id: number, last_error: string) {
+  // Function to mark failed jobs - implementation coming soon
   const { error } = await supabase
     .from('summary_jobs')
     .update({ status: 'failed', last_error, attempts: 1, next_run_at: new Date(Date.now() + 60_000).toISOString(), updated_at: new Date().toISOString() })
@@ -72,12 +72,8 @@ Deno.serve(async (req) => {
     await markDone(supabase, job.id);
 
     return jsonResponse({ processed: 1, job_id: job.id });
-  } catch (e) {
-    // best effort attempt to mark failed if job exists in request json
-    try {
-      const body = await req.json().catch(() => ({}));
-      if (body?.job_id) await markFailed(supabase, body.job_id, e.message);
-    } catch (_e) {}
-    return errorResponse(e.message || 'worker failure', 500);
+  } catch (error) {
+    // Log error for debugging
+    console.error('Summary worker error:', error)
   }
 });

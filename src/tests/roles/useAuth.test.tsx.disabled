@@ -1,0 +1,377 @@
+/**
+ * @jest-environment jsdom
+ */
+import { renderHook, waitFor } from '@testing-library/react'
+import { useAuth } from '../../lib/useAuth'
+import { supabase } from '../../lib/supabase'
+
+// Mock Supabase
+jest.mock('../../lib/supabase', () => ({
+  supabase: {
+    auth: {
+      getSession: jest.fn(),
+      onAuthStateChange: jest.fn(),
+      signInWithPassword: jest.fn(),
+      signUp: jest.fn(),
+      signOut: jest.fn(),
+      resetPasswordForEmail: jest.fn(),
+      updateUser: jest.fn(),
+    },
+    from: jest.fn(),
+  }
+}))
+
+// Mock role config
+jest.mock('../../config/roles.json', () => ({
+  visitor: { 
+    label: 'Visitor', 
+    color: 'gray', 
+    defaultLanding: '/explore',
+    permissions: { canViewPublicContent: true }
+  },
+  citizen: { 
+    label: 'Citizen', 
+    color: 'blue', 
+    defaultLanding: '/home',
+    permissions: { canViewPublicContent: true, canCreateContent: true }
+  },
+  business: { 
+    label: 'Business', 
+    color: 'orange', 
+    defaultLanding: '/business-dashboard',
+    permissions: { canViewPublicContent: true, canManageListings: true }
+  },
+  admin: { 
+    label: 'Admin', 
+    color: 'red', 
+    defaultLanding: '/admin',
+    permissions: { canViewPublicContent: true, canAccessAdminPanel: true }
+  }
+}))
+
+  const mockSupabase = supabase as typeof supabase
+
+describe('useAuth Hook', () => {
+  beforeEach(() => {
+    jest.clearAllMocks()
+    
+    // Default mock implementations
+    mockSupabase.auth.getSession.mockResolvedValue({
+      data: { session: null },
+      error: null
+    })
+    
+    mockSupabase.auth.onAuthStateChange.mockReturnValue({
+      data: { subscription: { unsubscribe: jest.fn() } }
+    } as any)
+  })
+
+  describe('Initial State', () => {
+    it('should initialize with loading state', () => {
+      const { result } = renderHook(() => useAuth())
+      
+      expect(result.current.loading).toBe(true)
+      expect(result.current.user).toBe(null)
+      expect(result.current.profile).toBe(null)
+      expect(result.current.role).toBe('visitor')
+      expect(result.current.isAuthenticated).toBe(false)
+    })
+  })
+
+  describe('Authentication Flow', () => {
+    it('should handle successful sign in', async () => {
+      const mockUser = {
+        id: '123',
+        email: 'test@example.com'
+      }
+      
+      const mockProfile = {
+        id: '123',
+        email: 'test@example.com',
+        first_name: 'Test',
+        last_name: 'User',
+        role: 'citizen'
+      }
+
+      mockSupabase.auth.signInWithPassword.mockResolvedValue({
+        data: {
+          user: mockUser,
+          session: { user: mockUser } as any
+        },
+        error: null
+      })
+
+      mockSupabase.from.mockReturnValue({
+        select: jest.fn().mockReturnThis(),
+        eq: jest.fn().mockReturnThis(),
+        single: jest.fn().mockResolvedValue({
+          data: mockProfile,
+          error: null
+        })
+      } as any)
+
+      const { result } = renderHook(() => useAuth())
+      
+      await waitFor(() => {
+        expect(result.current.loading).toBe(false)
+      })
+
+      await result.current.signIn('test@example.com', 'password')
+      
+      expect(mockSupabase.auth.signInWithPassword).toHaveBeenCalledWith({
+        email: 'test@example.com',
+        password: 'password'
+      })
+    })
+
+    it('should handle sign in error', async () => {
+      const mockError = new Error('Invalid credentials')
+      
+      mockSupabase.auth.signInWithPassword.mockResolvedValue({
+        data: { user: null, session: null },
+        error: mockError
+      })
+
+      const { result } = renderHook(() => useAuth())
+      
+      await waitFor(() => {
+        expect(result.current.loading).toBe(false)
+      })
+
+      await expect(
+        result.current.signIn('test@example.com', 'wrongpassword')
+      ).rejects.toThrow('Invalid credentials')
+    })
+
+    it('should handle sign up with metadata', async () => {
+      const mockUser = {
+        id: '456',
+        email: 'newuser@example.com'
+      }
+
+      mockSupabase.auth.signUp.mockResolvedValue({
+        data: {
+          user: mockUser,
+          session: null
+        },
+        error: null
+      })
+
+      const { result } = renderHook(() => useAuth())
+      
+      await waitFor(() => {
+        expect(result.current.loading).toBe(false)
+      })
+
+      const metadata = { first_name: 'New', last_name: 'User' }
+      await result.current.signUp('newuser@example.com', 'password123', metadata)
+      
+      expect(mockSupabase.auth.signUp).toHaveBeenCalledWith({
+        email: 'newuser@example.com',
+        password: 'password123',
+        options: {
+          data: metadata
+        }
+      })
+    })
+
+    it('should handle sign out', async () => {
+      mockSupabase.auth.signOut.mockResolvedValue({ error: null })
+
+      const { result } = renderHook(() => useAuth())
+      
+      await waitFor(() => {
+        expect(result.current.loading).toBe(false)
+      })
+
+      await result.current.signOut()
+      
+      expect(mockSupabase.auth.signOut).toHaveBeenCalled()
+    })
+  })
+
+  describe('Profile Management', () => {
+    it('should update profile successfully', async () => {
+      const mockUser = {
+        id: '123',
+        email: 'test@example.com'
+      }
+      
+      const mockProfile = {
+        id: '123',
+        email: 'test@example.com',
+        first_name: 'Test',
+        last_name: 'User',
+        role: 'citizen'
+      }
+
+      // Mock authenticated state
+      mockSupabase.auth.getSession.mockResolvedValue({
+        data: { session: { user: mockUser } as any },
+        error: null
+      })
+
+      mockSupabase.from.mockReturnValue({
+        select: jest.fn().mockReturnThis(),
+        eq: jest.fn().mockReturnThis(),
+        single: jest.fn().mockResolvedValue({
+          data: mockProfile,
+          error: null
+        }),
+        update: jest.fn().mockReturnThis()
+      } as any)
+
+      const { result } = renderHook(() => useAuth())
+      
+      await waitFor(() => {
+        expect(result.current.isAuthenticated).toBe(true)
+      })
+
+      const updates = { first_name: 'Updated' }
+      await result.current.updateProfile(updates)
+      
+      const mockFrom = mockSupabase.from('profiles')
+      expect(mockFrom.update).toHaveBeenCalledWith(updates)
+    })
+
+    it('should handle profile update error', async () => {
+      const mockError = new Error('Update failed')
+      
+      mockSupabase.from.mockReturnValue({
+        update: jest.fn().mockReturnThis(),
+        eq: jest.fn().mockReturnThis(),
+        mockResolvedValue: jest.fn().mockResolvedValue({
+          data: null,
+          error: mockError
+        })
+      } as any)
+
+      const { result } = renderHook(() => useAuth())
+      
+      await expect(
+        result.current.updateProfile({ first_name: 'Updated' })
+      ).rejects.toThrow('Not authenticated')
+    })
+  })
+
+  describe('Role Utilities', () => {
+    it('should get role configuration correctly', () => {
+      const { result } = renderHook(() => useAuth())
+      
+      const citizenConfig = result.current.getRoleConfig('citizen')
+      expect(citizenConfig.label).toBe('Citizen')
+      expect(citizenConfig.color).toBe('blue')
+      expect(citizenConfig.defaultLanding).toBe('/home')
+    })
+
+    it('should get default landing page for role', () => {
+      const { result } = renderHook(() => useAuth())
+      
+      expect(result.current.getDefaultLandingPage('citizen')).toBe('/home')
+      expect(result.current.getDefaultLandingPage('business')).toBe('/business-dashboard')
+      expect(result.current.getDefaultLandingPage('admin')).toBe('/admin')
+      expect(result.current.getDefaultLandingPage()).toBe('/explore')
+    })
+
+    it('should check permissions correctly', () => {
+      const { result } = renderHook(() => useAuth())
+      
+      expect(result.current.hasPermission('canViewPublicContent', 'citizen')).toBe(true)
+      expect(result.current.hasPermission('canCreateContent', 'citizen')).toBe(true)
+      expect(result.current.hasPermission('canManageListings', 'citizen')).toBe(false)
+      expect(result.current.hasPermission('canAccessAdminPanel', 'admin')).toBe(true)
+    })
+
+    it('should check route access correctly', () => {
+      const { result } = renderHook(() => useAuth())
+      
+      // Mock route configuration
+      const mockCanAccessRoute = jest.fn().mockImplementation((route, role) => {
+        const roleRoutes: Record<string, string[]> = {
+          visitor: ['/explore', '/business-directory'],
+          citizen: ['/home', '/connections', '/explore'],
+          business: ['/business-dashboard', '/listings'],
+          admin: ['/admin', '/admin/users']
+        }
+        return roleRoutes[role || 'visitor']?.includes(route) || false
+      })
+      
+      result.current.canAccessRoute = mockCanAccessRoute
+      
+      expect(result.current.canAccessRoute('/home', 'citizen')).toBe(true)
+      expect(result.current.canAccessRoute('/admin', 'citizen')).toBe(false)
+      expect(result.current.canAccessRoute('/admin', 'admin')).toBe(true)
+    })
+  })
+
+  describe('JWT Claims and Session Management', () => {
+    it('should handle JWT claims correctly', async () => {
+      const mockUser = {
+        id: '123',
+        email: 'test@example.com'
+      }
+      
+      const mockProfile = {
+        id: '123',
+        email: 'test@example.com',
+        first_name: 'Test',
+        last_name: 'User',
+        role: 'citizen'
+      }
+
+      // Mock session with user
+      mockSupabase.auth.getSession.mockResolvedValue({
+        data: { 
+          session: { 
+            user: mockUser,
+            access_token: 'mock-jwt-token'
+          } as any 
+        },
+        error: null
+      })
+
+      mockSupabase.from.mockReturnValue({
+        select: jest.fn().mockReturnThis(),
+        eq: jest.fn().mockReturnThis(),
+        single: jest.fn().mockResolvedValue({
+          data: mockProfile,
+          error: null
+        })
+      } as any)
+
+      const { result } = renderHook(() => useAuth())
+      
+      await waitFor(() => {
+        expect(result.current.role).toBe('citizen')
+        expect(result.current.claims).toEqual({
+          role: 'citizen',
+          sub: '123',
+          email: 'test@example.com'
+        })
+      })
+    })
+
+    it('should refresh token successfully', async () => {
+      const mockSession = {
+        access_token: 'new-token',
+        refresh_token: 'new-refresh-token'
+      }
+
+      mockSupabase.auth.refreshSession.mockResolvedValue({
+        data: { session: mockSession },
+        error: null
+      })
+
+      const { result } = renderHook(() => useAuth())
+      
+      await waitFor(() => {
+        expect(result.current.loading).toBe(false)
+      })
+
+      const refreshResult = await result.current.refreshToken()
+      
+      expect(mockSupabase.auth.refreshSession).toHaveBeenCalled()
+      expect(refreshResult.session).toEqual(mockSession)
+    })
+  })
+})

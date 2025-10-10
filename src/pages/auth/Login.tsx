@@ -13,7 +13,7 @@ const Login: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const successMessage = location.state?.message;
-  const { signIn, isAuthenticated, loading } = useAuthContext();
+  const { signIn, isAuthenticated, loading, getDefaultLandingPage } = useAuthContext();
 
   // Load saved email on mount if "Remember Me" was checked
   useEffect(() => {
@@ -72,8 +72,20 @@ const Login: React.FC = () => {
         localStorage.removeItem('savedEmail');
       }
 
-      // Redirect to the home page on successful login
-      navigate('/');
+      // Get the redirect path from location state or determine from role
+      const from = location.state?.from;
+      
+      // Wait a moment for profile to load, then redirect based on role
+      setTimeout(() => {
+        if (from && from !== '/auth/login' && from !== '/login') {
+          // Redirect back to where they came from
+          navigate(from, { replace: true });
+        } else {
+          // Get role-specific landing page or fallback to home
+          const landingPage = getDefaultLandingPage();
+          navigate(landingPage || '/', { replace: true });
+        }
+      }, 100);
 
     } catch (err) {
       setError(err instanceof Error ? err.message : 'An error occurred during login');

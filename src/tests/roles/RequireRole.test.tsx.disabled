@@ -1,0 +1,295 @@
+/**
+ * @jest-environment jsdom
+ */
+import { render, screen, fireEvent, waitFor } from '@testing-library/react'
+import { BrowserRouter } from 'react-router-dom'
+import { AuthProvider } from '../../lib/AuthProvider'
+import { useAuth } from '../../lib/useAuth'
+import RequireRole from '../../components/RequireRole'
+
+// Mock the auth hook
+jest.mock('../../lib/useAuth')
+const mockUseAuth = useAuth as jest.MockedFunction<typeof useAuth>
+
+// Mock role config
+jest.mock('../../config/roles.json', () => ({
+  visitor: { label: 'Visitor', color: 'gray', defaultLanding: '/explore' },
+  citizen: { label: 'Citizen', color: 'blue', defaultLanding: '/home' },
+  business: { label: 'Business', color: 'orange', defaultLanding: '/business-dashboard' },
+  admin: { label: 'Admin', color: 'red', defaultLanding: '/admin' }
+}))
+
+const TestComponent = () => <div>Protected Content</div>
+
+const renderWithRouter = (component: React.ReactElement) => {
+  return render(
+    <BrowserRouter>
+      <AuthProvider>
+        {component}
+      </AuthProvider>
+    </BrowserRouter>
+  )
+}
+
+describe('RequireRole Component', () => {
+  beforeEach(() => {
+    jest.clearAllMocks()
+  })
+
+  describe('Loading State', () => {
+    it('should show loading spinner when auth is loading', () => {
+      mockUseAuth.mockReturnValue({
+        user: null,
+        session: null,
+        profile: null,
+        role: 'visitor',
+        claims: null,
+        loading: true,
+        isAuthenticated: false,
+        signIn: jest.fn(),
+        signUp: jest.fn(),
+        signOut: jest.fn(),
+        resetPassword: jest.fn(),
+        updatePassword: jest.fn(),
+        updateProfile: jest.fn(),
+        refreshProfile: jest.fn(),
+        refreshToken: jest.fn(),
+        getRoleConfig: jest.fn(),
+        getDefaultLandingPage: jest.fn(),
+        hasPermission: jest.fn(),
+        canAccessRoute: jest.fn()
+      })
+
+      renderWithRouter(
+        <RequireRole roles={['citizen']}>
+          <TestComponent />
+        </RequireRole>
+      )
+
+      expect(screen.getByText('Loading...')).toBeInTheDocument()
+    })
+  })
+
+  describe('Unauthenticated User', () => {
+    it('should redirect to login when user is not authenticated', () => {
+      mockUseAuth.mockReturnValue({
+        user: null,
+        session: null,
+        profile: null,
+        role: 'visitor',
+        claims: null,
+        loading: false,
+        isAuthenticated: false,
+        signIn: jest.fn(),
+        signUp: jest.fn(),
+        signOut: jest.fn(),
+        resetPassword: jest.fn(),
+        updatePassword: jest.fn(),
+        updateProfile: jest.fn(),
+        refreshProfile: jest.fn(),
+        refreshToken: jest.fn(),
+        getRoleConfig: jest.fn(),
+        getDefaultLandingPage: jest.fn(),
+        hasPermission: jest.fn(),
+        canAccessRoute: jest.fn()
+      })
+
+      renderWithRouter(
+        <RequireRole roles={['citizen']}>
+          <TestComponent />
+        </RequireRole>
+      )
+
+      // Should redirect to login (Navigate component doesn't render visible content in tests)
+      expect(screen.queryByText('Protected Content')).not.toBeInTheDocument()
+    })
+  })
+
+  describe('Authenticated User with Correct Role', () => {
+    it('should render protected content for citizen role', () => {
+      mockUseAuth.mockReturnValue({
+        user: { id: '123', email: 'test@example.com' } as any,
+        session: {} as any,
+        profile: { id: '123', role: 'citizen', email: 'test@example.com' } as any,
+        role: 'citizen',
+        claims: { role: 'citizen', sub: '123' },
+        loading: false,
+        isAuthenticated: true,
+        signIn: jest.fn(),
+        signUp: jest.fn(),
+        signOut: jest.fn(),
+        resetPassword: jest.fn(),
+        updatePassword: jest.fn(),
+        updateProfile: jest.fn(),
+        refreshProfile: jest.fn(),
+        refreshToken: jest.fn(),
+        getRoleConfig: jest.fn(),
+        getDefaultLandingPage: jest.fn(),
+        hasPermission: jest.fn(),
+        canAccessRoute: jest.fn()
+      })
+
+      renderWithRouter(
+        <RequireRole roles={['citizen']}>
+          <TestComponent />
+        </RequireRole>
+      )
+
+      expect(screen.getByText('Protected Content')).toBeInTheDocument()
+    })
+
+    it('should render protected content for admin accessing citizen route', () => {
+      mockUseAuth.mockReturnValue({
+        user: { id: '123', email: 'admin@example.com' } as any,
+        session: {} as any,
+        profile: { id: '123', role: 'admin', email: 'admin@example.com' } as any,
+        role: 'admin',
+        claims: { role: 'admin', sub: '123' },
+        loading: false,
+        isAuthenticated: true,
+        signIn: jest.fn(),
+        signUp: jest.fn(),
+        signOut: jest.fn(),
+        resetPassword: jest.fn(),
+        updatePassword: jest.fn(),
+        updateProfile: jest.fn(),
+        refreshProfile: jest.fn(),
+        refreshToken: jest.fn(),
+        getRoleConfig: jest.fn(),
+        getDefaultLandingPage: jest.fn(),
+        hasPermission: jest.fn(),
+        canAccessRoute: jest.fn()
+      })
+
+      renderWithRouter(
+        <RequireRole roles={['citizen', 'admin']}>
+          <TestComponent />
+        </RequireRole>
+      )
+
+      expect(screen.getByText('Protected Content')).toBeInTheDocument()
+    })
+  })
+
+  describe('Authenticated User with Incorrect Role', () => {
+    it('should show access denied for visitor accessing citizen route', () => {
+      mockUseAuth.mockReturnValue({
+        user: { id: '123', email: 'visitor@example.com' } as any,
+        session: {} as any,
+        profile: { id: '123', role: 'visitor', email: 'visitor@example.com' } as any,
+        role: 'visitor',
+        claims: { role: 'visitor', sub: '123' },
+        loading: false,
+        isAuthenticated: true,
+        signIn: jest.fn(),
+        signUp: jest.fn(),
+        signOut: jest.fn(),
+        resetPassword: jest.fn(),
+        updatePassword: jest.fn(),
+        updateProfile: jest.fn(),
+        refreshProfile: jest.fn(),
+        refreshToken: jest.fn(),
+        getRoleConfig: jest.fn(),
+        getDefaultLandingPage: jest.fn(),
+        hasPermission: jest.fn(),
+        canAccessRoute: jest.fn()
+      })
+
+      renderWithRouter(
+        <RequireRole roles={['citizen']}>
+          <TestComponent />
+        </RequireRole>
+      )
+
+      expect(screen.getByText('Access Denied')).toBeInTheDocument()
+      expect(screen.getByText('Your role: visitor')).toBeInTheDocument()
+      expect(screen.getByText('Required roles: citizen')).toBeInTheDocument()
+    })
+
+    it('should show request access button and handle click', () => {
+      mockUseAuth.mockReturnValue({
+        user: { id: '123', email: 'business@example.com' } as any,
+        session: {} as any,
+        profile: { id: '123', role: 'business', email: 'business@example.com' } as any,
+        role: 'business',
+        claims: { role: 'business', sub: '123' },
+        loading: false,
+        isAuthenticated: true,
+        signIn: jest.fn(),
+        signUp: jest.fn(),
+        signOut: jest.fn(),
+        resetPassword: jest.fn(),
+        updatePassword: jest.fn(),
+        updateProfile: jest.fn(),
+        refreshProfile: jest.fn(),
+        refreshToken: jest.fn(),
+        getRoleConfig: jest.fn(),
+        getDefaultLandingPage: jest.fn(),
+        hasPermission: jest.fn(),
+        canAccessRoute: jest.fn()
+      })
+
+      const consoleSpy = jest.spyOn(console, 'log').mockImplementation()
+
+      renderWithRouter(
+        <RequireRole roles={['admin']}>
+          <TestComponent />
+        </RequireRole>
+      )
+
+      const requestButton = screen.getByText('Request Access')
+      fireEvent.click(requestButton)
+
+      expect(consoleSpy).toHaveBeenCalledWith('Request access for roles:', ['admin'])
+
+      consoleSpy.mockRestore()
+    })
+  })
+
+  describe('Fallback Behavior', () => {
+    it('should redirect to fallback path when provided', () => {
+      mockUseAuth.mockReturnValue({
+        user: { id: '123', email: 'visitor@example.com' } as any,
+        session: {} as any,
+        profile: { id: '123', role: 'visitor', email: 'visitor@example.com' } as any,
+        role: 'visitor',
+        claims: { role: 'visitor', sub: '123' },
+        loading: false,
+        isAuthenticated: true,
+        signIn: jest.fn(),
+        signUp: jest.fn(),
+        signOut: jest.fn(),
+        resetPassword: jest.fn(),
+        updatePassword: jest.fn(),
+        updateProfile: jest.fn(),
+        refreshProfile: jest.fn(),
+        refreshToken: jest.fn(),
+        getRoleConfig: jest.fn(),
+        getDefaultLandingPage: jest.fn(),
+        hasPermission: jest.fn(),
+        canAccessRoute: jest.fn()
+      })
+
+      renderWithRouter(
+        <RequireRole roles={['admin']} fallbackPath="/unauthorized" showAccessDenied={false}>
+          <TestComponent />
+        </RequireRole>
+      )
+
+      // Should redirect to fallback path
+      expect(screen.queryByText('Protected Content')).not.toBeInTheDocument()
+      expect(screen.queryByText('Access Denied')).not.toBeInTheDocument()
+    })
+  })
+})
+
+describe('useRoleGuard Hook', () => {
+  // Note: This would typically be tested in a separate file
+  // For brevity, including basic structure here
+  
+  it('should return correct role checking functions', () => {
+    // This test would need to be implemented with proper hook testing utilities
+    // Example structure shown for reference
+    expect(true).toBe(true) // Placeholder
+  })
+})

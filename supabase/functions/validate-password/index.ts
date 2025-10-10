@@ -57,7 +57,7 @@ function validatePassword(password: string): PasswordValidationResult {
   }
 
   // Check for special characters
-  if (/[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(password)) {
+  if (/[!@#$%^&*()_+=\\[\\]{};'|,.<>?-]/.test(password)) {
     result.score += 2
     result.feedback.push('Contains special characters')
   } else {

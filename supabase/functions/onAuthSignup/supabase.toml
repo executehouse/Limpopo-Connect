@@ -1,0 +1,2 @@
+# supabase/functions/onAuthSignup/supabase.toml
+name = "onAuthSignup"
