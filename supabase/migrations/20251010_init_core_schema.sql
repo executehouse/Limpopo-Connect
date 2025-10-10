@@ -23,7 +23,7 @@ alter table public.profiles enable row level security;
 -- Policies for profiles
 drop policy if exists public_profiles_viewable on public.profiles;
 create policy public_profiles_viewable on public.profiles
-  for select using (true);
+  for select using (auth.uid() = id);
 
 drop policy if exists users_insert_own_profile on public.profiles;
 create policy users_insert_own_profile on public.profiles
