@@ -18,6 +18,7 @@ import Login from './pages/auth/Login';
 import Register from './pages/auth/Register';
 import ForgotPassword from './pages/auth/ForgotPassword';
 import ResetPassword from './pages/auth/ResetPassword';
+import Profile from './pages/Profile';
 import ChatDemo from './pages/ChatDemo';
 import './index.css';
 
@@ -48,6 +49,7 @@ function App() {
             <Route path="connections/shared-interests" element={<SharedInterests />} />
             <Route path="connections/community-stories" element={<CommunityStories />} />
             <Route path="connections/missed-moments" element={<MissedMoments />} />
+            <Route path="profile" element={<Profile />} />
             <Route path="chat-demo" element={<ChatDemo />} />
             </Route>
           </Routes>
