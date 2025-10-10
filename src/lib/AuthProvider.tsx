@@ -4,7 +4,8 @@
  * This provides authentication state and methods throughout the React app
  */
 
-import React, { createContext, useContext, ReactNode } from 'react'
+import { createContext, useContext } from 'react'
+import type { ReactNode } from 'react'
 import { useAuth } from './useAuth'
 import type { Session, User } from '@supabase/supabase-js'
 import type { Profile } from './useAuth'
@@ -24,7 +25,7 @@ interface AuthContextType {
   resetPassword: (email: string) => Promise<void>
   updatePassword: (newPassword: string) => Promise<void>
   updateProfile: (updates: Partial<Profile>) => Promise<void>
-  refreshProfile: () => Promise<void> | undefined
+  refreshProfile: () => Promise<void> | null
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined)
