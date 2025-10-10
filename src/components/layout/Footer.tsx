@@ -1,6 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { MapPin, Facebook, Twitter, Instagram, Mail, Phone } from 'lucide-react';
+import siteConfig from '../../config/site';
 
 const Footer: React.FC = () => {
   return (
@@ -74,14 +75,35 @@ const Footer: React.FC = () => {
         </div>
 
         {/* Bottom Bar */}
-        <div className="border-t border-gray-800 mt-12 pt-8 flex flex-col sm:flex-row justify-between items-center">
-          <p className="text-gray-500 text-sm">
-            © {new Date().getFullYear()} Limpopo Connect. All Rights Reserved.
-          </p>
-          <div className="flex space-x-6 mt-4 sm:mt-0">
-            <Link to="/privacy" className="text-gray-500 hover:text-white text-sm transition">Privacy Policy</Link>
-            <Link to="/terms" className="text-gray-500 hover:text-white text-sm transition">Terms of Service</Link>
+        <div className="border-t border-gray-800 mt-12 pt-8">
+          <div className="flex flex-col sm:flex-row justify-between items-center mb-4">
+            <p className="text-gray-500 text-sm">
+              © {new Date().getFullYear()} Limpopo Connect. All Rights Reserved.
+            </p>
+            <div className="flex space-x-6 mt-4 sm:mt-0">
+              <Link to="/privacy" className="text-gray-500 hover:text-white text-sm transition">Privacy Policy</Link>
+              <Link to="/terms" className="text-gray-500 hover:text-white text-sm transition">Terms of Service</Link>
+            </div>
           </div>
+          
+          {/* Developer Credit - Configurable via siteConfig.site.showDevCredit */}
+          {siteConfig.site.showDevCredit && (
+            <div className="text-center border-t border-gray-800 pt-4">
+              <p className="text-gray-600 text-xs">
+                {siteConfig.developer.displayText}{' '}
+                <a 
+                  href={siteConfig.developer.portfolioUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-limpopo-gold hover:text-yellow-400 transition-colors duration-300 focus:outline-none focus:ring-2 focus:ring-limpopo-gold focus:ring-offset-2 focus:ring-offset-gray-900 rounded"
+                  aria-label={`Visit ${siteConfig.developer.name}'s portfolio`}
+                >
+                  charleyraluswinga.space
+                </a>
+                {/* Design choice: Subtle footer credit with accessibility focus - https://charleyraluswinga.space */}
+              </p>
+            </div>
+          )}
         </div>
       </div>
     </footer>

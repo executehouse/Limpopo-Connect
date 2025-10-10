@@ -1,0 +1,10 @@
+{
+  "links": [
+    {
+      "url": "http://localhost:4173/",
+      "status": 0,
+      "state": "BROKEN"
+    }
+  ],
+  "passed": false
+}

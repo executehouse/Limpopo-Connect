@@ -1,0 +1,10 @@
+Error: Failed to launch the browser process:  Code: 127
+
+stderr:
+/home/codespace/.cache/puppeteer/chrome/linux-141.0.7390.54/chrome-linux64/chrome: error while loading shared libraries: libatk-1.0.so.0: cannot open shared object file: No such file or directory
+
+TROUBLESHOOTING: https://pptr.dev/troubleshooting
+
+    at ChildProcess.onClose (/usr/local/share/nvm/versions/node/v22.17.0/lib/node_modules/pa11y/node_modules/@puppeteer/browsers/lib/cjs/launch.js:337:24)
+    at ChildProcess.emit (node:events:530:35)
+    at ChildProcess._handle.onexit (node:internal/child_process:293:12)

@@ -17,6 +17,8 @@ import Login from './pages/auth/Login';
 import Register from './pages/auth/Register';
 import ForgotPassword from './pages/auth/ForgotPassword';
 import ResetPassword from './pages/auth/ResetPassword';
+import Privacy from './pages/Privacy';
+import Terms from './pages/Terms';
 import './index.css';
 
 function App() {
@@ -42,6 +44,8 @@ function App() {
             <Route path="connections/shared-interests" element={<SharedInterests />} />
             <Route path="connections/community-stories" element={<CommunityStories />} />
             <Route path="connections/missed-moments" element={<MissedMoments />} />
+            <Route path="privacy" element={<Privacy />} />
+            <Route path="terms" element={<Terms />} />
           </Route>
         </Routes>
       </div>
