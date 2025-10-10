@@ -4,7 +4,7 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "dev": "vite",
+        "dev": "vite --host",,
     "start": "node server.js",
     "build": "tsc -b && vite build",
     "build:frontend": "vite build",
@@ -24,7 +24,8 @@
     "pg": "^8.10.0",
     "react": "^19.1.1",
     "react-dom": "^19.1.1",
-    "react-router-dom": "^7.9.2"
+    "react-router-dom": "^7.9.2",
+    "zxcvbn": "^4.4.2"
   },
   "devDependencies": {
     "@eslint/js": "^9.36.0",
@@ -33,6 +34,7 @@
     "@testing-library/react": "^16.3.0",
     "@types/react": "^19.1.13",
     "@types/react-dom": "^19.1.9",
+    "@types/zxcvbn": "^4.4.5",
     "@vitejs/plugin-react": "^5.0.3",
     "autoprefixer": "^10.4.21",
     "dotenv": "^17.2.3",
@@ -44,6 +46,7 @@
     "jsdom": "^27.0.0",
     "npm-run-all": "^4.1.5",
     "postcss": "^8.5.6",
+    "supabase": "^2.48.3",
     "tailwindcss": "^3.4.17",
     "typescript": "~5.8.3",
     "typescript-eslint": "^8.44.0",
