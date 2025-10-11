@@ -23,6 +23,10 @@ self.addEventListener('install', (event) => {
 
 // Fetch event - serve from cache when offline
 self.addEventListener('fetch', (event) => {
+  // Ignore non-GET requests and API calls to avoid caching dynamic data
+  if (event.request.method !== 'GET' || new URL(event.request.url).pathname.startsWith('/api')) {
+    return;
+  }
   event.respondWith(
     caches.match(event.request)
       .then((response) => {
