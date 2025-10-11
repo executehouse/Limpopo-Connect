@@ -1,3 +1,4 @@
+/* eslint-disable react-refresh/only-export-components */
 /**
  * Authentication Context Provider
  * 
@@ -10,19 +11,13 @@ import { useAuth } from './useAuth'
 import type { Session, User } from '@supabase/supabase-js'
 import type { Profile, UserRole } from './useAuth'
 
-interface RoleClaims {
-  role: UserRole
-  sub: string
-  email?: string
-}
-
 interface AuthContextType {
   // State
   user: User | null
   session: Session | null
   profile: Profile | null
   role: UserRole
-  claims: RoleClaims | null
+  claims: { role: UserRole; sub: string; email?: string } | null
   loading: boolean
   isAuthenticated: boolean
 
@@ -65,7 +60,6 @@ interface AuthProviderProps {
   children: ReactNode
 }
 
-// eslint-disable-next-line react-refresh/only-export-components
 export function AuthProvider({ children }: AuthProviderProps) {
   const auth = useAuth()
 

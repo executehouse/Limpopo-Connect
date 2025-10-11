@@ -41,6 +41,9 @@ app.listen(PORT, () => {
   console.log(`Limpopo Connect listening on port ${PORT}`);
   console.log(`API proxy target: ${API_URL}`);
 });
-app.get('/test-secret', (req, res) => {
-  res.send(`DB_USER=${process.env.DB_USER}, DB_PASSWORD=${process.env.DB_PASSWORD ? '**** loaded' : 'NOT loaded'}`);
-});
+// Development-only diagnostics endpoint; NEVER expose in production
+if (process.env.NODE_ENV !== 'production') {
+  app.get('/test-secret', (req, res) => {
+    res.send(`DB_USER=${process.env.DB_USER}, DB_PASSWORD=${process.env.DB_PASSWORD ? '**** loaded' : 'NOT loaded'}`);
+  });
+}

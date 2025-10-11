@@ -47,10 +47,22 @@ async function markDone(supabase: ReturnType<typeof createServiceRoleClient>, id
   if (error) throw error;
 }
 
-  // Function to mark failed jobs - implementation coming soon
+// Mark job as failed and schedule a retry in ~60s
+async function markFailed(
+  supabase: ReturnType<typeof createServiceRoleClient>,
+  id: number,
+  last_error: string
+) {
   const { error } = await supabase
     .from('summary_jobs')
-    .update({ status: 'failed', last_error, attempts: 1, next_run_at: new Date(Date.now() + 60_000).toISOString(), updated_at: new Date().toISOString() })
+    .update({
+      status: 'failed',
+      last_error,
+      // We set attempts to 1 if null; proper increment can be implemented via DB trigger
+      attempts: 1,
+      next_run_at: new Date(Date.now() + 60_000).toISOString(),
+      updated_at: new Date().toISOString(),
+    })
     .eq('id', id);
   if (error) throw error;
 }
@@ -61,19 +73,24 @@ Deno.serve(async (req) => {
   }
 
   const supabase = createServiceRoleClient();
-  try {
-    const { job, error } = await claimNextJob(supabase);
-    if (error) return errorResponse(error.message, 500);
-    if (!job) return jsonResponse({ processed: 0, message: 'no jobs' });
+  const { job, error } = await claimNextJob(supabase);
+  if (error) return errorResponse(error.message, 500);
+  if (!job) return jsonResponse({ processed: 0, message: 'no jobs' });
 
+  try {
     const messages = await fetchThreadMessages(supabase, job.thread_id);
     const summary = naiveSummarize(messages);
     await writeSummary(supabase, job.thread_id, summary);
     await markDone(supabase, job.id);
-
     return jsonResponse({ processed: 1, job_id: job.id });
-  } catch (error) {
-    // Log error for debugging
-    console.error('Summary worker error:', error)
+  } catch (err) {
+    const message = err instanceof Error ? err.message : String(err);
+    console.error('Summary worker error:', message);
+    try {
+      await markFailed(supabase, job.id, message);
+    } catch (markErr) {
+      console.error('Failed to mark job as failed:', markErr);
+    }
+    return errorResponse('Job processing failed', 500);
   }
 });
