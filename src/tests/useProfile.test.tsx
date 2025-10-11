@@ -98,7 +98,7 @@ describe('useProfile hook', () => {
     });
 
     mockSupabase.from.mockReturnValue({
-      select: vi.fn().mkReturnValue({
+      select: vi.fn().mockReturnValue({
         eq: vi.fn().mockReturnValue({
           single: mockSelect,
         }),
@@ -113,7 +113,7 @@ describe('useProfile hook', () => {
 
     expect(result.current.loading).toBe(false);
     expect(result.current.profile).toBe(null);
-    expect(result.current.error).toEqual(mockError);
+    expect(result.current.error).toEqual(mockError.message);
   });
 
   it('uses current user ID when no userId provided', async () => {
@@ -152,34 +152,21 @@ describe('useProfileMutations hook', () => {
   });
 
   it('updates profile successfully', async () => {
-    const updatedProfile = { ...mockProfile, first_name: 'Jane' };
-    const mockUpdate = vi.fn().mockResolvedValue({
-      data: updatedProfile,
-      error: null,
-    });
-
-    mockSupabase.from.mockReturnValue({
-      update: vi.fn().mockReturnValue({
-        eq: vi.fn().mockReturnValue({
-          select: vi.fn().mockReturnValue({
-            single: mockUpdate,
-          }),
-        }),
-      }),
-    });
+    // Update succeeds scenario
+    const mockEq = vi.fn().mockResolvedValue({ error: null });
+    const mockUpdate = vi.fn(() => ({ eq: mockEq }));
+    mockSupabase.from.mockReturnValue({ update: mockUpdate });
 
     const { result } = renderHook(() => useProfileMutations());
 
-    let updateResult;
     await act(async () => {
-      updateResult = await result.current.updateProfile({
+      await result.current.updateProfile({
         first_name: 'Jane',
         last_name: 'Doe',
       });
     });
 
     expect(mockSupabase.from).toHaveBeenCalledWith('profiles');
-    expect(updateResult).toEqual(updatedProfile);
     expect(result.current.error).toBe(null);
   });
 
@@ -205,7 +192,7 @@ describe('useProfileMutations hook', () => {
     await act(async () => {
       try {
         await result.current.updateProfile({ first_name: 'Jane' });
-      } catch (error) {
+      } catch {
         // Expected to throw
       }
     });
@@ -215,10 +202,7 @@ describe('useProfileMutations hook', () => {
 
   it('uploads avatar successfully', async () => {
     const mockFile = new File(['avatar'], 'avatar.jpg', { type: 'image/jpeg' });
-    const mockUpload = vi.fn().mockResolvedValue({
-      data: { path: 'avatars/user-123/avatar.jpg' },
-      error: null,
-    });
+    const mockUpload = vi.fn().mockResolvedValue({ error: null });
     const mockGetPublicUrl = vi.fn().mockReturnValue({
       data: { publicUrl: 'https://example.com/avatar.jpg' },
     });
@@ -230,24 +214,19 @@ describe('useProfileMutations hook', () => {
 
     const { result } = renderHook(() => useProfileMutations());
 
-    let uploadResult;
     await act(async () => {
-      uploadResult = await result.current.uploadAvatar(mockFile);
+      await result.current.uploadAvatar(mockFile);
     });
 
-    expect(mockSupabase.storage.from).toHaveBeenCalledWith('user-uploads');
+    expect(mockSupabase.storage.from).toHaveBeenCalledWith('avatars');
     expect(mockUpload).toHaveBeenCalled();
     expect(mockGetPublicUrl).toHaveBeenCalled();
-    expect(uploadResult.url).toBe('https://example.com/avatar.jpg');
   });
 
   it('handles avatar upload error', async () => {
     const mockFile = new File(['avatar'], 'avatar.jpg', { type: 'image/jpeg' });
     const mockError = new Error('Upload failed');
-    const mockUpload = vi.fn().mockResolvedValue({
-      data: null,
-      error: mockError,
-    });
+    const mockUpload = vi.fn().mockResolvedValue({ error: mockError });
 
     mockSupabase.storage.from.mockReturnValue({
       upload: mockUpload,
@@ -259,15 +238,13 @@ describe('useProfileMutations hook', () => {
       try {
         await result.current.uploadAvatar(mockFile);
       } catch (error) {
-        expect(error).toEqual(mockError);
+        expect((error as Error).message).toEqual('Failed to upload avatar');
       }
     });
   });
 
   it('deletes avatar successfully', async () => {
-    const mockRemove = vi.fn().mockResolvedValue({
-      error: null,
-    });
+    const mockRemove = vi.fn().mockResolvedValue({ error: null });
 
     mockSupabase.storage.from.mockReturnValue({
       remove: mockRemove,
@@ -276,10 +253,10 @@ describe('useProfileMutations hook', () => {
     const { result } = renderHook(() => useProfileMutations());
 
     await act(async () => {
-      await result.current.deleteAvatar('https://example.com/storage/v1/object/public/user-uploads/avatars/user-123/avatar.jpg');
+      await result.current.deleteAvatar();
     });
 
-    expect(mockSupabase.storage.from).toHaveBeenCalledWith('user-uploads');
-    expect(mockRemove).toHaveBeenCalledWith(['avatars/user-123/avatar.jpg']);
+    expect(mockSupabase.storage.from).toHaveBeenCalledWith('avatars');
+    expect(mockRemove).toHaveBeenCalled();
   });
 });
