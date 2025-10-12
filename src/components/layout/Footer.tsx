@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { MapPin, Facebook, Twitter, Instagram, Mail, Phone } from 'lucide-react';
+import { MapPin, Facebook, Twitter, Instagram, Mail, Phone, Code, Heart, Github, Linkedin } from 'lucide-react';
 
 const Footer: React.FC = () => {
   return (
@@ -72,6 +72,59 @@ const Footer: React.FC = () => {
             </ul>
           </div>
         </div>
+
+          {/* Developer Credits Section */}
+          <div className="border-t border-gray-800 mt-12 pt-8">
+            <div className="bg-gradient-to-r from-limpopo-green/10 to-limpopo-gold/10 rounded-lg p-6 border border-gray-700">
+              <div className="flex flex-col lg:flex-row items-center justify-between space-y-4 lg:space-y-0">
+                <div className="flex items-center space-x-4">
+                  <div className="flex items-center space-x-2">
+                    <Code className="h-5 w-5 text-limpopo-gold animate-pulse" />
+                    <span className="text-gray-300 text-sm font-medium">Crafted with</span>
+                    <Heart className="h-4 w-4 text-red-500 animate-pulse" />
+                    <span className="text-gray-300 text-sm font-medium">by</span>
+                  </div>
+                  <div className="text-lg font-bold bg-gradient-to-r from-limpopo-gold to-limpopo-green bg-clip-text text-transparent">
+                    Tshikweta Makole
+                  </div>
+                </div>
+                <div className="flex items-center space-x-4">
+                  <span className="text-xs text-gray-400 hidden sm:block">
+                    Full-Stack Developer • React • TypeScript • Supabase
+                  </span>
+                  <div className="flex space-x-3">
+                    <a 
+                      href="https://github.com/Tshikwetamakole" 
+                      target="_blank" 
+                      rel="noopener noreferrer"
+                      className="group p-2 rounded-full bg-gray-800 hover:bg-gray-700 transition-all duration-300 border border-gray-600 hover:border-limpopo-gold"
+                      title="View GitHub Profile"
+                    >
+                      <Github className="h-4 w-4 text-gray-400 group-hover:text-limpopo-gold transition-colors" />
+                    </a>
+                    <a 
+                      href="https://linkedin.com/in/tshikweta-makole" 
+                      target="_blank" 
+                      rel="noopener noreferrer"
+                      className="group p-2 rounded-full bg-gray-800 hover:bg-gray-700 transition-all duration-300 border border-gray-600 hover:border-blue-400"
+                      title="Connect on LinkedIn"
+                    >
+                      <Linkedin className="h-4 w-4 text-gray-400 group-hover:text-blue-400 transition-colors" />
+                    </a>
+                  </div>
+                </div>
+              </div>
+              <div className="mt-3 text-center lg:text-left">
+                <p className="text-xs text-gray-400">
+                  Building digital solutions for communities across South Africa • 
+                  <span className="text-limpopo-gold mx-1">React</span>•
+                  <span className="text-blue-400 mx-1">TypeScript</span>•
+                  <span className="text-green-400 mx-1">Supabase</span>•
+                  <span className="text-purple-400 mx-1">Tailwind CSS</span>
+                </p>
+              </div>
+            </div>
+          </div>
 
         {/* Bottom Bar */}
         <div className="border-t border-gray-800 mt-12 pt-8 flex flex-col sm:flex-row justify-between items-center">
