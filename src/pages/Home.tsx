@@ -2,6 +2,9 @@ import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Search, MapPin, Calendar, ShoppingBag, Camera, Newspaper, ArrowRight } from 'lucide-react';
 import heroImage from '../assets/hero-bg.jpg';
+import { WeatherWidget } from '../components/WeatherWidget';
+import { NewsFeed } from '../components/NewsFeed';
+import { HolidayCalendar } from '../components/HolidayCalendar';
 
 const Home: React.FC = () => {
   const [scrollY, setScrollY] = useState(0);
@@ -190,6 +193,21 @@ const Home: React.FC = () => {
             <p className="text-xl text-gray-600 max-w-3xl mx-auto">
               From world-class wildlife experiences to vibrant local businesses, explore what makes our province special
             </p>
+          </div>
+
+          {/* Live Information Widgets */}
+          <div className="mb-16">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-12">
+              <WeatherWidget />
+              <div className="lg:col-span-2">
+                <NewsFeed maxArticles={3} category="limpopo" />
+              </div>
+            </div>
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+              <div className="lg:col-span-3">
+                <HolidayCalendar maxHolidays={3} showUpcomingOnly={true} />
+              </div>
+            </div>
           </div>
 
           {/* Featured Businesses */}
