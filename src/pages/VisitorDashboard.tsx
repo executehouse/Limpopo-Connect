@@ -1,6 +1,9 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { MapPin, Building2, Calendar, Users, UserPlus, ArrowRight } from 'lucide-react';
+import { WeatherWidget } from '../components/WeatherWidget';
+import { MapView } from '../components/MapView';
+import { CurrencyConverter } from '../components/CurrencyConverter';
 
 const VisitorDashboard: React.FC = () => {
   return (
@@ -119,6 +122,20 @@ const VisitorDashboard: React.FC = () => {
               </p>
             </div>
           </div>
+        </div>
+
+        {/* Live Information Widgets */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-12">
+          <WeatherWidget />
+          <CurrencyConverter />
+        </div>
+
+        <div className="mb-12">
+          <MapView 
+            title="Limpopo Province - Polokwane"
+            height="350px"
+            showDirections={false}
+          />
         </div>
 
         {/* Call to Action */}
