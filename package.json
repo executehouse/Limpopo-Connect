@@ -8,7 +8,7 @@
     "start": "node server.js",
     "build": "tsc -b && vite build",
     "build:frontend": "vite build",
-    "preview": "vite preview",
+    "preview": "vite preview --port 4173",
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "lint": "eslint .",
     "test": "vitest",

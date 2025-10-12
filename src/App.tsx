@@ -24,6 +24,7 @@ import ResetPassword from './pages/auth/ResetPassword';
 import Profile from './pages/Profile';
 import ChatDemo from './pages/ChatDemo';
 import DiagnosticPage from './pages/DiagnosticPage';
+import Health from './pages/Health';
 
 // Role-based pages
 import CompleteOnboarding from './pages/CompleteOnboarding';
@@ -57,6 +58,9 @@ function App() {
             
             {/* Diagnostic route for debugging deployment issues */}
             <Route path="/diagnostic" element={<DiagnosticPage />} />
+            
+            {/* Health check route for deployment verification */}
+            <Route path="/health" element={<Health />} />
 
             {/* Onboarding - protected route */}
             <Route 
