@@ -7,6 +7,10 @@ import path from 'path'
 // For custom domain deployment (limpopoconnect.site), we use root path.
 // For GitHub Pages, we would need the repository name as base path.
 const getBasePath = () => {
+  // Check VITE_BASE from environment (set in Vercel)
+  if (process.env.VITE_BASE) {
+    return process.env.VITE_BASE;
+  }
   // Check if explicitly deploying to GitHub Pages
   if (process.env.DEPLOY_TARGET === 'github-pages' && process.env.GITHUB_REPOSITORY) {
     return `/${process.env.GITHUB_REPOSITORY.split('/')[1]}/`
