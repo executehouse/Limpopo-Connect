@@ -33,3 +33,11 @@ __pycache__/
 .Python
 
 .vercel
+
+# Exclude accidental Next.js project
+limpopoconnect/
+
+# Test reports
+automated-test-report.txt
+eslint-report.txt
+typecheck-report.txt
