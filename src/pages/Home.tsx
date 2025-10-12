@@ -180,6 +180,172 @@ const Home: React.FC = () => {
         </div>
       </section>
 
+      {/* Featured Content Section */}
+      <section className="py-20 bg-white">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-16">
+            <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
+              Discover <span className="text-limpopo-green">Limpopo</span>
+            </h2>
+            <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+              From world-class wildlife experiences to vibrant local businesses, explore what makes our province special
+            </p>
+          </div>
+
+          {/* Featured Businesses */}
+          <div className="mb-16">
+            <div className="flex justify-between items-center mb-8">
+              <h3 className="text-2xl font-bold text-gray-900">Featured Businesses</h3>
+              <Link to="/business-directory" className="text-limpopo-blue hover:text-limpopo-green transition-colors">
+                View All →
+              </Link>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+              <div className="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-shadow">
+                <img 
+                  src="https://storage.googleapis.com/workspace-0f70711f-8b4e-4d94-86f1-2a93ccde5887/image/99ce67aa-5659-4285-a324-6ef5a9cedb33.png" 
+                  alt="Makhadzi Restaurant"
+                  className="w-full h-48 object-cover"
+                />
+                <div className="p-6">
+                  <h4 className="text-xl font-bold text-gray-900 mb-2">Makhadzi Restaurant</h4>
+                  <p className="text-gray-600 mb-3">Authentic Venda cuisine serving traditional dishes with modern flair</p>
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm text-limpopo-green font-semibold">Restaurant</span>
+                    <div className="flex items-center">
+                      <span className="text-limpopo-gold text-sm">★★★★☆</span>
+                      <span className="text-gray-500 text-sm ml-1">(4.5)</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              
+              <div className="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-shadow">
+                <img 
+                  src="https://storage.googleapis.com/workspace-0f70711f-8b4e-4d94-86f1-2a93ccde5887/image/a9155348-a844-4fff-9b59-61909228f4c6.png" 
+                  alt="Mokopane Fresh Produce"
+                  className="w-full h-48 object-cover"
+                />
+                <div className="p-6">
+                  <h4 className="text-xl font-bold text-gray-900 mb-2">Mokopane Fresh Produce</h4>
+                  <p className="text-gray-600 mb-3">Farm-fresh vegetables, fruits, and grains directly from local farmers</p>
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm text-limpopo-green font-semibold">Agriculture</span>
+                    <div className="flex items-center">
+                      <span className="text-limpopo-gold text-sm">★★★★☆</span>
+                      <span className="text-gray-500 text-sm ml-1">(4.4)</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-shadow">
+                <div className="w-full h-48 bg-gradient-to-br from-limpopo-blue/20 to-limpopo-green/20 flex items-center justify-center">
+                  <Camera className="h-12 w-12 text-limpopo-green" />
+                </div>
+                <div className="p-6">
+                  <h4 className="text-xl font-bold text-gray-900 mb-2">Baobab Craft Centre</h4>
+                  <p className="text-gray-600 mb-3">Handcrafted African art, pottery, and jewelry made by local artisans</p>
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm text-limpopo-green font-semibold">Arts & Crafts</span>
+                    <div className="flex items-center">
+                      <span className="text-limpopo-gold text-sm">★★★★★</span>
+                      <span className="text-gray-500 text-sm ml-1">(4.8)</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Upcoming Events */}
+          <div className="mb-16">
+            <div className="flex justify-between items-center mb-8">
+              <h3 className="text-2xl font-bold text-gray-900">Upcoming Events</h3>
+              <Link to="/events" className="text-limpopo-blue hover:text-limpopo-green transition-colors">
+                View All →
+              </Link>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+              <div className="bg-gradient-to-br from-limpopo-green/10 to-limpopo-blue/10 rounded-xl p-6 border border-limpopo-green/20">
+                <div className="flex items-start justify-between mb-4">
+                  <div>
+                    <span className="text-sm font-semibold text-limpopo-green bg-limpopo-green/10 px-3 py-1 rounded-full">
+                      Cultural
+                    </span>
+                    <h4 className="text-xl font-bold text-gray-900 mt-2">Limpopo Arts & Culture Festival 2024</h4>
+                  </div>
+                  <Calendar className="h-6 w-6 text-limpopo-green" />
+                </div>
+                <p className="text-gray-600 mb-4">Annual celebration featuring traditional music, dance, art exhibitions, and local cuisine</p>
+                <div className="flex items-center justify-between text-sm">
+                  <span className="text-gray-500">📍 Polokwane Civic Centre</span>
+                  <span className="text-limpopo-blue font-semibold">May 15-17</span>
+                </div>
+              </div>
+
+              <div className="bg-gradient-to-br from-limpopo-gold/10 to-limpopo-green/10 rounded-xl p-6 border border-limpopo-gold/20">
+                <div className="flex items-start justify-between mb-4">
+                  <div>
+                    <span className="text-sm font-semibold text-limpopo-gold bg-limpopo-gold/10 px-3 py-1 rounded-full">
+                      Education
+                    </span>
+                    <h4 className="text-xl font-bold text-gray-900 mt-2">Kruger Conservation Workshop</h4>
+                  </div>
+                  <Calendar className="h-6 w-6 text-limpopo-gold" />
+                </div>
+                <p className="text-gray-600 mb-4">Educational workshop on wildlife conservation and community involvement</p>
+                <div className="flex items-center justify-between text-sm">
+                  <span className="text-gray-500">📍 Skukuza Rest Camp</span>
+                  <span className="text-limpopo-blue font-semibold">April 20</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Tourism Highlights */}
+          <div>
+            <div className="flex justify-between items-center mb-8">
+              <h3 className="text-2xl font-bold text-gray-900">Must-Visit Attractions</h3>
+              <Link to="/tourism" className="text-limpopo-blue hover:text-limpopo-green transition-colors">
+                Explore More →
+              </Link>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+              <div className="relative rounded-xl overflow-hidden h-64 group cursor-pointer">
+                <div className="absolute inset-0 bg-gradient-to-br from-limpopo-green/30 to-limpopo-blue/30"></div>
+                <div className="absolute inset-0 bg-black/20 group-hover:bg-black/10 transition-colors"></div>
+                <div className="absolute bottom-4 left-4 text-white">
+                  <h4 className="text-xl font-bold">Kruger National Park</h4>
+                  <p className="text-sm opacity-90">World-renowned Big Five safari experience</p>
+                </div>
+                <Camera className="absolute top-4 right-4 h-6 w-6 text-white/80" />
+              </div>
+              
+              <div className="relative rounded-xl overflow-hidden h-64 group cursor-pointer">
+                <div className="absolute inset-0 bg-gradient-to-br from-limpopo-gold/30 to-limpopo-green/30"></div>
+                <div className="absolute inset-0 bg-black/20 group-hover:bg-black/10 transition-colors"></div>
+                <div className="absolute bottom-4 left-4 text-white">
+                  <h4 className="text-xl font-bold">God's Window</h4>
+                  <p className="text-sm opacity-90">Breathtaking views over Blyde River Canyon</p>
+                </div>
+                <Camera className="absolute top-4 right-4 h-6 w-6 text-white/80" />
+              </div>
+              
+              <div className="relative rounded-xl overflow-hidden h-64 group cursor-pointer">
+                <div className="absolute inset-0 bg-gradient-to-br from-limpopo-blue/30 to-limpopo-gold/30"></div>
+                <div className="absolute inset-0 bg-black/20 group-hover:bg-black/10 transition-colors"></div>
+                <div className="absolute bottom-4 left-4 text-white">
+                  <h4 className="text-xl font-bold">Mapungubwe National Park</h4>
+                  <p className="text-sm opacity-90">UNESCO World Heritage archaeological site</p>
+                </div>
+                <Camera className="absolute top-4 right-4 h-6 w-6 text-white/80" />
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* Enhanced CTA Section with Glassmorphism */}
       <section className="py-24 bg-gradient-to-br from-gray-100 via-blue-50 to-gray-100 relative overflow-hidden">
         {/* Animated Background Elements */}

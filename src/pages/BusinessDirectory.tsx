@@ -50,9 +50,7 @@ const BusinessDirectory: React.FC = () => {
     setFilteredBusinesses(filtered);
   }, [businesses, selectedCategory, selectedLocation, searchQuery]);
 
-  const handleSearch = () => {
-    // Search is handled in useEffect
-  };
+
 
   const formatRating = (rating?: number) => {
     return rating ? rating.toFixed(1) : 'N/A';
@@ -118,63 +116,71 @@ const BusinessDirectory: React.FC = () => {
           </div>
         </div>
 
-        {/* Search and Filter Section */}
-        <div className="bg-white rounded-2xl shadow-lg p-6 mb-8">
-          <div className="flex flex-col lg:flex-row gap-4">
-            <div className="flex-1 relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
-              <input
-                type="text"
-                placeholder="Search businesses, services, or professionals..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-limpopo-blue focus:border-transparent"
-              />
+        {/* Enhanced Search and Filters */}
+        <div className="bg-white rounded-xl shadow-lg p-6 mb-8 border border-gray-100">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+            <div className="md:col-span-2">
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Search Businesses
+              </label>
+              <div className="relative">
+                <Search className="absolute left-3 top-3 h-5 w-5 text-gray-400" />
+                <input
+                  type="text"
+                  placeholder="Search by name, service, or description..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-limpopo-blue focus:border-limpopo-blue transition-colors"
+                />
+              </div>
             </div>
-            <div className="flex flex-col sm:flex-row gap-4">
-              <select 
-                value={selectedCategory}
-                onChange={(e) => setSelectedCategory(e.target.value)}
-                className="px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-limpopo-blue"
-              >
-                <option value="">All Categories</option>
-                {categories.map(category => (
-                  <option key={category} value={category}>{category}</option>
-                ))}
-              </select>
-              <select 
-                value={selectedLocation}
-                onChange={(e) => setSelectedLocation(e.target.value)}
-                className="px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-limpopo-blue"
-              >
-                <option value="">All Locations</option>
-                {locations.map(location => (
-                  <option key={location} value={location}>{location}</option>
-                ))}
-              </select>
-              <button 
-                onClick={handleSearch}
-                className="btn-primary px-6 py-3 flex items-center space-x-2"
-              >
-                <Filter className="h-5 w-5" />
-                <span>Filter</span>
-              </button>
+            
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Category
+              </label>
+              <div className="relative">
+                <Filter className="absolute left-3 top-3 h-5 w-5 text-gray-400" />
+                <select
+                  value={selectedCategory}
+                  onChange={(e) => setSelectedCategory(e.target.value)}
+                  className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-limpopo-blue focus:border-limpopo-blue transition-colors appearance-none bg-white"
+                >
+                  <option value="">All Categories</option>
+                  {categories.map((category) => (
+                    <option key={category} value={category}>{category}</option>
+                  ))}
+                </select>
+              </div>
+            </div>
+            
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Location
+              </label>
+              <div className="relative">
+                <MapPin className="absolute left-3 top-3 h-5 w-5 text-gray-400" />
+                <select
+                  value={selectedLocation}
+                  onChange={(e) => setSelectedLocation(e.target.value)}
+                  className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-limpopo-blue focus:border-limpopo-blue transition-colors appearance-none bg-white"
+                >
+                  <option value="">All Locations</option>
+                  {locations.map((location) => (
+                    <option key={location} value={location}>{location}</option>
+                  ))}
+                </select>
+              </div>
             </div>
           </div>
           
-          {/* Results count */}
-          <div className="mt-4 text-sm text-gray-600">
-            Showing {filteredBusinesses.length} of {businesses.length} businesses
-            {selectedCategory && (
-              <span className="ml-2 px-2 py-1 bg-limpopo-blue/10 text-limpopo-blue rounded-full text-xs">
-                {selectedCategory}
-              </span>
-            )}
-            {selectedLocation && (
-              <span className="ml-2 px-2 py-1 bg-limpopo-green/10 text-limpopo-green rounded-full text-xs">
-                {selectedLocation}
-              </span>
-            )}
+          {/* Results Count */}
+          <div className="mt-4 pt-4 border-t border-gray-200">
+            <p className="text-sm text-gray-600">
+              Showing <span className="font-semibold">{filteredBusinesses.length}</span> of <span className="font-semibold">{businesses.length}</span> businesses
+              {selectedCategory && <span className="ml-2 text-limpopo-blue">in {selectedCategory}</span>}
+              {selectedLocation && <span className="ml-2 text-limpopo-green">in {selectedLocation}</span>}
+            </p>
           </div>
         </div>
 
