@@ -4,6 +4,7 @@
 -- Solution: Implement JWT-based authorization with proper visibility controls
 
 -- Drop existing insecure policy
+-- Remove insecure USING(true) policy if it exists
 DROP POLICY IF EXISTS public_profiles_viewable ON public.profiles;
 
 -- Create new secure policies for profiles

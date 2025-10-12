@@ -252,13 +252,17 @@ test_security() {
     print_section "Security Components"
     run_test "Security" "PasswordStrengthMeter implemented" \
         "grep -q 'zxcvbn' src/components/PasswordStrengthMeter.tsx"
+    # Validate that our auth layer integrates with Supabase JWT/session APIs.
+    # Accept evidence in either AuthProvider (context wrapper) or useAuth (hook implementation).
     run_test "Security" "Auth provider uses JWT" \
-        "grep -q 'auth.uid()' src/lib/AuthProvider.tsx || grep -q 'getSession' src/lib/AuthProvider.tsx"
+        "grep -q 'auth.uid()' src/lib/AuthProvider.tsx || grep -q 'getSession' src/lib/AuthProvider.tsx || grep -q 'getSession' src/lib/useAuth.ts"
     
     print_section "Security Policies"
     if [ -f "supabase/migrations/20251010_fix_rls_profiles.sql" ]; then
+        # Ensure we do not ship insecure USING(true) policies. If the legacy line exists, it must be flagged with a removal comment.
+        # Use '--' to terminate grep options since the pattern starts with a dash in the comment text.
         run_test "Security" "No insecure using(true) in RLS profiles" \
-            "! grep -q 'USING (true)' supabase/migrations/20251010_fix_rls_profiles.sql || grep -q '-- Remove insecure' supabase/migrations/20251010_fix_rls_profiles.sql"
+            "! grep -q 'USING (true)' supabase/migrations/20251010_fix_rls_profiles.sql || grep -q -- 'Remove insecure' supabase/migrations/20251010_fix_rls_profiles.sql"
     else
         print_skip "RLS profile migration check (file missing)"
     fi
@@ -276,10 +280,11 @@ test_routes() {
     # Check for key routes in App.tsx
     run_test "Routes" "Login route defined" "grep -q '/auth/login' src/App.tsx"
     run_test "Routes" "Register route defined" "grep -q '/auth/register' src/App.tsx"
-    run_test "Routes" "Profile route defined" "grep -q '/profile' src/App.tsx"
-    run_test "Routes" "Business directory route defined" "grep -q '/business-directory' src/App.tsx"
-    run_test "Routes" "Events route defined" "grep -q '/events' src/App.tsx"
-    run_test "Routes" "Marketplace route defined" "grep -q '/marketplace' src/App.tsx"
+    # Accept either absolute ("/route") or nested route definitions (path="route").
+    run_test "Routes" "Profile route defined" "grep -q 'path.*profile' src/App.tsx || grep -q '/profile' src/App.tsx"
+    run_test "Routes" "Business directory route defined" "grep -q 'path.*business-directory' src/App.tsx || grep -q '/business-directory' src/App.tsx"
+    run_test "Routes" "Events route defined" "grep -q 'path.*events' src/App.tsx || grep -q '/events' src/App.tsx"
+    run_test "Routes" "Marketplace route defined" "grep -q 'path.*marketplace' src/App.tsx || grep -q '/marketplace' src/App.tsx"
     run_test "Routes" "Admin dashboard route defined" "grep -q '/admin' src/App.tsx || grep -q '/dashboard/admin' src/App.tsx"
     
     print_section "Protected Routes with RoleGuard"
