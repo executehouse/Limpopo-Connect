@@ -244,8 +244,8 @@ const Home: React.FC = () => {
                   <Camera className="h-12 w-12 text-limpopo-green" />
                 </div>
                 <div className="p-6">
-                  <h4 className="text-xl font-bold text-gray-900 mb-2">Baobab Craft Centre</h4>
-                  <p className="text-gray-600 mb-3">Handcrafted African art, pottery, and jewelry made by local artisans</p>
+                  <h4 className="text-xl font-bold text-gray-900 mb-2">Sinthumule Traditional Pottery</h4>
+                  <p className="text-gray-600 mb-3">Traditional Venda pottery workshop in Sinthumule village</p>
                   <div className="flex items-center justify-between">
                     <span className="text-sm text-limpopo-green font-semibold">Arts & Crafts</span>
                     <div className="flex items-center">
@@ -300,6 +300,23 @@ const Home: React.FC = () => {
                   <span className="text-limpopo-blue font-semibold">April 20</span>
                 </div>
               </div>
+              
+              <div className="bg-gradient-to-br from-limpopo-green/10 to-limpopo-gold/10 rounded-xl p-6 border border-limpopo-green/20">
+                <div className="flex items-start justify-between mb-4">
+                  <div>
+                    <span className="text-sm font-semibold text-limpopo-green bg-limpopo-green/10 px-3 py-1 rounded-full">
+                      Cultural
+                    </span>
+                    <h4 className="text-xl font-bold text-gray-900 mt-2">Sinthumule Pottery Festival</h4>
+                  </div>
+                  <Calendar className="h-6 w-6 text-limpopo-green" />
+                </div>
+                <p className="text-gray-600 mb-4">Traditional Venda pottery demonstrations and workshops in Sinthumule village</p>
+                <div className="flex items-center justify-between text-sm">
+                  <span className="text-gray-500">📍 Sinthumule Village</span>
+                  <span className="text-limpopo-blue font-semibold">June 8-9</span>
+                </div>
+              </div>
             </div>
           </div>
 
@@ -336,8 +353,8 @@ const Home: React.FC = () => {
                 <div className="absolute inset-0 bg-gradient-to-br from-limpopo-blue/30 to-limpopo-gold/30"></div>
                 <div className="absolute inset-0 bg-black/20 group-hover:bg-black/10 transition-colors"></div>
                 <div className="absolute bottom-4 left-4 text-white">
-                  <h4 className="text-xl font-bold">Mapungubwe National Park</h4>
-                  <p className="text-sm opacity-90">UNESCO World Heritage archaeological site</p>
+                  <h4 className="text-xl font-bold">Kutama-Sinthumule Route</h4>
+                  <p className="text-sm opacity-90">Traditional Venda villages cultural tour</p>
                 </div>
                 <Camera className="absolute top-4 right-4 h-6 w-6 text-white/80" />
               </div>

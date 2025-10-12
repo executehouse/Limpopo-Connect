@@ -25,7 +25,7 @@ export const mockBusinesses: Business[] = [
     name: 'Baobab Craft Centre',
     description: 'Handcrafted African art, pottery, and jewelry made by local artisans. Supporting community crafts and traditional skills.',
     category: 'Arts & Crafts',
-    address: '45 Market Square, Thohoyandou, 0950',
+    address: '45 Traditional Crafts Road, Sinthumule, 0932',
     phone: '+27 15 962 3456',
     email: 'crafts@baobab.co.za',
     latitude: -22.9462,
@@ -57,7 +57,7 @@ export const mockBusinesses: Business[] = [
     name: 'Dr. Sarah Mthombeni - Family Practice',
     description: 'Comprehensive family healthcare services including general practice, pediatrics, and preventive care.',
     category: 'Healthcare',
-    address: '22 Hospital Street, Louis Trichardt, 0920',
+    address: '22 Hospital Street, Tshikota (Louis Trichardt), 0920',
     phone: '+27 15 516 7890',
     email: 'reception@drmthombeni.co.za',
     latitude: -23.0434,
@@ -100,6 +100,54 @@ export const mockBusinesses: Business[] = [
     openingHours: 'Mon-Sat: 6:00 AM - 6:00 PM, Sun: 8:00 AM - 2:00 PM',
     verified: true,
     createdAt: '2024-01-25T08:00:00Z'
+  },
+  {
+    id: '7',
+    name: 'Kutama Community Clinic',
+    description: 'Primary healthcare services for the Kutama community. Offering general consultations, maternal health, and chronic disease management.',
+    category: 'Healthcare',
+    address: '15 Main Road, Kutama, 0945',
+    phone: '+27 15 963 2100',
+    email: 'clinic@kutama.gov.za',
+    latitude: -22.7234,
+    longitude: 30.2145,
+    rating: 4.3,
+    imageUrl: 'https://placehold.co/400x300?text=Community+clinic+with+healthcare+services+and+modern+facilities',
+    openingHours: 'Mon-Fri: 7:00 AM - 4:00 PM, Sat: 8:00 AM - 12:00 PM',
+    verified: true,
+    createdAt: '2024-02-10T09:30:00Z'
+  },
+  {
+    id: '8',
+    name: 'Elim Shopping Centre',
+    description: 'Local shopping center serving the Elim community with grocery stores, clothing shops, and essential services.',
+    category: 'Retail',
+    address: 'Elim Hospital Road, Elim, 0960',
+    phone: '+27 15 556 8900',
+    email: 'info@elimshopping.co.za',
+    latitude: -23.1456,
+    longitude: 30.0987,
+    rating: 4.1,
+    imageUrl: 'https://placehold.co/400x300?text=Local+shopping+center+with+various+shops+and+community+services',
+    openingHours: 'Mon-Sat: 8:00 AM - 6:00 PM, Sun: 9:00 AM - 3:00 PM',
+    verified: true,
+    createdAt: '2024-01-30T13:15:00Z'
+  },
+  {
+    id: '9',
+    name: 'Sinthumule Traditional Pottery',
+    description: 'Traditional Venda pottery workshop preserving ancient ceramic techniques. Handcrafted pots, vessels, and decorative items.',
+    category: 'Arts & Crafts',
+    address: 'Traditional Village, Sinthumule, 0932',
+    phone: '+27 15 964 1234',
+    email: 'pottery@sinthumule.co.za',
+    latitude: -22.8876,
+    longitude: 30.4321,
+    rating: 4.7,
+    imageUrl: 'https://placehold.co/400x300?text=Traditional+pottery+workshop+with+clay+pots+and+ceramic+art',
+    openingHours: 'Mon-Fri: 8:00 AM - 5:00 PM, Sat: 8:00 AM - 2:00 PM',
+    verified: true,
+    createdAt: '2024-02-08T11:00:00Z'
   }
 ];
 
@@ -156,8 +204,62 @@ export const mockEvents: Event[] = [
     ticketPrice: 0,
     maxAttendees: 1000,
     currentAttendees: 234,
-    tags: ['market', 'community', 'food', 'local', 'farmers'],
-    createdAt: '2024-03-15T09:30:00Z'
+    tags: ['community', 'market', 'food', 'family'],
+    createdAt: '2024-03-18T16:45:00Z'
+  },
+  {
+    id: '4',
+    title: 'Sinthumule Traditional Pottery Festival',
+    description: 'Celebrate the ancient art of Venda pottery with master potters demonstrating techniques passed down through generations. Workshops, exhibitions, and pottery sales.',
+    category: 'Cultural',
+    startDate: '2024-06-08T09:00:00Z',
+    endDate: '2024-06-09T17:00:00Z',
+    location: 'Sinthumule Community Hall',
+    address: 'Traditional Village, Sinthumule, 0932',
+    organizer: 'Sinthumule Arts Council',
+    contactInfo: '+27 15 964 5555',
+    imageUrl: 'https://placehold.co/400x300?text=Traditional+pottery+workshop+with+master+potters+and+clay+demonstrations',
+    ticketPrice: 25,
+    maxAttendees: 300,
+    currentAttendees: 89,
+    tags: ['pottery', 'traditional', 'venda', 'crafts'],
+    createdAt: '2024-03-20T10:30:00Z'
+  },
+  {
+    id: '5',
+    title: 'Elim Hospital Health Fair',
+    description: 'Free health screenings, wellness education, and medical consultations for the Elim community. Blood pressure checks, diabetes testing, and vaccination drives.',
+    category: 'Health',
+    startDate: '2024-05-25T08:00:00Z',
+    endDate: '2024-05-25T16:00:00Z',
+    location: 'Elim Hospital Grounds',
+    address: 'Elim Hospital Road, Elim, 0960',
+    organizer: 'Elim Hospital & Community Health',
+    contactInfo: '+27 15 556 2000',
+    imageUrl: 'https://placehold.co/400x300?text=Community+health+fair+with+medical+screenings+and+wellness+education',
+    ticketPrice: 0,
+    maxAttendees: 500,
+    currentAttendees: 178,
+    tags: ['health', 'community', 'wellness', 'free'],
+    createdAt: '2024-03-22T14:00:00Z'
+  },
+  {
+    id: '6',
+    title: 'Kutama Youth Football Tournament',
+    description: 'Annual youth football tournament bringing together teams from across the Vhembe District. Under-16 and Under-19 categories with prizes and scholarships.',
+    category: 'Sports',
+    startDate: '2024-07-12T08:00:00Z',
+    endDate: '2024-07-14T18:00:00Z',
+    location: 'Kutama Sports Grounds',
+    address: 'Sports Complex, Kutama, 0945',
+    organizer: 'Vhembe Youth Sports Association',
+    contactInfo: '+27 15 963 7777',
+    imageUrl: 'https://placehold.co/400x300?text=Youth+football+tournament+with+teams+and+community+supporters',
+    ticketPrice: 20,
+    maxAttendees: 1000,
+    currentAttendees: 234,
+    tags: ['football', 'youth', 'sports', 'tournament'],
+    createdAt: '2024-03-25T11:15:00Z'
   },
   {
     id: '4',
@@ -206,7 +308,7 @@ export const mockMarketplaceItems: MarketplaceItem[] = [
     category: 'Arts & Crafts',
     price: 450,
     condition: 'new',
-    location: 'Thohoyandou',
+    location: 'Sinthumule',
     sellerId: 'seller1',
     sellerName: 'Mufunwa Crafts',
     sellerPhone: '+27 82 345 6789',
@@ -261,7 +363,23 @@ export const mockMarketplaceItems: MarketplaceItem[] = [
     imageUrl: 'https://placehold.co/400x300?text=White+Toyota+Hilux+double+cab+pickup+truck+in+good+condition',
     tags: ['toyota', 'hilux', 'bakkie', '4x4', 'reliable'],
     isAvailable: true,
-    createdAt: '2024-03-10T16:20:00Z'
+    createdAt: '2024-02-28T11:20:00Z'
+  },
+  {
+    id: '6',
+    title: 'Traditional Venda Wooden Sculptures',
+    description: 'Authentic hand-carved wooden sculptures depicting traditional Venda culture and mythology. Made by master carver from Kutama village.',
+    category: 'Arts & Crafts',
+    price: 850,
+    condition: 'new',
+    location: 'Kutama',
+    sellerId: 'seller6',
+    sellerName: 'Kutama Traditional Arts',
+    sellerPhone: '+27 82 567 8901',
+    imageUrl: 'https://placehold.co/400x300?text=Traditional+wooden+sculptures+with+intricate+Venda+cultural+designs',
+    tags: ['wooden', 'sculpture', 'traditional', 'venda', 'kutama'],
+    isAvailable: true,
+    createdAt: '2024-03-05T16:45:00Z'
   }
 ];
 
@@ -343,6 +461,57 @@ The sector employs over 350,000 people directly and supports an estimated 1.2 mi
     imageUrl: 'https://placehold.co/400x300?text=Limpopo+farms+with+citrus+groves+and+modern+farming+equipment',
     tags: ['agriculture', 'exports', 'farming', 'economy'],
     source: 'AgriNews Limpopo'
+  },
+  {
+    id: '4',
+    title: 'Elim Hospital Celebrates 150 Years of Healthcare Service',
+    summary: 'Historic hospital marks milestone with community health fair and infrastructure upgrades.',
+    content: `Elim Hospital, one of South Africa's oldest medical institutions, celebrated its 150th anniversary this week with a grand community health fair that attracted over 2,000 visitors from across the Vhembe District.
+
+Founded in 1874 by Swiss missionaries, Elim Hospital has been a cornerstone of healthcare in the region, serving rural communities with dedication and excellence. The anniversary celebrations included free health screenings, vaccination drives, and educational workshops.
+
+Key achievements highlighted during the celebration:
+- Over 1.5 million patients treated since inception
+- Training of hundreds of healthcare workers
+- Pioneering rural healthcare delivery models
+- Recent R50 million infrastructure upgrade
+
+Hospital CEO Dr. Mpho Rathebe noted: "Elim Hospital's legacy represents the spirit of community service that defines our region. We continue to innovate while honoring our heritage of compassionate care."
+
+The celebration featured traditional Venda performances, historical displays, and testimonials from families who have been served by the hospital across multiple generations.
+
+New facilities include a modern maternity ward, upgraded surgical theatre, and expanded outpatient services. The hospital serves over 200,000 people across the Elim, Waterval, and surrounding areas.`,
+    category: 'Healthcare',
+    author: 'Vhembe Health Reporter',
+    publishedAt: '2024-03-18T09:00:00Z',
+    imageUrl: 'https://placehold.co/400x300?text=Historic+Elim+Hospital+celebration+with+community+gathering+and+healthcare+workers',
+    tags: ['healthcare', 'elim', 'anniversary', 'community'],
+    source: 'Vhembe Health News'
+  },
+  {
+    id: '5',
+    title: 'Kutama Youth Football Academy Produces Provincial Champions',
+    summary: 'Local academy celebrates as three players are selected for Limpopo provincial team.',
+    content: `The Kutama Youth Football Academy has achieved remarkable success with three of its players selected for the Limpopo Provincial Under-19 team, following their outstanding performance in regional tournaments.
+
+Players selected include:
+- Rendani Muthelo (striker) - 32 goals in 18 matches
+- Azwifheleli Rambau (midfielder) - team captain and playmaker
+- Mukovhe Tshisikhawe (goalkeeper) - 12 clean sheets this season
+
+Academy founder and coach Mbulaheni Nemakhavhani expressed pride in his players' achievements: "These boys represent the talent and potential that exists in our rural communities. With proper support and facilities, our youth can compete at any level."
+
+The academy, established in 2019, operates from basic facilities but has built a reputation for developing skilled players through dedication and community support. Local businesses and the Kutama Traditional Council have pledged continued support for the program.
+
+The provincial team will compete in the national championships in Johannesburg next month, marking the first time Kutama has been represented at this level.
+
+The academy currently trains 120 young players aged 8-19 and offers educational support alongside football development.`,
+    category: 'Sports',
+    author: 'Sports Reporter Limpopo',
+    publishedAt: '2024-03-16T15:30:00Z',
+    imageUrl: 'https://placehold.co/400x300?text=Young+football+players+celebrating+with+trophies+and+team+photo',
+    tags: ['football', 'youth', 'kutama', 'sports', 'achievement'],
+    source: 'Limpopo Sports Today'
   }
 ];
 
@@ -423,7 +592,7 @@ export const mockTourismAttractions: TourismAttraction[] = [
     name: 'Shangana Cultural Village',
     description: 'Authentic cultural experience showcasing Shangana traditions, crafts, cuisine, and traditional performances.',
     category: 'Cultural',
-    location: 'Hazyview',
+    location: 'Near Kruger National Park',
     address: 'R535, Hazyview, 1242',
     latitude: -25.0442,
     longitude: 31.1086,
@@ -434,6 +603,40 @@ export const mockTourismAttractions: TourismAttraction[] = [
     phone: '+27 13 737 8000',
     openingHours: 'Daily tours: 11:45 AM, 2:30 PM, 4:45 PM',
     features: ['Cultural Performances', 'Traditional Crafts', 'Local Cuisine', 'Village Tours', 'Souvenir Shop'],
+    createdAt: '2024-01-01T00:00:00Z'
+  },
+  {
+    id: '6',
+    name: 'Elim Hospital Museum',
+    description: 'Historic museum showcasing the Swiss Mission heritage and medical history of Elim Hospital, one of the oldest hospitals in South Africa.',
+    category: 'Heritage',
+    location: 'Elim Hospital',
+    address: 'Elim Hospital Complex, Elim, 0960',
+    latitude: -23.1467,
+    longitude: 30.0978,
+    priceRange: 'R20 - R50 per person',
+    rating: 4.2,
+    imageUrl: 'https://placehold.co/400x300?text=Historic+museum+with+medical+heritage+displays+and+Swiss+mission+artifacts',
+    phone: '+27 15 556 2100',
+    openingHours: 'Tue-Sat: 9:00 AM - 4:00 PM',
+    features: ['Medical History', 'Swiss Mission Heritage', 'Historic Buildings', 'Guided Tours', 'Educational Displays'],
+    createdAt: '2024-01-01T00:00:00Z'
+  },
+  {
+    id: '7',
+    name: 'Kutama-Sinthumule Cultural Route',
+    description: 'Scenic cultural route connecting traditional Venda villages, showcasing local customs, traditional architecture, and community life.',
+    category: 'Cultural',
+    location: 'Kutama to Sinthumule',
+    address: 'Starting from Kutama Village, 0945',
+    latitude: -22.8000,
+    longitude: 30.3000,
+    priceRange: 'R100 - R300 guided tours',
+    rating: 4.6,
+    imageUrl: 'https://placehold.co/400x300?text=Traditional+Venda+villages+with+cultural+sites+and+scenic+landscapes',
+    phone: '+27 15 964 8888',
+    openingHours: 'Daily: 8:00 AM - 5:00 PM',
+    features: ['Traditional Villages', 'Cultural Sites', 'Local Guides', 'Photography', 'Community Interaction'],
     createdAt: '2024-01-01T00:00:00Z'
   }
 ];
