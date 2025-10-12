@@ -85,7 +85,7 @@ const Footer: React.FC = () => {
                     <span className="text-gray-300 text-sm font-medium">by</span>
                   </div>
                   <div className="text-lg font-bold bg-gradient-to-r from-limpopo-gold to-limpopo-green bg-clip-text text-transparent">
-                    Tshikweta Makole
+                    Emmanuel Charley Raluswinga
                   </div>
                 </div>
                 <div className="flex items-center space-x-4">
@@ -110,6 +110,15 @@ const Footer: React.FC = () => {
                       title="Connect on LinkedIn"
                     >
                       <Linkedin className="h-4 w-4 text-gray-400 group-hover:text-blue-400 transition-colors" />
+                    </a>
+                    <a 
+                      href="https://www.facebook.com/share/17QpP4VCFn/" 
+                      target="_blank" 
+                      rel="noopener noreferrer"
+                      className="group p-2 rounded-full bg-gray-800 hover:bg-gray-700 transition-all duration-300 border border-gray-600 hover:border-blue-500"
+                      title="Follow on Facebook"
+                    >
+                      <Facebook className="h-4 w-4 text-gray-400 group-hover:text-blue-500 transition-colors" />
                     </a>
                   </div>
                 </div>
