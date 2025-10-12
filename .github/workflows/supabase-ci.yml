@@ -1,0 +1,65 @@
+name: Supabase CI / Deploy
+on:
+  push:
+    branches: [ main, master ]
+  workflow_dispatch: {}
+
+jobs:
+  supabase-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install supabase CLI
+        run: |
+          npm i -g supabase
+
+      - name: Authenticate supabase CLI
+        env:
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+        run: |
+          supabase login --access-token "$SUPABASE_ACCESS_TOKEN"
+
+      - name: Run SQL migrations
+        env:
+          SUPABASE_PROJECT_REF: ${{ secrets.SUPABASE_PROJECT_REF }}
+        run: |
+          # Ensure migrations folder exists at ./supabase/migrations
+          if [ -d "supabase/migrations" ]; then
+            supabase db push --project-ref "$SUPABASE_PROJECT_REF"
+          else
+            echo "No migrations present at supabase/migrations" && exit 0
+          fi
+
+      - name: Deploy Edge Functions
+        env:
+          SUPABASE_PROJECT_REF: ${{ secrets.SUPABASE_PROJECT_REF }}
+        run: |
+          if [ -d "edge-functions" ]; then
+            for fn in edge-functions/*; do
+              [ -d "$fn" ] || continue
+              name=$(basename "$fn")
+              echo "Deploying function: $name"
+              supabase functions deploy "$name" --project-ref "$SUPABASE_PROJECT_REF"
+            done
+          else
+            echo "No edge-functions directory; skipping"
+          fi
+
+      - name: Run tests (optional)
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
+          SUPABASE_SERVICE_ROLE: ${{ secrets.SUPABASE_SERVICE_ROLE }}
+        run: |
+          if [ -f "tests/run_tests.sh" ]; then
+            bash tests/run_tests.sh
+          else
+            echo "No tests present; skipping"
+          fi
