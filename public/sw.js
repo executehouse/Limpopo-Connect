@@ -1,4 +1,4 @@
-const CACHE_NAME = 'limpopo-connect-v1';
+const CACHE_NAME = 'limpopo-connect-v2';
 const urlsToCache = [
   '/',
   '/business-directory',

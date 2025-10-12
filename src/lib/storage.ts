@@ -1,7 +1,8 @@
 import { supabase } from './supabase';
 
+// Avoid throwing at module load; log a warning instead and guard in functions.
 if (!supabase) {
-  throw new Error('Supabase client not initialized');
+  console.warn('[storage] Supabase client not initialized. Storage features will be disabled until environment variables are configured.');
 }
 
 export interface FileUploadOptions {

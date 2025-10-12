@@ -7,8 +7,10 @@
 import { useState, useEffect, useCallback } from 'react'
 import { supabase } from './supabase';
 
+// Do not crash the app at import-time if env vars are missing in production.
+// Gracefully degrade by logging a warning; individual functions will guard.
 if (!supabase) {
-  throw new Error('Supabase client not initialized');
+  console.warn('[useProfile] Supabase client not initialized. Profile features will be limited until environment variables are configured.');
 }
 import { useAuthContext } from './AuthProvider'
 import type { Profile } from './useAuth'
