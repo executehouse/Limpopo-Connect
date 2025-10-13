@@ -20,7 +20,14 @@ export async function signInWithPassword(email: string, password: string) {
   return client.auth.signInWithPassword({ email, password });
 }
 
-export async function signUpWithEmail(email: string, password: string, metadata?: Record<string, unknown>) {
+export interface SignUpMetadata {
+  first_name: string;
+  last_name: string;
+  phone?: string;
+  role?: 'citizen' | 'business_owner' | 'visitor';
+}
+
+export async function signUpWithEmail(email: string, password: string, metadata: SignUpMetadata) {
   const client = getSupabase();
   return client.auth.signUp({
     email,
