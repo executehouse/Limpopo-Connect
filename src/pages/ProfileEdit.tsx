@@ -9,7 +9,7 @@
  * - Comprehensive error handling
  */
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, 'react';
 import { useNavigate } from 'react-router-dom';
 import { 
   User, 
@@ -49,11 +49,11 @@ interface FormErrors {
 const ProfileEdit: React.FC = () => {
   const { user, profile, isAuthenticated } = useAuthContext();
   const navigate = useNavigate();
-  const fileInputRef = useRef<HTMLInputElement>(null);
+  const fileInputRef = React.useRef<HTMLInputElement>(null);
   
   const { updateProfile, uploadAvatar, deleteAvatar, loading: mutationLoading, error: mutationError } = useProfileMutations();
   
-  const [formData, setFormData] = useState<FormData>({
+  const [formData, setFormData] = React.useState<FormData>({
     first_name: '',
     last_name: '',
     phone: '',
@@ -62,15 +62,15 @@ const ProfileEdit: React.FC = () => {
     show_contact: false
   });
   
-  const [formErrors, setFormErrors] = useState<FormErrors>({});
-  const [isSaving, setIsSaving] = useState(false);
-  const [success, setSuccess] = useState<string | null>(null);
-  const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
-  const [avatarFile, setAvatarFile] = useState<File | null>(null);
-  const [avatarUploading, setAvatarUploading] = useState(false);
+  const [formErrors, setFormErrors] = React.useState<FormErrors>({});
+  const [isSaving, setIsSaving] = React.useState(false);
+  const [success, setSuccess] = React.useState<string | null>(null);
+  const [avatarPreview, setAvatarPreview] = React.useState<string | null>(null);
+  const [avatarFile, setAvatarFile] = React.useState<File | null>(null);
+  const [avatarUploading, setAvatarUploading] = React.useState(false);
 
   // Redirect if not authenticated
-  useEffect(() => {
+  React.useEffect(() => {
     if (!isAuthenticated && user === null) {
       navigate('/login');
       return;
@@ -78,7 +78,7 @@ const ProfileEdit: React.FC = () => {
   }, [isAuthenticated, user, navigate]);
 
   // Initialize form with profile data
-  useEffect(() => {
+  React.useEffect(() => {
     if (profile) {
       setFormData({
         first_name: profile.first_name || '',
