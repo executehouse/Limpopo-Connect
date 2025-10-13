@@ -53,6 +53,7 @@ const Header: React.FC = () => {
     { name: 'Events', path: '/events' },
     { name: 'Tourism', path: '/tourism' },
     { name: 'News', path: '/news' },
+    { name: 'Contact', path: '/contact' },
     ...(isAuthenticated ? [
       { name: 'Connections', path: '/connections' },
       { name: 'Marketplace', path: '/marketplace' },

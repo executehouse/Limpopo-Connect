@@ -1,21 +1,12 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { Link } from 'react-router-dom';
 import { Search, MapPin, Calendar, ShoppingBag, Camera, Newspaper, ArrowRight } from 'lucide-react';
-import heroImage from '../assets/hero-bg.jpg';
 import { WeatherWidget } from '../components/WeatherWidget';
 import { NewsFeed } from '../components/NewsFeed';
 import { HolidayCalendar } from '../components/HolidayCalendar';
+import { HeroImageBanner } from '../components/HeroImageBanner';
 
 const Home: React.FC = () => {
-  const [scrollY, setScrollY] = useState(0);
-
-  useEffect(() => {
-    const handleScroll = () => {
-      setScrollY(window.scrollY);
-    };
-    window.addEventListener('scroll', handleScroll, { passive: true });
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
 
   const features = [
     {
@@ -59,82 +50,55 @@ const Home: React.FC = () => {
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Ultra-Modern Hero Section with Background Image */}
-      <section className="relative text-white overflow-hidden min-h-[90vh] flex items-center">
-        {/* Background Image with Parallax Effect */}
-        <div 
-          className="absolute inset-0 parallax-layer"
-          style={{
-            transform: `translateY(${scrollY * 0.5}px)`,
-            transition: 'transform 0.1s ease-out'
-          }}
-        >
-          <img 
-            src={heroImage} 
-            alt="Limpopo Province Landscape" 
-            className="w-full h-full object-cover object-center"
-            loading="eager"
-          />
-        </div>
-        
-        {/* Creative Gradient Overlay with Color Blending */}
-        <div className="absolute inset-0 hero-image-overlay"></div>
-        
-        {/* Animated Gradient Accent */}
-        <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent"></div>
-        
-        {/* Subtle Pattern Overlay */}
-        <div className="absolute inset-0 bg-hero-pattern opacity-5"></div>
-        
-        {/* Content Container */}
-        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24 md:py-32 w-full z-10">
-          <div className="text-center animate-fade-in">
-            {/* Main Heading with Gradient Text Effect */}
-            <h1 className="text-5xl md:text-7xl lg:text-8xl font-extrabold mb-8 tracking-tight animate-slide-up">
-              <span className="block mb-2">Welcome to</span>
-              <span className="text-limpopo-gold drop-shadow-2xl inline-block transform hover:scale-105 transition-transform duration-300">
-                Limpopo Connect
+      <HeroImageBanner
+        query="limpopo community nature"
+        height="90vh"
+        overlay={true}
+      >
+        <div className="text-center animate-fade-in text-white">
+          {/* Main Heading with Gradient Text Effect */}
+          <h1 className="text-5xl md:text-7xl lg:text-8xl font-extrabold mb-8 tracking-tight animate-slide-up">
+            <span className="block mb-2">Welcome to</span>
+            <span className="text-limpopo-gold drop-shadow-2xl inline-block transform hover:scale-105 transition-transform duration-300">
+              Limpopo Connect
+            </span>
+          </h1>
+
+          {/* Subtitle with Enhanced Typography */}
+          <p className="text-xl md:text-2xl lg:text-3xl mb-12 max-w-4xl mx-auto font-light text-shadow-lg leading-relaxed animate-slide-up animation-delay-200">
+            Your gateway to discovering businesses, events, tourism, and community life across the beautiful Limpopo Province.
+          </p>
+
+          {/* CTA Buttons with Enhanced Effects */}
+          <div className="flex flex-col sm:flex-row gap-6 justify-center animate-slide-up animation-delay-400">
+            <Link
+              to="/business-directory"
+              className="btn-primary text-lg group relative overflow-hidden"
+            >
+              <span className="relative z-10 flex items-center justify-center">
+                Explore Businesses
+                <ArrowRight className="ml-2 h-5 w-5 transform group-hover:translate-x-1 transition-transform" />
               </span>
-            </h1>
-            
-            {/* Subtitle with Enhanced Typography */}
-            <p className="text-xl md:text-2xl lg:text-3xl mb-12 max-w-4xl mx-auto font-light text-shadow-lg leading-relaxed animate-slide-up animation-delay-200">
-              Your gateway to discovering businesses, events, tourism, and community life across the beautiful Limpopo Province.
-            </p>
-            
-            {/* CTA Buttons with Enhanced Effects */}
-            <div className="flex flex-col sm:flex-row gap-6 justify-center animate-slide-up animation-delay-400">
-              <Link 
-                to="/business-directory" 
-                className="btn-primary text-lg group relative overflow-hidden"
-              >
-                <span className="relative z-10 flex items-center justify-center">
-                  Explore Businesses
-                  <ArrowRight className="ml-2 h-5 w-5 transform group-hover:translate-x-1 transition-transform" />
-                </span>
-              </Link>
-              <Link 
-                to="/events" 
-                className="btn-secondary text-lg group relative overflow-hidden"
-              >
-                <span className="relative z-10 flex items-center justify-center">
-                  Find Events
-                  <Calendar className="ml-2 h-5 w-5 transform group-hover:scale-110 transition-transform" />
-                </span>
-              </Link>
-            </div>
-            
-            {/* Scroll Indicator */}
-            <div className="mt-16 animate-bounce">
-              <div className="w-6 h-10 border-2 border-white/50 rounded-full mx-auto flex items-start justify-center p-2">
-                <div className="w-1 h-3 bg-white/70 rounded-full animate-pulse"></div>
-              </div>
+            </Link>
+            <Link
+              to="/events"
+              className="btn-secondary text-lg group relative overflow-hidden"
+            >
+              <span className="relative z-10 flex items-center justify-center">
+                Find Events
+                <Calendar className="ml-2 h-5 w-5 transform group-hover:scale-110 transition-transform" />
+              </span>
+            </Link>
+          </div>
+
+          {/* Scroll Indicator */}
+          <div className="mt-16 animate-bounce">
+            <div className="w-6 h-10 border-2 border-white/50 rounded-full mx-auto flex items-start justify-center p-2">
+              <div className="w-1 h-3 bg-white/70 rounded-full animate-pulse"></div>
             </div>
           </div>
         </div>
-        
-        {/* Decorative Elements */}
-        <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-gray-50 to-transparent"></div>
-      </section>
+      </HeroImageBanner>
 
       {/* Features Section with Modern Grid Layout */}
       <section className="py-24 bg-white relative overflow-hidden">

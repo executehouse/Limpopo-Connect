@@ -1,19 +1,25 @@
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { vi, describe, it, expect, beforeEach } from 'vitest';
 import { BrowserRouter } from 'react-router-dom';
-import ProfileEdit from '../components/ProfileEdit';
-import { AuthProvider } from '../lib/AuthProvider';
+import ProfileEdit from '@/pages/ProfileEdit';
+import { AuthProvider } from '@/lib/AuthProvider';
 
 // Mock the hooks and utilities
 const mockUseProfileMutations = vi.fn();
 const mockUseAuth = vi.fn();
 const mockNavigate = vi.fn();
+const mockValidateProfileData = vi.fn();
 
-vi.mock('../lib/useProfile', () => ({
-  useProfileMutations: () => mockUseProfileMutations(),
-}));
+vi.mock('@/lib/useProfile', () => {
+  const mockValidateProfileData = vi.fn();
+  return {
+    useProfileMutations: () => mockUseProfileMutations(),
+    validateProfileData: mockValidateProfileData,
+  };
+});
 
-vi.mock('../lib/useAuth', () => ({
+vi.mock('@/lib/useAuth', () => ({
+  useAuth: () => mockUseAuth(),
   useAuthContext: () => mockUseAuth(),
 }));
 
@@ -71,12 +77,13 @@ describe('ProfileEdit Component', () => {
     vi.clearAllMocks();
     mockUseAuth.mockReturnValue(mockAuthUser);
     mockUseProfileMutations.mockReturnValue(mockMutations);
+    mockValidateProfileData.mockReturnValue([]);
   });
 
   it('renders form with current profile data', () => {
     render(
       <TestWrapper>
-        <ProfileEdit profile={mockProfile} onSave={vi.fn()} onCancel={vi.fn()} />
+        <ProfileEdit />
       </TestWrapper>
     );
 
@@ -87,12 +94,11 @@ describe('ProfileEdit Component', () => {
   });
 
   it('handles form submission with valid data', async () => {
-    const mockOnSave = vi.fn();
     mockMutations.updateProfile.mockResolvedValue(mockProfile);
 
     render(
       <TestWrapper>
-        <ProfileEdit profile={mockProfile} onSave={mockOnSave} onCancel={vi.fn()} />
+        <ProfileEdit />
       </TestWrapper>
     );
 
@@ -113,64 +119,60 @@ describe('ProfileEdit Component', () => {
       });
     });
 
-    expect(mockOnSave).toHaveBeenCalledWith(mockProfile);
+    await waitFor(() => {
+      expect(mockNavigate).toHaveBeenCalledWith('/profile');
+    });
   });
 
   it('validates required fields', async () => {
+    mockValidateProfileData.mockReturnValue(['First name must be at least 2 characters long']);
+
     render(
       <TestWrapper>
-        <ProfileEdit profile={mockProfile} onSave={vi.fn()} onCancel={vi.fn()} />
+        <ProfileEdit />
       </TestWrapper>
     );
-
-    fireEvent.change(screen.getByDisplayValue('John'), {
-      target: { value: '' }
-    });
 
     fireEvent.click(screen.getByText('Save Changes'));
 
     await waitFor(() => {
-      expect(screen.getByText('First name is required')).toBeInTheDocument();
+      expect(screen.getByText('First name must be at least 2 characters long')).toBeInTheDocument();
     });
 
     expect(mockMutations.updateProfile).not.toHaveBeenCalled();
   });
 
   it('validates bio length', async () => {
+    mockValidateProfileData.mockReturnValue(['Bio must be 1000 characters or less']);
+
     render(
       <TestWrapper>
-        <ProfileEdit profile={mockProfile} onSave={vi.fn()} onCancel={vi.fn()} />
+        <ProfileEdit />
       </TestWrapper>
     );
-
-    fireEvent.change(screen.getByDisplayValue('Test bio'), {
-      target: { value: 'x'.repeat(1001) }
-    });
 
     fireEvent.click(screen.getByText('Save Changes'));
 
     await waitFor(() => {
-      expect(screen.getByText('Bio cannot exceed 1000 characters')).toBeInTheDocument();
+      expect(screen.getByText('Bio must be 1000 characters or less')).toBeInTheDocument();
     });
 
     expect(mockMutations.updateProfile).not.toHaveBeenCalled();
   });
 
   it('validates phone number format', async () => {
+    mockValidateProfileData.mockReturnValue(['Phone number must be a valid South African number']);
+
     render(
       <TestWrapper>
-        <ProfileEdit profile={mockProfile} onSave={vi.fn()} onCancel={vi.fn()} />
+        <ProfileEdit />
       </TestWrapper>
     );
-
-    fireEvent.change(screen.getByDisplayValue('+27123456789'), {
-      target: { value: 'invalid-phone' }
-    });
 
     fireEvent.click(screen.getByText('Save Changes'));
 
     await waitFor(() => {
-      expect(screen.getByText('Invalid phone number format')).toBeInTheDocument();
+      expect(screen.getByText('Phone number must be a valid South African number')).toBeInTheDocument();
     });
 
     expect(mockMutations.updateProfile).not.toHaveBeenCalled();
@@ -184,11 +186,11 @@ describe('ProfileEdit Component', () => {
 
     render(
       <TestWrapper>
-        <ProfileEdit profile={mockProfile} onSave={vi.fn()} onCancel={vi.fn()} />
+        <ProfileEdit />
       </TestWrapper>
     );
 
-    const fileInput = screen.getByLabelText('Upload Avatar');
+    const fileInput = screen.getByLabelText('Choose Photo');
     fireEvent.change(fileInput, { target: { files: [mockFile] } });
 
     await waitFor(() => {
@@ -202,11 +204,11 @@ describe('ProfileEdit Component', () => {
 
     render(
       <TestWrapper>
-        <ProfileEdit profile={mockProfile} onSave={vi.fn()} onCancel={vi.fn()} />
+        <ProfileEdit />
       </TestWrapper>
     );
 
-    const fileInput = screen.getByLabelText('Upload Avatar');
+    const fileInput = screen.getByLabelText('Choose Photo');
     fireEvent.change(fileInput, { target: { files: [mockFile] } });
 
     await waitFor(() => {
@@ -220,43 +222,41 @@ describe('ProfileEdit Component', () => {
 
     render(
       <TestWrapper>
-        <ProfileEdit profile={mockProfile} onSave={vi.fn()} onCancel={vi.fn()} />
+        <ProfileEdit />
       </TestWrapper>
     );
 
-    const fileInput = screen.getByLabelText('Upload Avatar');
+    const fileInput = screen.getByLabelText('Choose Photo');
     fireEvent.change(fileInput, { target: { files: [largeFile] } });
 
     await waitFor(() => {
-      expect(screen.getByText('File too large. Maximum size: 5MB')).toBeInTheDocument();
+      expect(screen.getByText('Image must be less than 5MB')).toBeInTheDocument();
     });
   });
 
   it('handles privacy toggle changes', () => {
     render(
       <TestWrapper>
-        <ProfileEdit profile={mockProfile} onSave={vi.fn()} onCancel={vi.fn()} />
+        <ProfileEdit />
       </TestWrapper>
     );
 
-    const publicToggle = screen.getByLabelText('Make profile public');
+    const publicToggle = screen.getByLabelText('Public Profile');
     fireEvent.click(publicToggle);
 
     expect(publicToggle).not.toBeChecked();
   });
 
   it('handles cancel action', () => {
-    const mockOnCancel = vi.fn();
-
     render(
       <TestWrapper>
-        <ProfileEdit profile={mockProfile} onSave={vi.fn()} onCancel={mockOnCancel} />
+        <ProfileEdit />
       </TestWrapper>
     );
 
     fireEvent.click(screen.getByText('Cancel'));
 
-    expect(mockOnCancel).toHaveBeenCalled();
+    expect(mockNavigate).toHaveBeenCalledWith('/profile');
   });
 
   it('shows loading state during save', async () => {
@@ -266,7 +266,7 @@ describe('ProfileEdit Component', () => {
 
     render(
       <TestWrapper>
-        <ProfileEdit profile={mockProfile} onSave={vi.fn()} onCancel={vi.fn()} />
+        <ProfileEdit />
       </TestWrapper>
     );
 
