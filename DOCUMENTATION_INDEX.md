@@ -250,8 +250,12 @@ psql $DATABASE_URL -f supabase/migrations/20251010_add_password_validation.sql
 
 ### Deployment
 - ✅ [VERCEL_DEPLOYMENT.md](./VERCEL_DEPLOYMENT.md) - Vercel setup
+- ✅ [VERCEL_CUSTOM_DOMAIN_SETUP.md](./VERCEL_CUSTOM_DOMAIN_SETUP.md) - Custom domain guide
+- ✅ [DEPLOYMENT_TROUBLESHOOTING.md](./DEPLOYMENT_TROUBLESHOOTING.md) - Deployment issue resolution ⭐
+- ✅ [DEPLOYMENT_ISSUES_ANALYSIS.md](./DEPLOYMENT_ISSUES_ANALYSIS.md) - Detailed investigation report
 - ✅ [GITHUB_PAGES_SETUP.md](./GITHUB_PAGES_SETUP.md) - GitHub Pages
 - ✅ [DEPLOYMENT_GUIDE.md](./DEPLOYMENT_GUIDE.md) - General deployment
+- ✅ [scripts/validate-deployment.sh](./scripts/validate-deployment.sh) - Automated deployment validation
 
 ### Database & Backend
 - ✅ [SUPABASE_SETUP_GUIDE.md](./SUPABASE_SETUP_GUIDE.md) - Supabase configuration
@@ -295,6 +299,10 @@ psql $DATABASE_URL -f supabase/migrations/20251010_add_password_validation.sql
 → Read: [VERCEL_DEPLOYMENT.md](./VERCEL_DEPLOYMENT.md)  
 → Run: `vercel --prod`
 
+#### **Troubleshoot deployment issues**
+→ Read: [DEPLOYMENT_TROUBLESHOOTING.md](./DEPLOYMENT_TROUBLESHOOTING.md)  
+→ Run: `./scripts/validate-deployment.sh`
+
 #### **Apply database migrations**
 → Read: [SUPABASE_SETUP_GUIDE.md](./SUPABASE_SETUP_GUIDE.md)  
 → Run: `supabase db push`
@@ -309,7 +317,8 @@ psql $DATABASE_URL -f supabase/migrations/20251010_add_password_validation.sql
 
 #### **Troubleshoot an issue**
 → Read: [QUICK_START.md § Common Issues](./QUICK_START.md#-common-issues)  
-→ Read: [PROJECT_SUMMARY.md § Common Issues](./PROJECT_SUMMARY.md#common-issues)
+→ Read: [PROJECT_SUMMARY.md § Common Issues](./PROJECT_SUMMARY.md#common-issues)  
+→ Read: [DEPLOYMENT_TROUBLESHOOTING.md](./DEPLOYMENT_TROUBLESHOOTING.md) - For deployment issues
 
 ---
 
