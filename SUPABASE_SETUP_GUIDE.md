@@ -61,7 +61,7 @@ VITE_SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFz
 -- Drop old trigger, function, and table if they exist, to ensure a clean setup.
 DROP TRIGGER IF EXISTS on_auth_user_created ON auth.users;
 DROP FUNCTION IF EXISTS public.handle_new_user();
-DROP TABLE IF EXISTS public.profiles;
+DROP TABLE IF EXISTS public.profiles CASCADE;
 
 -- Create a table for public profiles
 -- This table will store user data that is safe to be publicly accessible.
