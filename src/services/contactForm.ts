@@ -1,4 +1,4 @@
-import { fetchWithTimeout, ApiServiceError, getEnvVar, CACHE_DURATIONS } from './utils';
+import { fetchWithTimeout, ApiServiceError, getEnvVar } from './utils';
 import type { ContactFormData, ContactSubmissionResponse, FormspreeResponse } from './types';
 
 // Rate limiting storage keys
@@ -11,8 +11,8 @@ const COOLDOWN_DURATION = 30 * 60 * 1000; // 30 minutes
  * Formspree free tier: 50 submissions/month
  */
 export async function submitContact(
-  formId?: string, 
-  payload: Record<string, any>
+  payload: Record<string, unknown>,
+  formId?: string
 ): Promise<ContactSubmissionResponse> {
   const effectiveFormId = formId || getEnvVar('VITE_FORMSPREE_FORM_ID');
   
@@ -90,7 +90,7 @@ export async function submitContact(
 
 async function submitToFormspree(
   formId: string, 
-  payload: Record<string, any>
+  payload: Record<string, unknown>
 ): Promise<ContactSubmissionResponse> {
   const url = `https://formspree.io/f/${formId}`;
   
@@ -142,7 +142,7 @@ async function submitToFormspree(
   }
 }
 
-async function submitToSupabase(payload: Record<string, any>): Promise<ContactSubmissionResponse> {
+async function submitToSupabase(payload: Record<string, unknown>): Promise<ContactSubmissionResponse> {
   try {
     // Dynamically import Supabase to avoid bundle issues if not configured
     const { supabase } = await import('../lib/supabase');
@@ -172,7 +172,7 @@ async function submitToSupabase(payload: Record<string, any>): Promise<ContactSu
       success: true,
       message: 'Thank you! Your message has been received and saved.'
     };
-  } catch (error) {
+  } catch {
     throw new ApiServiceError(
       'Failed to save contact via Supabase fallback',
       'SUPABASE_ERROR'
@@ -202,7 +202,7 @@ function setCooldown(): void {
 // Legacy compatibility - keep the existing class for backwards compatibility
 export class ContactFormService {
   async submitForm(data: ContactFormData): Promise<boolean> {
-    const result = await submitContact(undefined, data);
+    const result = await submitContact(data);
     return result.success;
   }
 

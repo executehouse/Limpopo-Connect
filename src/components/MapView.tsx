@@ -1,5 +1,5 @@
-import React, { useState, useEffect, useCallback, Suspense, lazy } from 'react';
-import { MapPin, Navigation, ZoomIn, ZoomOut, AlertTriangle } from 'lucide-react';
+import { useState, useEffect, useCallback, Suspense, lazy } from 'react';
+import { MapPin, Navigation, AlertTriangle } from 'lucide-react';
 import { getMapboxToken, getDirectionsUrl, getOpenStreetMapEmbedUrl, isValidCoordinates, DEFAULT_MAP_CONFIG } from '@/services/maps';
 import { locationService } from '@/services';
 
@@ -151,7 +151,6 @@ export function MapView({
             lat={coordinates.lat}
             lng={coordinates.lng}
             title={title}
-            height={height}
             zoom={zoom}
           />
         )}
@@ -182,13 +181,11 @@ function OSMFallbackMap({
   lat, 
   lng, 
   title, 
-  height, 
   zoom 
 }: { 
   lat: number; 
   lng: number; 
   title: string; 
-  height: string; 
   zoom: number;
 }) {
   const embedUrl = getOpenStreetMapEmbedUrl(lat, lng, zoom);

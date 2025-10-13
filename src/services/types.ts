@@ -99,7 +99,7 @@ export interface ApiError {
 }
 
 // Contact Form types
-export interface ContactFormData {
+export interface ContactFormData extends Record<string, unknown> {
   name: string;
   email: string;
   subject?: string;

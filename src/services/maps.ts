@@ -1,5 +1,5 @@
 import { getEnvVar } from './utils';
-import type { MapboxStyleConfig, MapViewConfig } from './types';
+import type { MapViewConfig } from './types';
 
 export interface MapMarker {
   lat: number;

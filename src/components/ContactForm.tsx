@@ -136,7 +136,7 @@ export function ContactForm({
         message: formState.message.trim()
       };
 
-      const result = await submitContact(formId, submissionData);
+      const result = await submitContact(submissionData, formId);
       setResponse(result);
 
       if (result.success) {
