@@ -1,11 +1,12 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { ContactForm } from '../ContactForm';
 
 // Mock the contact form service
+const mockSubmitContact = vi.fn();
 vi.mock('@/services/contactForm', () => ({
-  submitContact: vi.fn()
+  submitContact: mockSubmitContact
 }));
 
 // Mock Supabase
@@ -16,8 +17,6 @@ vi.mock('@/lib/supabase', () => ({
     }))
   }
 }));
-
-const mockSubmitContact = vi.mocked((await import('@/services/contactForm')).submitContact);
 
 describe('ContactForm Component', () => {
   beforeEach(() => {
@@ -132,7 +131,7 @@ describe('ContactForm Component', () => {
   it('shows loading state during submission', async () => {
     const user = userEvent.setup();
     // Create a promise that we can control
-    let resolveSubmit: (value: any) => void;
+    let resolveSubmit: (value: unknown) => void;
     const submissionPromise = new Promise(resolve => {
       resolveSubmit = resolve;
     });

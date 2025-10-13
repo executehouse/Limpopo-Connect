@@ -84,6 +84,28 @@ export function ContactForm({
     }
   }, [errors]);
 
+  // Log contact submission for analytics
+  const logContactSubmission = useCallback(async (data: ContactFormData) => {
+    try {
+      const { supabase } = await import('@/lib/supabase');
+      if (!supabase) return;
+
+      await supabase
+        .from('platform_logs')
+        .insert({
+          event_type: 'contact_form_submission',
+          event_data: {
+            has_subject: Boolean(data.subject),
+            message_length: data.message.length,
+            source: 'ContactForm'
+          },
+          created_at: new Date().toISOString()
+        });
+    } catch (error) {
+      console.warn('Failed to log contact submission:', error);
+    }
+  }, []);
+
   const handleSubmit = useCallback(async (e: React.FormEvent) => {
     e.preventDefault();
     
@@ -153,29 +175,7 @@ export function ContactForm({
     } finally {
       setIsSubmitting(false);
     }
-  }, [formState, formId, validateForm, onSuccess, onError]);
-
-  // Log contact submission for analytics
-  const logContactSubmission = useCallback(async (data: ContactFormData) => {
-    try {
-      const { supabase } = await import('@/lib/supabase');
-      if (!supabase) return;
-
-      await supabase
-        .from('platform_logs')
-        .insert({
-          event_type: 'contact_form_submission',
-          event_data: {
-            has_subject: Boolean(data.subject),
-            message_length: data.message.length,
-            source: 'ContactForm'
-          },
-          created_at: new Date().toISOString()
-        });
-    } catch (error) {
-      console.warn('Failed to log contact submission:', error);
-    }
-  }, []);
+  }, [formState, formId, validateForm, onSuccess, onError, logContactSubmission]);
 
   // Success state
   if (submitted && response?.success) {

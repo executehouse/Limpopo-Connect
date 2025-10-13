@@ -31,7 +31,7 @@ describe('Maps Service', () => {
       expect(token).toBe('pk.test.mapbox.token');
     });
 
-    it('returns null and warns when token is not available', () => {
+    it('returns null and warns when token is not available', async () => {
       const consoleSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
       
       // Mock missing token
@@ -215,7 +215,7 @@ describe('Maps Service', () => {
       expect(isValidCoordinates(0, -181)).toBe(false); // Longitude too low
       expect(isValidCoordinates(NaN, 0)).toBe(false); // NaN latitude
       expect(isValidCoordinates(0, NaN)).toBe(false); // NaN longitude
-      expect(isValidCoordinates('23.9' as any, 29.45)).toBe(false); // String instead of number
+      expect(isValidCoordinates('23.9' as unknown as number, 29.45)).toBe(false); // String instead of number
     });
   });
 
