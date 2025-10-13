@@ -1,4 +1,5 @@
 import { getEnvVar } from './utils';
+import type { MapboxStyleConfig, MapViewConfig } from './types';
 
 export interface MapMarker {
   lat: number;
@@ -8,20 +9,163 @@ export interface MapMarker {
 }
 
 /**
- * Map Service supporting Mapbox
- * Displays maps with markers for local services and events
- * Mapbox free tier: 50,000 loads/month
+ * Enhanced Map Service supporting Mapbox with fallbacks
+ * Displays interactive and static maps with markers for local services and events
+ * Mapbox free tier: 50,000 map loads/month, 100,000 geocoding requests/month
+ */
+
+/**
+ * Get Mapbox access token with validation
+ */
+export function getMapboxToken(): string | null {
+  const token = getEnvVar('VITE_MAPBOX_TOKEN');
+  if (!token) {
+    console.warn('Mapbox token not configured - falling back to OpenStreetMap');
+    return null;
+  }
+  return token;
+}
+
+/**
+ * Get Mapbox style URL for interactive maps
+ */
+export function getMapboxStyleUrl(token?: string): string | null {
+  const mapboxToken = token || getMapboxToken();
+  if (!mapboxToken) return null;
+  
+  // Default to Mapbox Streets v11 style
+  return `mapbox://styles/mapbox/streets-v11`;
+}
+
+/**
+ * Generate Mapbox static map URL
+ */
+export function getMapboxStaticUrl(
+  lat: number,
+  lng: number,
+  zoom: number = 12,
+  width: number = 600,
+  height: number = 400,
+  token?: string
+): string | null {
+  const mapboxToken = token || getMapboxToken();
+  if (!mapboxToken) return null;
+
+  return `https://api.mapbox.com/styles/v1/mapbox/streets-v11/static/${lng},${lat},${zoom}/${width}x${height}?access_token=${mapboxToken}`;
+}
+
+/**
+ * Generate Mapbox static map URL with marker
+ */
+export function getMapboxStaticUrlWithMarker(
+  lat: number,
+  lng: number,
+  zoom: number = 12,
+  width: number = 600,
+  height: number = 400,
+  markerColor: string = 'ff0000',
+  token?: string
+): string | null {
+  const mapboxToken = token || getMapboxToken();
+  if (!mapboxToken) return null;
+
+  return `https://api.mapbox.com/styles/v1/mapbox/streets-v11/static/pin-s+${markerColor}(${lng},${lat})/${lng},${lat},${zoom}/${width}x${height}?access_token=${mapboxToken}`;
+}
+
+/**
+ * Get Google Maps directions URL
+ */
+export function getDirectionsUrl(lat: number, lng: number): string {
+  return `https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}`;
+}
+
+/**
+ * Get OpenStreetMap embed URL (free alternative)
+ */
+export function getOpenStreetMapEmbedUrl(lat: number, lng: number, zoom: number = 12): string {
+  const bbox = calculateBoundingBox(lat, lng, zoom);
+  return `https://www.openstreetmap.org/export/embed.html?bbox=${bbox.west},${bbox.south},${bbox.east},${bbox.north}&layer=mapnik&marker=${lat},${lng}`;
+}
+
+/**
+ * Calculate bounding box for a given center point and zoom level
+ */
+function calculateBoundingBox(lat: number, lng: number, zoom: number) {
+  // Approximate degree span based on zoom level
+  const degreeSpan = 360 / Math.pow(2, zoom);
+  const latSpan = degreeSpan * 0.5;
+  const lngSpan = degreeSpan * 0.7; // Adjust for latitude compression
+  
+  return {
+    north: lat + latSpan,
+    south: lat - latSpan,
+    east: lng + lngSpan,
+    west: lng - lngSpan
+  };
+}
+
+/**
+ * Calculate distance between two coordinates (in km) using Haversine formula
+ */
+export function calculateDistance(
+  lat1: number,
+  lng1: number,
+  lat2: number,
+  lng2: number
+): number {
+  const R = 6371; // Earth's radius in km
+  const dLat = toRad(lat2 - lat1);
+  const dLng = toRad(lng2 - lng1);
+  const a =
+    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+    Math.cos(toRad(lat1)) *
+      Math.cos(toRad(lat2)) *
+      Math.sin(dLng / 2) *
+      Math.sin(dLng / 2);
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  return R * c;
+}
+
+function toRad(degrees: number): number {
+  return (degrees * Math.PI) / 180;
+}
+
+/**
+ * Validate coordinates
+ */
+export function isValidCoordinates(lat: number, lng: number): boolean {
+  return (
+    typeof lat === 'number' &&
+    typeof lng === 'number' &&
+    lat >= -90 &&
+    lat <= 90 &&
+    lng >= -180 &&
+    lng <= 180 &&
+    !isNaN(lat) &&
+    !isNaN(lng)
+  );
+}
+
+/**
+ * Default map configuration for South Africa/Limpopo
+ */
+export const DEFAULT_MAP_CONFIG: MapViewConfig = {
+  center: [29.45, -23.9], // [lng, lat] for Polokwane, Limpopo
+  zoom: 10,
+  pitch: 0,
+  bearing: 0
+};
+
+/**
+ * Legacy class for backwards compatibility
  */
 export class MapService {
   private readonly mapboxToken: string | undefined;
 
   constructor() {
-    this.mapboxToken = getEnvVar('VITE_MAPBOX_TOKEN');
+    this.mapboxToken = getMapboxToken() || undefined;
   }
 
-  /**
-   * Generate Mapbox static map URL
-   */
   getMapboxStaticUrl(
     lat: number,
     lng: number,
@@ -29,17 +173,9 @@ export class MapService {
     width: number = 600,
     height: number = 400
   ): string | null {
-    if (!this.mapboxToken) {
-      console.warn('Mapbox token not configured');
-      return null;
-    }
-
-    return `https://api.mapbox.com/styles/v1/mapbox/streets-v11/static/${lng},${lat},${zoom}/${width}x${height}?access_token=${this.mapboxToken}`;
+    return getMapboxStaticUrl(lat, lng, zoom, width, height, this.mapboxToken);
   }
 
-  /**
-   * Generate Mapbox static map URL with marker
-   */
   getMapboxStaticUrlWithMarker(
     lat: number,
     lng: number,
@@ -47,68 +183,32 @@ export class MapService {
     width: number = 600,
     height: number = 400
   ): string | null {
-    if (!this.mapboxToken) {
-      console.warn('Mapbox token not configured');
-      return null;
-    }
-
-    return `https://api.mapbox.com/styles/v1/mapbox/streets-v11/static/pin-s+ff0000(${lng},${lat})/${lng},${lat},${zoom}/${width}x${height}?access_token=${this.mapboxToken}`;
+    return getMapboxStaticUrlWithMarker(lat, lng, zoom, width, height, 'ff0000', this.mapboxToken);
   }
 
-  /**
-   * Get iframe embed URL for interactive Mapbox map
-   */
   getMapboxEmbedUrl(lat: number, lng: number): string {
-    // Note: Mapbox doesn't provide direct iframe embed like Google Maps
-    // This returns a URL that can be used with Mapbox GL JS
-    return `https://www.openstreetmap.org/export/embed.html?bbox=${lng - 0.1},${lat - 0.1},${lng + 0.1},${lat + 0.1}&layer=mapnik&marker=${lat},${lng}`;
+    return getOpenStreetMapEmbedUrl(lat, lng);
   }
 
-  /**
-   * Get Google Maps embed URL (no API key needed for basic embed)
-   */
   getGoogleMapsEmbedUrl(lat: number, lng: number, zoom: number = 12): string {
     return `https://maps.google.com/maps?q=${lat},${lng}&z=${zoom}&output=embed`;
   }
 
-  /**
-   * Get directions URL
-   */
   getDirectionsUrl(lat: number, lng: number): string {
-    return `https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}`;
+    return getDirectionsUrl(lat, lng);
   }
 
-  /**
-   * Get OpenStreetMap embed URL (free alternative)
-   */
   getOpenStreetMapEmbedUrl(lat: number, lng: number): string {
-    return `https://www.openstreetmap.org/export/embed.html?bbox=${lng - 0.05},${lat - 0.05},${lng + 0.05},${lat + 0.05}&layer=mapnik&marker=${lat},${lng}`;
+    return getOpenStreetMapEmbedUrl(lat, lng);
   }
 
-  /**
-   * Calculate distance between two coordinates (in km)
-   */
   calculateDistance(
     lat1: number,
     lng1: number,
     lat2: number,
     lng2: number
   ): number {
-    const R = 6371; // Earth's radius in km
-    const dLat = this.toRad(lat2 - lat1);
-    const dLng = this.toRad(lng2 - lng1);
-    const a =
-      Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-      Math.cos(this.toRad(lat1)) *
-        Math.cos(this.toRad(lat2)) *
-        Math.sin(dLng / 2) *
-        Math.sin(dLng / 2);
-    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-    return R * c;
-  }
-
-  private toRad(degrees: number): number {
-    return (degrees * Math.PI) / 180;
+    return calculateDistance(lat1, lng1, lat2, lng2);
   }
 }
 
