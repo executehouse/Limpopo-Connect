@@ -64,7 +64,7 @@ describe('ContactForm Service', () => {
         })
       );
 
-      const result = await submitContact(undefined, validPayload);
+      const result = await submitContact(validPayload);
 
       expect(result).toEqual({
         success: true,
@@ -85,7 +85,7 @@ describe('ContactForm Service', () => {
         })
       );
 
-      const result = await submitContact(undefined, validPayload);
+      const result = await submitContact(validPayload);
 
       expect(result.success).toBe(false);
       expect(result.message).toContain('error');
@@ -101,7 +101,7 @@ describe('ContactForm Service', () => {
         })
       );
 
-      const result = await submitContact(undefined, validPayload);
+      const result = await submitContact(validPayload);
 
       expect(result.success).toBe(false);
       expect(result.rateLimited).toBe(true);
@@ -116,7 +116,7 @@ describe('ContactForm Service', () => {
       const cooldownUntil = Date.now() + 30 * 60 * 1000; // 30 minutes from now
       localStorageMock.getItem.mockReturnValue(cooldownUntil.toString());
 
-      const result = await submitContact(undefined, validPayload);
+      const result = await submitContact(validPayload);
 
       expect(result.success).toBe(false);
       expect(result.rateLimited).toBe(true);
@@ -140,7 +140,7 @@ describe('ContactForm Service', () => {
         insert: mockSupabaseInsert
       });
 
-      const result = await submitContact(undefined, validPayload);
+      const result = await submitContact(validPayload);
 
       expect(result.success).toBe(true);
       expect(result.fallbackUsed).toBe('supabase');
@@ -171,7 +171,7 @@ describe('ContactForm Service', () => {
         insert: vi.fn(() => ({ error: { message: 'Database error' } }))
       });
 
-      const result = await submitContact(undefined, validPayload);
+      const result = await submitContact(validPayload);
 
       expect(result.success).toBe(false);
       expect(result.fallbackUsed).toBe('error');
@@ -184,7 +184,7 @@ describe('ContactForm Service', () => {
         env: {}
       });
 
-      const result = await submitContact(undefined, validPayload);
+      const result = await submitContact(validPayload);
 
       expect(result.success).toBe(false);
       expect(result.fallbackUsed).toBe('error');
@@ -200,7 +200,7 @@ describe('ContactForm Service', () => {
       ];
 
       for (const payload of invalidPayloads) {
-        const result = await submitContact(undefined, payload);
+        const result = await submitContact(payload);
         expect(result.success).toBe(false);
         expect(result.message).toContain('required fields');
       }
@@ -212,7 +212,7 @@ describe('ContactForm Service', () => {
         honeypot: 'spam-value'
       };
 
-      const result = await submitContact(undefined, spamPayload);
+      const result = await submitContact(spamPayload);
 
       expect(result.success).toBe(false);
       expect(result.message).toContain('Spam detection');
@@ -227,7 +227,7 @@ describe('ContactForm Service', () => {
         })
       );
 
-      const result = await submitContact(undefined, validPayload);
+      const result = await submitContact(validPayload);
 
       // Should fallback due to timeout
       expect(result.success).toBe(false);
@@ -242,7 +242,7 @@ describe('ContactForm Service', () => {
         })
       );
 
-      const result = await submitContact(customFormId, validPayload);
+      const result = await submitContact(validPayload, customFormId);
 
       expect(result.success).toBe(true);
     });
@@ -259,7 +259,7 @@ describe('ContactForm Service', () => {
         })
       );
 
-      const result = await submitContact(undefined, payloadWithSubject);
+      const result = await submitContact(payloadWithSubject);
       expect(result.success).toBe(true);
     });
   });

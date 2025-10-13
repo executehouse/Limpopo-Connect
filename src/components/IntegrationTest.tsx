@@ -1,5 +1,4 @@
 // Integration test to verify components work together
-import React from 'react';
 import { ContactForm } from '@/components/ContactForm';
 import { MapView } from '@/components/MapView';
 
