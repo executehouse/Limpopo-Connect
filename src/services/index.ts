@@ -6,8 +6,8 @@ export { countryService, CountryService } from './country';
 export { imageService, ImageService } from './images';
 export { holidayService, HolidayService } from './holidays';
 export { exchangeRateService, ExchangeRateService } from './exchangeRate';
-export { contactFormService, ContactFormService } from './contactForm';
-export { mapService, MapService } from './maps';
+export { contactFormService, ContactFormService, submitContact } from './contactForm';
+export { mapService, MapService, getMapboxToken, getMapboxStyleUrl, getDirectionsUrl, getOpenStreetMapEmbedUrl } from './maps';
 
 // Export types
 export type {
@@ -21,9 +21,13 @@ export type {
   ExchangeRate,
   CachedData,
   ApiError,
+  ContactFormData,
+  ContactSubmissionResponse,
+  FormspreeResponse,
+  MapboxStyleConfig,
+  MapViewConfig,
 } from './types';
 
-export type { ContactFormData } from './contactForm';
 export type { MapMarker } from './maps';
 
 // Export utilities
