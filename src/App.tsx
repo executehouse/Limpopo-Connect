@@ -10,6 +10,7 @@ import Events from './pages/Events';
 import Marketplace from './pages/Marketplace';
 import Tourism from './pages/Tourism';
 import News from './pages/News';
+import Contact from './pages/Contact';
 import Connections from './pages/Connections';
 import FriendshipPartners from './pages/connections/FriendshipPartners';
 import MeaningfulRelationships from './pages/connections/MeaningfulRelationships';
@@ -145,6 +146,7 @@ function App() {
               <Route path="events" element={<Events />} />
               <Route path="tourism" element={<Tourism />} />
               <Route path="news" element={<News />} />
+              <Route path="contact" element={<Contact />} />
               
               {/* Protected routes - require authentication */}
               <Route 

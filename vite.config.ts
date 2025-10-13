@@ -45,6 +45,7 @@ export default defineConfig({
     globals: true,
     environment: 'jsdom',
     setupFiles: './src/setupTests.ts',
+    testTimeout: 30000,
   },
   base: getBasePath(),
   build: {

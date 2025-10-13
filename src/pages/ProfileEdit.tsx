@@ -262,7 +262,7 @@ const ProfileEdit: React.FC = () => {
           </div>
         )}
 
-        <form onSubmit={handleSubmit} className="space-y-6">
+        <form onSubmit={handleSubmit} className="space-y-6" noValidate>
           {/* Avatar Section */}
           <div className="border-b border-gray-200 pb-6">
             <h2 className="text-lg font-medium text-gray-900 mb-4 flex items-center gap-2">

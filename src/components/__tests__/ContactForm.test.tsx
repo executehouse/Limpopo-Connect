@@ -4,7 +4,9 @@ import userEvent from '@testing-library/user-event';
 import { ContactForm } from '../ContactForm';
 
 // Mock the contact form service
-const mockSubmitContact = vi.fn();
+const { mockSubmitContact } = vi.hoisted(() => {
+  return { mockSubmitContact: vi.fn() };
+});
 vi.mock('@/services/contactForm', () => ({
   submitContact: mockSubmitContact
 }));
@@ -277,11 +279,13 @@ describe('ContactForm Component', () => {
     // Click "Send Another Message" button
     await user.click(screen.getByRole('button', { name: /send another message/i }));
     
-    // Form should be cleared
-    expect(nameInput.value).toBe('');
-    expect(emailInput.value).toBe('');
-    expect(subjectInput.value).toBe('');
-    expect(messageInput.value).toBe('');
+    // Re-query the elements after the form is re-rendered and assert they are empty
+    await waitFor(() => {
+      expect((screen.getByLabelText(/name/i) as HTMLInputElement).value).toBe('');
+      expect((screen.getByLabelText(/email/i) as HTMLInputElement).value).toBe('');
+      expect((screen.getByLabelText(/subject/i) as HTMLInputElement).value).toBe('');
+      expect((screen.getByLabelText(/message/i) as HTMLTextAreaElement).value).toBe('');
+    });
   });
 
   it('has proper accessibility attributes', () => {

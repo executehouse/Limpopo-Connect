@@ -141,21 +141,13 @@ export function ContactForm({
 
       if (result.success) {
         setSubmitted(true);
-        // Clear form on success
-        setFormState({
-          name: '',
-          email: '',
-          subject: '',
-          message: '',
-          honeypot: ''
-        });
-
-        // Log analytics to Supabase if available
         logContactSubmission(submissionData);
-
         onSuccess?.(result);
       } else {
-        setErrors({ general: result.message });
+        // Only set a general error if it's not a specific rate limit issue
+        if (!result.rateLimited) {
+          setErrors({ general: result.message });
+        }
         onError?.(result);
       }
     } catch (error) {
@@ -200,6 +192,13 @@ export function ContactForm({
             onClick={() => {
               setSubmitted(false);
               setResponse(null);
+              setFormState({
+                name: '',
+                email: '',
+                subject: '',
+                message: '',
+                honeypot: ''
+              });
             }}
             className="mt-4 px-4 py-2 bg-limpopo-green text-white rounded-md hover:bg-limpopo-green-dark transition-colors"
           >
