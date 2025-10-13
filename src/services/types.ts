@@ -97,3 +97,42 @@ export interface ApiError {
   code?: string;
   status?: number;
 }
+
+// Contact Form types
+export interface ContactFormData {
+  name: string;
+  email: string;
+  subject?: string;
+  message: string;
+  honeypot?: string; // Anti-spam field
+}
+
+export interface ContactSubmissionResponse {
+  success: boolean;
+  message: string;
+  fallbackUsed?: 'supabase' | 'error';
+  rateLimited?: boolean;
+  cooldownUntil?: number;
+}
+
+export interface FormspreeResponse {
+  ok: boolean;
+  next?: string;
+  errors?: Array<{
+    field: string;
+    message: string;
+  }>;
+}
+
+// Map types
+export interface MapboxStyleConfig {
+  styleId: string;
+  username?: string;
+}
+
+export interface MapViewConfig {
+  center: [number, number]; // [lng, lat]
+  zoom: number;
+  pitch?: number;
+  bearing?: number;
+}
