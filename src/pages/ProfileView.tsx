@@ -25,8 +25,13 @@ import {
   Eye,
   EyeOff
 } from 'lucide-react';
+import { Helmet } from '@dr.pogodin/react-helmet';
 import { useAuthContext } from '../lib/AuthProvider';
 import { useProfile, getDisplayName, canViewProfile } from '../lib/useProfile';
+import ProfileLoadingSkeleton from '../components/LoadingSkeleton';
+import ErrorFallback from '../components/ErrorFallback';
+import PrivateProfileCTA from '../components/PrivateProfileCTA';
+import Avatar from '../components/Avatar';
 
 const ProfileView: React.FC = () => {
   const { userId } = useParams<{ userId?: string }>();
@@ -45,80 +50,56 @@ const ProfileView: React.FC = () => {
   const canView = canViewProfile(profile, user?.id || null, isAdmin);
 
   if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-limpopo-blue mx-auto mb-4"></div>
-          <p className="text-gray-600">Loading profile...</p>
-        </div>
-      </div>
-    );
+    return <ProfileLoadingSkeleton />;
   }
 
   if (error || !profile) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center">
-          <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
-            {error || 'Profile not found'}
-          </div>
-          <button
-            onClick={() => navigate(-1)}
-            className="btn-secondary"
-          >
-            Go Back
-          </button>
-        </div>
-      </div>
+      <ErrorFallback
+        error={error || 'Profile not found.'}
+        onRetry={() => navigate(0)} // Refreshes the page
+      />
     );
   }
 
   if (!canView) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center">
-          <EyeOff className="h-16 w-16 text-gray-400 mx-auto mb-4" />
-          <h2 className="text-2xl font-bold text-gray-900 mb-2">Private Profile</h2>
-          <p className="text-gray-600 mb-4">This profile is set to private.</p>
-          <button
-            onClick={() => navigate(-1)}
-            className="btn-secondary"
-          >
-            Go Back
-          </button>
-        </div>
-      </div>
-    );
+    return <PrivateProfileCTA />;
   }
 
   const displayName = getDisplayName(profile);
   const showContact = isOwnProfile || isAdmin || profile.show_contact;
+  const roleDisplay = profile.role?.replace('_', ' ') || 'Member';
+  const pageTitle = `${displayName} — ${roleDisplay} | Limpopo Connect`;
+  const pageDescription = profile.bio?.substring(0, 160).trim()
+    ? `${profile.bio.substring(0, 160).trim()}...`
+    : `Connect with ${displayName}, a ${roleDisplay} in the Limpopo community.`;
+  const canonicalUrl = `https://limpopo-connect.vercel.app/profile/view/${profile.id}`;
 
   return (
     <div className="container mx-auto px-4 py-8 max-w-4xl">
+      <Helmet>
+        <title>{pageTitle}</title>
+        <meta name="description" content={pageDescription} />
+        <link rel="canonical" href={canonicalUrl} />
+        <meta property="og:title" content={pageTitle} />
+        <meta property="og:description" content={pageDescription} />
+        <meta property="og:url" content={canonicalUrl} />
+        <meta property="og:image" content={profile.avatar_url || '/logo512.png'} />
+        <meta property="og:type" content="profile" />
+        <meta name="twitter:card" content="summary_large_image" />
+      </Helmet>
+
       {/* Profile Header */}
       <div className="bg-white rounded-lg shadow-md p-6 mb-6">
         <div className="flex flex-col md:flex-row items-start md:items-center gap-6">
           {/* Avatar */}
           <div className="relative">
-            <div className="w-32 h-32 bg-gradient-to-br from-limpopo-blue to-limpopo-green rounded-full flex items-center justify-center text-white text-4xl font-bold">
-              {profile.avatar_url ? (
-                <img
-                  src={profile.avatar_url}
-                  alt={`${displayName}'s avatar`}
-                  className="w-32 h-32 rounded-full object-cover"
-                  onError={(e) => {
-                    // Fallback to initials if image fails to load
-                    const target = e.target as HTMLImageElement;
-                    target.style.display = 'none';
-                  }}
-                />
-              ) : (
-                <span>
-                  {profile.first_name?.charAt(0) || profile.email?.charAt(0) || '?'}
-                </span>
-              )}
-            </div>
+            <Avatar
+              src={profile.avatar_url}
+              alt={`${displayName}'s avatar`}
+              initials={profile.first_name?.charAt(0) || profile.email?.charAt(0) || '?'}
+              size={128}
+            />
             {!profile.is_public_profile && (
               <div className="absolute -top-2 -right-2 bg-yellow-400 text-yellow-900 p-1 rounded-full" title="Private Profile">
                 <EyeOff className="h-4 w-4" />
@@ -134,7 +115,7 @@ const ProfileView: React.FC = () => {
                   {displayName}
                 </h1>
                 <div className="flex items-center gap-2 text-gray-600 mb-2">
-                  <Shield className="h-4 w-4" />
+                  <Shield className="h-4 w-4" aria-hidden="true" />
                   <span className="capitalize">{profile.role?.replace('_', ' ')}</span>
                 </div>
                 {profile.bio && (
@@ -146,8 +127,9 @@ const ProfileView: React.FC = () => {
                 <button
                   onClick={() => navigate('/profile/edit')}
                   className="btn-primary flex items-center gap-2 whitespace-nowrap"
+                  aria-label={`Edit ${displayName}'s profile`}
                 >
-                  <Edit className="h-4 w-4" />
+                  <Edit className="h-4 w-4" aria-hidden="true" />
                   Edit Profile
                 </button>
               )}
@@ -161,13 +143,13 @@ const ProfileView: React.FC = () => {
         <div className="lg:col-span-2">
           <div className="bg-white rounded-lg shadow-md p-6">
             <h2 className="text-xl font-bold text-gray-900 mb-4 flex items-center gap-2">
-              <User className="h-5 w-5" />
+              <User className="h-5 w-5" aria-hidden="true" />
               Contact Information
             </h2>
             
             <div className="space-y-4">
               <div className="flex items-center gap-3">
-                <Mail className="h-5 w-5 text-gray-400" />
+                <Mail className="h-5 w-5 text-gray-400" aria-hidden="true" />
                 <div>
                   <p className="text-sm text-gray-500">Email</p>
                   {showContact ? (
@@ -180,7 +162,7 @@ const ProfileView: React.FC = () => {
               
               {profile.phone && (
                 <div className="flex items-center gap-3">
-                  <Phone className="h-5 w-5 text-gray-400" />
+                  <Phone className="h-5 w-5 text-gray-400" aria-hidden="true" />
                   <div>
                     <p className="text-sm text-gray-500">Phone</p>
                     {showContact ? (
@@ -193,7 +175,7 @@ const ProfileView: React.FC = () => {
               )}
               
               <div className="flex items-center gap-3">
-                <Calendar className="h-5 w-5 text-gray-400" />
+                <Calendar className="h-5 w-5 text-gray-400" aria-hidden="true" />
                 <div>
                   <p className="text-sm text-gray-500">Member Since</p>
                   <p className="font-medium">
@@ -217,7 +199,7 @@ const ProfileView: React.FC = () => {
               <div className="space-y-4">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
-                    <MessageSquare className="h-4 w-4 text-limpopo-blue" />
+                    <MessageSquare className="h-4 w-4 text-limpopo-blue" aria-hidden="true" />
                     <span className="text-sm text-gray-600">Messages</span>
                   </div>
                   <span className="font-semibold">{stats.messages_sent}</span>
@@ -225,7 +207,7 @@ const ProfileView: React.FC = () => {
                 
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
-                    <Users className="h-4 w-4 text-limpopo-green" />
+                    <Users className="h-4 w-4 text-limpopo-green" aria-hidden="true" />
                     <span className="text-sm text-gray-600">Rooms Joined</span>
                   </div>
                   <span className="font-semibold">{stats.rooms_joined}</span>
@@ -233,7 +215,7 @@ const ProfileView: React.FC = () => {
                 
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
-                    <Building className="h-4 w-4 text-limpopo-gold" />
+                    <Building className="h-4 w-4 text-limpopo-gold" aria-hidden="true" />
                     <span className="text-sm text-gray-600">Businesses</span>
                   </div>
                   <span className="font-semibold">{stats.businesses_owned}</span>
@@ -241,7 +223,7 @@ const ProfileView: React.FC = () => {
                 
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
-                    <FileText className="h-4 w-4 text-red-500" />
+                    <FileText className="h-4 w-4 text-red-500" aria-hidden="true" />
                     <span className="text-sm text-gray-600">Reports</span>
                   </div>
                   <span className="font-semibold">{stats.reports_submitted}</span>
@@ -254,7 +236,7 @@ const ProfileView: React.FC = () => {
           {isOwnProfile && (
             <div className="bg-white rounded-lg shadow-md p-6">
               <h2 className="text-xl font-bold text-gray-900 mb-4 flex items-center gap-2">
-                <Eye className="h-5 w-5" />
+                <Eye className="h-5 w-5" aria-hidden="true" />
                 Privacy Settings
               </h2>
               <div className="space-y-3">
