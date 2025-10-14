@@ -17,6 +17,7 @@
     "validate:supabase": "node scripts/validate-supabase.mjs"
   },
   "dependencies": {
+    "@playwright/test": "^1.56.0",
     "@radix-ui/react-slot": "^1.2.3",
     "@supabase/supabase-js": "^2.31.0",
     "@testing-library/user-event": "^14.6.1",
