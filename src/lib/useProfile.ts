@@ -57,6 +57,7 @@ export function useProfile(userId?: string, options: UseProfileOptions = {}): Us
   const isOwnProfile = targetUserId === user?.id
 
   const fetchProfile = useCallback(async () => {
+    console.log('[DEBUG] Fetching profile for userId:', targetUserId);
     if (!targetUserId) {
       setLoading(false)
       return
@@ -64,7 +65,26 @@ export function useProfile(userId?: string, options: UseProfileOptions = {}): Us
 
     try {
       if (!supabase) {
-        throw new Error('Supabase client not available')
+        console.error('[DEBUG] Supabase client not available. Check .env.local');
+        // Dev fallback
+        if (import.meta.env.DEV) {
+          console.log('[DEBUG] Using fallback profile for development.');
+          setProfile({
+            id: targetUserId,
+            first_name: 'Dev',
+            last_name: 'Fallback',
+            email: 'dev@example.com',
+            role: 'citizen',
+            is_public_profile: true,
+            bio: 'This is a fallback profile for development purposes.',
+            created_at: new Date().toISOString(),
+            avatar_url: null,
+            show_contact: true,
+          });
+        } else {
+          throw new Error('Supabase client not available');
+        }
+        return;
       }
       
       setLoading(true)

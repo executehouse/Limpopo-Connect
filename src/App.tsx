@@ -23,6 +23,8 @@ import Register from './pages/auth/Register';
 import ForgotPassword from './pages/auth/ForgotPassword';
 import ResetPassword from './pages/auth/ResetPassword';
 import Profile from './pages/Profile';
+import ProfileView from './pages/ProfileView';
+import ProfileEdit from './pages/ProfileEdit';
 import ChatDemo from './pages/ChatDemo';
 import DiagnosticPage from './pages/DiagnosticPage';
 import Health from './pages/Health';
@@ -221,41 +223,26 @@ function App() {
                 } 
               />
               
-              {/* Profile routes - require authentication */}
+              {/* Profile Routes */}
+              {/* Public profile view */}
+              <Route path="profile/view/:userId" element={<ProfileView />} />
+
+              {/* Authenticated routes */}
               <Route 
                 path="profile" 
                 element={
                   <RequireRole roles={['citizen', 'business', 'admin']}>
                     <Profile />
                   </RequireRole>
-                } 
+                }
               />
-              
               <Route 
-                path="profile/me" 
+                path="profile/edit"
                 element={
                   <RequireRole roles={['citizen', 'business', 'admin']}>
-                    <Profile />
+                    <ProfileEdit />
                   </RequireRole>
-                } 
-              />
-              
-              <Route 
-                path="profile/me/edit" 
-                element={
-                  <RequireRole roles={['citizen', 'business', 'admin']}>
-                    <Profile />
-                  </RequireRole>
-                } 
-              />
-              
-              <Route 
-                path="profile/:userId" 
-                element={
-                  <RequireRole roles={['citizen', 'business', 'admin']}>
-                    <Profile />
-                  </RequireRole>
-                } 
+                }
               />
               
               <Route 
