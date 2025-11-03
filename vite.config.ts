@@ -4,19 +4,13 @@ import react from '@vitejs/plugin-react'
 import path from 'path'
 
 // Function to determine the base path for the application.
-// For custom domain deployment (limpopoconnect.site), we use root path.
-// For GitHub Pages, we would need the repository name as base path.
 const getBasePath = () => {
-  // Check VITE_BASE from environment (set in Vercel)
-  if (process.env.VITE_BASE) {
-    return process.env.VITE_BASE;
+  // For GitHub Pages deployment in executehouse organization
+  if (process.env.GITHUB_PAGES === 'true') {
+    return '/Limpopo-Connect/';
   }
-  // Check if explicitly deploying to GitHub Pages
-  if (process.env.DEPLOY_TARGET === 'github-pages' && process.env.GITHUB_REPOSITORY) {
-    return `/${process.env.GITHUB_REPOSITORY.split('/')[1]}/`
-  }
-  // For custom domain or other deployments, use root path
-  return process.env.BASE_PATH || '/';
+  // For development or custom domain
+  return '/';
 }
 
 // https://vite.dev/config/
@@ -51,15 +45,31 @@ export default defineConfig({
   build: {
     outDir: 'dist',
     assetsDir: 'assets',
-    sourcemap: false,
+    sourcemap: process.env.NODE_ENV !== 'production',
     minify: 'esbuild',
+    target: ['es2022', 'chrome89', 'edge89', 'firefox89', 'safari15'],
+    assetsInlineLimit: 4096,
+    chunkSizeWarningLimit: 1000,
+    cssCodeSplit: true,
     rollupOptions: {
       output: {
         manualChunks: {
           react: ['react', 'react-dom'],
           router: ['react-router-dom'],
-          icons: ['lucide-react']
-        }
+          icons: ['lucide-react'],
+          supabase: ['@supabase/supabase-js'],
+          map: ['mapbox-gl', 'react-map-gl'],
+          vendor: ['@radix-ui/react-slot', 'class-variance-authority', 'clsx', 'tailwind-merge']
+        },
+        assetFileNames: (assetInfo) => {
+          const extType = assetInfo.name.split('.').at(1);
+          if (/png|jpe?g|svg|gif|tiff|bmp|ico/i.test(extType)) {
+            return 'assets/images/[name]-[hash][extname]';
+          }
+          return 'assets/[name]-[hash][extname]';
+        },
+        chunkFileNames: 'assets/js/[name]-[hash].js',
+        entryFileNames: 'assets/js/[name]-[hash].js'
       }
     }
   },

@@ -2,13 +2,17 @@
   "name": "limpopo-connect",
   "homepage": "https://Tshikwetamakole.github.io/Limpopo-Connect",
   "private": true,
-  "version": "0.0.0",
+  "version": "1.0.0",
   "type": "module",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/executehouse/Limpopo-Connect.git"
+  },
+  "homepage": "https://executehouse.github.io/Limpopo-Connect",
   "scripts": {
     "dev": "vite --host",
     "start": "node server.js",
-    "build": "tsc -b && vite build",
-    "build:frontend": "vite build",
+    "build": "tsc && vite build",
     "preview": "vite preview --port 4173",
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "lint": "eslint .",
