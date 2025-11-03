@@ -5,7 +5,7 @@ import path from 'path'
 
 // Function to determine the base path for the application.
 const getBasePath = () => {
-  // For GitHub Pages deployment
+  // For GitHub Pages deployment in executehouse organization
   if (process.env.GITHUB_PAGES === 'true') {
     return '/Limpopo-Connect/';
   }

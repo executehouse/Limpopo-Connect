@@ -2,7 +2,7 @@
 
 A full-stack social networking platform for the Limpopo Province community in South Africa.
 
-![GitHub Pages Deploy](https://github.com/Tshikwetamakole/Limpopo-Connect/actions/workflows/deploy.yml/badge.svg)
+![GitHub Pages Deploy](https://github.com/executehouse/Limpopo-Connect/actions/workflows/deploy.yml/badge.svg)
 
 ## Features
 
@@ -35,7 +35,7 @@ A full-stack social networking platform for the Limpopo Province community in So
 
 1. Clone the repository:
    ```bash
-   git clone https://github.com/Tshikwetamakole/Limpopo-Connect.git
+   git clone https://github.com/executehouse/Limpopo-Connect.git
    cd Limpopo-Connect
    ```
 

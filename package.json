@@ -1,8 +1,13 @@
 {
   "name": "limpopo-connect",
   "private": true,
-  "version": "0.0.0",
+  "version": "1.0.0",
   "type": "module",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/executehouse/Limpopo-Connect.git"
+  },
+  "homepage": "https://executehouse.github.io/Limpopo-Connect",
   "scripts": {
     "dev": "vite --host",
     "start": "node server.js",
