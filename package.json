@@ -1,5 +1,6 @@
 {
   "name": "limpopo-connect",
+  "homepage": "https://Tshikwetamakole.github.io/Limpopo-Connect",
   "private": true,
   "version": "1.0.0",
   "type": "module",
@@ -11,6 +12,7 @@
     "url": "https://github.com/executehouse/Limpopo-Connect.git"
   },
   "homepage": "https://executehouse.github.io/Limpopo-Connect",
+  
   "scripts": {
     "dev": "vite --host",
     "start": "node server.js",
