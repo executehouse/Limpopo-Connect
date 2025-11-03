@@ -10,13 +10,15 @@ function sleep(ms: number) {
 }
 
 async function withRetry<T>(operation: () => Promise<T>): Promise<T> {
-  let lastError: any;
+  let lastError: unknown;
   for (let i = 0; i < MAX_RETRIES; i++) {
     try {
       return await operation();
-    } catch (error: any) {
+    } catch (error: unknown) {
       lastError = error;
-      if (error?.status === 401 || error?.status === 403) {
+      // attempt to inspect known shapes safely
+      const maybeErr = error as { status?: number } | undefined;
+      if (maybeErr?.status === 401 || maybeErr?.status === 403) {
         // Don't retry auth errors
         throw error;
       }
@@ -59,7 +61,7 @@ export class SupabaseError extends Error {
     message: string,
     public code: string,
     public status?: number,
-    public details?: any
+    public details?: unknown
   ) {
     super(message);
     this.name = 'SupabaseError';

@@ -9,7 +9,7 @@
  * - Comprehensive error handling
  */
 
-import React, 'react';
+import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { 
   User, 
