@@ -6,14 +6,12 @@
   "scripts": {
     "dev": "vite --host",
     "start": "node server.js",
-    "build": "tsc -b && vite build",
-    "build:frontend": "vite build",
+    "build": "tsc && vite build",
     "preview": "vite preview --port 4173",
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "lint": "eslint .",
     "test": "vitest",
     "check": "npm run lint && npm run typecheck && npm test",
-    "deploy:gh-pages": "npm run build:frontend && npx gh-pages -d dist",
     "validate:supabase": "node scripts/validate-supabase.mjs"
   },
   "dependencies": {
