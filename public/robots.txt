@@ -1,4 +1,4 @@
-# robots.txt for limpopoconnect.site
+
 # Updated: 2025-10-10
 
 # Allow all search engines to crawl the site
@@ -9,8 +9,6 @@ Allow: /
 Disallow: /reset-password
 Disallow: /forgot-password
 
-# Sitemap location
-Sitemap: https://limpopoconnect.site/sitemap.xml
 
 # Crawl-delay for polite bots
 Crawl-delay: 1

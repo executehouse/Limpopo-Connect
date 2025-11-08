@@ -19,12 +19,6 @@
 - **Lucide React** - Icon library
 - **zxcvbn** - Password strength estimation (800KB library)
 
-### Backend
-- **Supabase** - PostgreSQL + Auth + Storage + Edge Functions + Realtime
-- **PostgreSQL 15+** with Row-Level Security (RLS)
-- **Supabase Auth** - JWT-based authentication
-- **Supabase Storage** - File uploads (user-uploads bucket)
-- **Edge Functions** - Deno-based serverless functions
 
 ### Development Tools
 - **ESLint 9** with TypeScript rules

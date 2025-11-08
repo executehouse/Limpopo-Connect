@@ -5,7 +5,7 @@ import { Mail, Phone } from 'lucide-react';
 const Contact: React.FC = () => {
   return (
     <div className="bg-gray-50 min-h-screen">
-      <div className="container mx-auto px-4 py-16">
+      <div className="container mx-auto px-4 py-
         <div className="max-w-4xl mx-auto">
           {/* Header */}
           <div className="text-center mb-12">
