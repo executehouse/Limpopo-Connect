@@ -37,7 +37,8 @@ export default defineConfig({
   },
   test: {
     globals: true,
-    environment: 'jsdom',
+    // Use happy-dom to avoid jsdom/whatwg-url runtime issues on older Node versions
+    environment: 'happy-dom',
     setupFiles: './src/setupTests.ts',
     testTimeout: 30000,
   },

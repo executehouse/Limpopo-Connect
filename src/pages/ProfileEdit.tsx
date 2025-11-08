@@ -9,18 +9,18 @@
  * - Comprehensive error handling
  */
 
-import React, 'react';
+import React, { useCallback, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { 
-  User, 
-  Mail, 
-  Phone, 
-  Shield, 
-  Save, 
-  X, 
-  Upload, 
-  Trash2, 
-  Eye, 
+import {
+  User,
+  Mail,
+  Phone,
+  Shield,
+  Save,
+  X,
+  Upload,
+  Trash2,
+  Eye,
   EyeOff,
   Camera,
   AlertCircle,
@@ -28,8 +28,8 @@ import {
   Loader2
 } from 'lucide-react';
 import { useAuthContext } from '../lib/AuthProvider';
-import { 
-  useProfileMutations, 
+import {
+  useProfileMutations,
   validateProfileData
 } from '../lib/useProfile';
 
@@ -91,10 +91,10 @@ const ProfileEdit: React.FC = () => {
     }
   }, [profile]);
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+  const handleInputChange = useCallback((e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value, type } = e.target;
     const checked = type === 'checkbox' ? (e.target as HTMLInputElement).checked : undefined;
-    
+
     setFormData(prev => ({
       ...prev,
       [name]: type === 'checkbox' ? checked! : value
@@ -107,9 +107,9 @@ const ProfileEdit: React.FC = () => {
         [name]: ''
       }));
     }
-    
+
     if (success) setSuccess(null);
-  };
+  }, [formErrors, success]);
 
   const validateForm = (): boolean => {
     const errors = validateProfileData(formData);
@@ -150,7 +150,7 @@ const ProfileEdit: React.FC = () => {
     }
   };
 
-  const handleAvatarSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleAvatarSelect = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
@@ -166,19 +166,19 @@ const ProfileEdit: React.FC = () => {
     }
 
     setAvatarFile(file);
-    
+
     // Create preview
     const reader = new FileReader();
     reader.onload = (e) => {
       setAvatarPreview(e.target?.result as string);
     };
     reader.readAsDataURL(file);
-    
+
     // Clear avatar error
     if (formErrors.avatar) {
       setFormErrors(prev => ({ ...prev, avatar: '' }));
     }
-  };
+  }, [formErrors.avatar]);
 
   const handleAvatarUpload = async () => {
     if (!avatarFile) return;
@@ -304,6 +304,14 @@ const ProfileEdit: React.FC = () => {
                     onClick={() => fileInputRef.current?.click()}
                     disabled={avatarUploading}
                     className="btn-secondary flex items-center gap-2"
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter') {
+                        fileInputRef.current?.click();
+                      }
+                    }}
+                    tabIndex={0}
+                    role="button"
+                    aria-label="Choose profile photo"
                   >
                     <Upload className="h-4 w-4" />
                     Choose Photo

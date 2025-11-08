@@ -4,6 +4,8 @@ on:
   push:
     branches:
       - main
+<<<<<<< HEAD
+<<<<<<< HEAD
   workflow_dispatch:
 
 permissions:
@@ -14,33 +16,81 @@ permissions:
 concurrency:
   group: "pages"
   cancel-in-progress: true
+=======
+>>>>>>> 359656d59b624229818b19910130c2ac775edba4
 
 jobs:
-  build:
+  deploy:
     runs-on: ubuntu-latest
+<<<<<<< HEAD
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+=======
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+>>>>>>> d8711ceeacee164ce62b88bdf2f22eca75958f90
+
+=======
+
+>>>>>>> 359656d59b624229818b19910130c2ac775edba4
+    permissions:
+      contents: write
+      pages: write
+      id-token: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
         with:
+<<<<<<< HEAD
+<<<<<<< HEAD
           node-version: 20
           cache: 'npm'
+=======
+          node-version: '20'
+>>>>>>> d8711ceeacee164ce62b88bdf2f22eca75958f90
+=======
+          node-version: '20'
+>>>>>>> 359656d59b624229818b19910130c2ac775edba4
 
       - name: Install dependencies
         run: npm ci
 
+<<<<<<< HEAD
+<<<<<<< HEAD
       - name: Build
+=======
+      - name: Build application
+        run: npm run build:frontend
+>>>>>>> 359656d59b624229818b19910130c2ac775edba4
         env:
-          GITHUB_PAGES: 'true'
           VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
           VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY }}
+<<<<<<< HEAD
         run: npm run build
+=======
+      - name: Build application
+        run: npm run build:frontend
+        env:
+          VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
+          VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY }}
+          DEPLOY_TARGET: github-pages
+>>>>>>> d8711ceeacee164ce62b88bdf2f22eca75958f90
+=======
+          DEPLOY_TARGET: github-pages
+>>>>>>> 359656d59b624229818b19910130c2ac775edba4
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
+<<<<<<< HEAD
+<<<<<<< HEAD
           path: dist
 
   deploy:
@@ -53,3 +103,11 @@ jobs:
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
+=======
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./dist
+>>>>>>> d8711ceeacee164ce62b88bdf2f22eca75958f90
+=======
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./dist
+>>>>>>> 359656d59b624229818b19910130c2ac775edba4

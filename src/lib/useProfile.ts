@@ -206,11 +206,11 @@ export function useProfileMutations(): UseProfileMutationsResult {
     }
   }, [user, refreshProfile])
 
-  const uploadAvatar = useCallback(async (file: File): Promise<string> => {
+  const uploadAvatar = useCallback(async (file: File, maxRetries: number = 3): Promise<string> => {
     if (!supabase) {
       throw new Error('Supabase client not available')
     }
-    
+
     if (!user) {
       throw new Error('User not authenticated')
     }
@@ -233,27 +233,43 @@ export function useProfileMutations(): UseProfileMutationsResult {
       const fileExt = file.name.split('.').pop()?.toLowerCase()
       const fileName = `${user.id}/avatar.${fileExt}`
 
-      // Upload to Supabase Storage
-      const { error: uploadError } = await supabase.storage
-        .from('avatars')
-        .upload(fileName, file, {
-          cacheControl: '3600',
-          upsert: true // Replace existing file
-        })
+      let lastError: Error | null = null;
 
-      if (uploadError) {
-        throw uploadError
+      // Retry logic for upload
+      for (let attempt = 1; attempt <= maxRetries; attempt++) {
+        try {
+          // Upload to Supabase Storage
+          const { error: uploadError } = await supabase.storage
+            .from('avatars')
+            .upload(fileName, file, {
+              cacheControl: '3600',
+              upsert: true // Replace existing file
+            })
+
+          if (uploadError) {
+            throw uploadError
+          }
+
+          // Get public URL
+          const { data: { publicUrl } } = supabase.storage
+            .from('avatars')
+            .getPublicUrl(fileName)
+
+          // Update profile with new avatar URL
+          await updateProfile({ avatar_url: publicUrl })
+
+          return publicUrl
+        } catch (err) {
+          lastError = err instanceof Error ? err : new Error('Upload failed')
+          if (attempt < maxRetries) {
+            // Wait before retry (exponential backoff)
+            await new Promise(resolve => setTimeout(resolve, Math.pow(2, attempt) * 1000))
+          }
+        }
       }
 
-      // Get public URL
-      const { data: { publicUrl } } = supabase.storage
-        .from('avatars')
-        .getPublicUrl(fileName)
-
-      // Update profile with new avatar URL
-      await updateProfile({ avatar_url: publicUrl })
-
-      return publicUrl
+      // If all retries failed
+      throw lastError || new Error('Failed to upload avatar after multiple attempts')
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to upload avatar'
       setError(errorMessage)
